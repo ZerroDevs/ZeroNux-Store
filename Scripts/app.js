@@ -1186,6 +1186,27 @@ function loadProductsFromFirebase() {
         // Re-initialize buttons and events
         initAddToCartButtons();
         initProductCardClick();
+
+        // Check for product ID in URL (Deep Linking)
+        const urlParams = new URLSearchParams(window.location.search);
+        const productIdFromUrl = urlParams.get('product');
+
+        if (productIdFromUrl && products[productIdFromUrl]) {
+            // Wait a bit to ensure DOM is ready and animations play nicely
+            setTimeout(() => {
+                showProductDetails(productIdFromUrl);
+
+                // Scroll to products section
+                const productsSection = document.getElementById('products');
+                if (productsSection) {
+                    productsSection.scrollIntoView({ behavior: 'smooth' });
+                }
+
+                // Clean URL without refreshing
+                const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                window.history.pushState({ path: newUrl }, '', newUrl);
+            }, 500);
+        }
     });
 }
 
