@@ -15,7 +15,7 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
-const productsRef = database.ref('products');
+const productsRef = database.ref('products');//products
 const settingsRef = database.ref('settings');
 
 // ============================================
