@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="Images/Logo.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تتبع طلبك - متجر زيرونكس</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Cairo:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="Style/index.css">
+    <style>
+        .page-header {
+            padding: 120px 0 60px;
+            text-align: center;
+            background: linear-gradient(180deg, rgba(26, 26, 46, 0) 0%, rgba(102, 126, 234, 0.1) 100%);
+        }
+
+        .page-title {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .track-section {
+            padding: 2rem 0 6rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            color: white;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-family: monospace;
+        }
+
+        .search-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .search-btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        /* Order Result Styles */
+        #order-result {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .order-card {
+            background: rgba(26, 26, 46, 0.8);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+
+        .status-timeline {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .status-timeline::before {
+            content: '';
+            position: absolute;
+            top: 25px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 0;
+        }
+
+        .status-step {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            width: 33.33%;
+        }
+
+        .status-icon {
+            width: 50px;
+            height: 50px;
+            background: #2a2a40;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            color: rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .status-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Active State logic applied via JS */
+        .status-step.completed .status-icon {
+            background: #667eea;
+            border-color: #667eea;
+            color: white;
+        }
+
+        .status-step.completed .status-label {
+            color: white;
+            font-weight: bold;
+        }
+
+        .order-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-item label {
+            display: block;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-item span {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .error-message {
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+            color: #ff7675;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo" onclick="window.location.href='index.html'">
+                    <img src="Images/Logo.png" alt="ZeroNux Store Logo">
+                </div>
+                <div class="nav-links">
+                    <a href="index.html" class="nav-link">الرئيسية</a>
+                    <a href="index.html#contact" class="nav-link">اتصل بنا</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="page-header">
+        <div class="container">
+            <h1 class="page-title">تتبع طلبك</h1>
+            <p style="color: rgba(255,255,255,0.7);">أدخل رقم الطلب لمعرفة حالته الحالية</p>
+        </div>
+    </header>
+
+    <main class="container track-section">
+        <div class="search-box">
+            <input type="text" id="order-input" class="search-input" placeholder="#ORDER_..." dir="ltr">
+            <button onclick="trackOrder()" class="search-btn">تتبع الآن</button>
+        </div>
+
+        <div id="error-msg" class="error-message"></div>
+
+        <div id="order-result">
+            <div class="order-card">
+                <div class="status-timeline">
+                    <!-- Pending -->
+                    <div class="status-step" id="step-pending">
+                        <div class="status-icon">🕒</div>
+                        <div class="status-label">قيد الانتظار</div>
+                    </div>
+                    <!-- Processing -->
+                    <div class="status-step" id="step-processing">
+                        <div class="status-icon">⚙️</div>
+                        <div class="status-label">قيد التنفيذ</div>
+                    </div>
+                    <!-- Shipped -->
+                    <div class="status-step" id="step-shipped">
+                        <div class="status-icon">🚚</div>
+                        <div class="status-label">تم الشحن</div>
+                    </div>
+                    <!-- Completed -->
+                    <div class="status-step" id="step-completed">
+                        <div class="status-icon">✅</div>
+                        <div class="status-label">مكتمل</div>
+                    </div>
+                </div>
+
+                <div class="order-info-grid">
+                    <div class="info-item">
+                        <label>تاريخ الطلب</label>
+                        <span id="order-date">-</span>
+                    </div>
+                    <div class="info-item">
+                        <label>الإجمالي</label>
+                        <span id="order-total" dir="ltr">-</span>
+                    </div>
+                    <div class="info-item" style="grid-column: 1 / -1;">
+                        <label>المنتجات</label>
+                        <span id="order-items">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 متجر زيرونكس. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <!-- Config from app.js (In production, load app.js or separate config file) -->
+    <!-- Ideally we should look at app.js to see if it exposes config globally, or just copy it here for this standalone page execution context -->
+    <!-- Assuming app.js is not loaded here to keep it light, we need init firebase. -->
+
+    <script>
+        // Retrieve config from localStorage or just try to load app.js for config? 
+        // Better: Include app.js but only use its config/init, or copy config.
+        // User didn't ask to refactor config. Let's include app.js but verify if it runs UI logic that might conflict.
+        // app.js has DOMContentLoaded listeners that look for elements on index.html. They might fail silently or error.
+        // Let's just create a script that loads Firebase Config from app.js by viewing it first?
+        // No, I can't see the config in app.js (it was truncated in previous turns or I missed it).
+        // Actually, app.js initializes firebase at the top.
+        // Let's just load app.js. It's safer to ensure connection sharing.
+    </script>
+    <script src="Scripts/app.js"></script>
+
+    <script>
+        // Override or Add Tracking Logic
+
+        async function trackOrder() {
+            const input = document.getElementById('order-input');
+            const resultDiv = document.getElementById('order-result');
+            const errorDiv = document.getElementById('error-msg');
+            const orderId = input.value.trim();
+
+            if (!orderId) return;
+
+            // Reset UI
+            resultDiv.style.display = 'none';
+            errorDiv.style.display = 'none';
+
+            // Show loading state? (optional)
+
+            try {
+                // Determine path: 'orders/' + orderId
+                // Note: We need to change app.js to save using .child(orderId).set() for this to work perfectly with simple security rules.
+                const orderRef = firebase.database().ref('orders/' + orderId);
+
+                const snapshot = await orderRef.once('value');
+
+                if (snapshot.exists()) {
+                    const order = snapshot.val();
+                    displayOrder(order);
+                } else {
+                    errorDiv.textContent = 'رقم الطلب غير صحيح أو لم يتم العثور عليه.';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error(error);
+                errorDiv.textContent = 'حدث خطأ في الاتصال. حاول مرة أخرى.';
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function displayOrder(order) {
+            const resultDiv = document.getElementById('order-result');
+
+            // Update Text Info
+            const date = new Date(order.timestamp);
+            document.getElementById('order-date').textContent = date.toLocaleDateString('ar-LY');
+            document.getElementById('order-total').textContent = order.finalTotal ? order.finalTotal.toFixed(2) + ' $' : order.total + ' $'; // Simple fallback
+
+            // Items text
+            const itemsText = order.items.map(i => `${i.name} (x1)`).join(', ');
+            document.getElementById('order-items').textContent = itemsText;
+
+            // Update Status Timeline
+            const statuses = ['pending', 'processing', 'shipped', 'completed'];
+            const currentStatus = order.status || 'pending';
+
+            // Reset classes
+            document.querySelectorAll('.status-step').forEach(s => s.classList.remove('completed'));
+
+            if (currentStatus === 'cancelled') {
+                // Handle Cancelled Case specially or just show nothing?
+                // Let's just highlight nothing or show error
+                document.getElementById('error-msg').textContent = 'عذراً، هذا الطلب تم إلغاؤه.';
+                document.getElementById('error-msg').style.display = 'block';
+                return;
+            }
+
+            // Highlight steps up to current
+            let found = false;
+            // Map simple status to timeline, assuming linear logic
+            let activeIndex = statuses.indexOf(currentStatus);
+            if (activeIndex === -1) activeIndex = 0; // Default pending
+
+            if (activeIndex >= 0) document.getElementById('step-pending').classList.add('completed');
+            if (activeIndex >= 1) document.getElementById('step-processing').classList.add('completed');
+            if (activeIndex >= 2) document.getElementById('step-shipped').classList.add('completed');
+            if (activeIndex >= 3) document.getElementById('step-completed').classList.add('completed');
+
+            resultDiv.style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>

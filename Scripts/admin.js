@@ -76,6 +76,8 @@ function loadOrders() {
 
             const statusText = {
                 'pending': 'قيد الانتظار',
+                'processing': 'قيد التنفيذ',
+                'shipped': 'تم الشحن',
                 'completed': 'مكتملة',
                 'cancelled': 'ملغاة'
             };
@@ -85,13 +87,15 @@ function loadOrders() {
                 <td>${formattedDate}</td>
                 <td>${order.items.length} منتج</td>
                 <td>$${order.finalTotal.toFixed(2)}</td>
-                <td><span class="order-status-badge status-${order.status}">${statusText[order.status]}</span></td>
+                <td><span class="order-status-badge status-${order.status}">${statusText[order.status] || order.status}</span></td>
                 <td>
                     <div class="order-actions">
                         <button class="btn btn-secondary" onclick="viewOrderDetails('${order.id}')" title="عرض التفاصيل">👁️</button>
                         <select onchange="updateOrderStatus('${order.id}', this.value)" class="status-select" style="padding: 0.4rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 6px; cursor: pointer;">
                             <option value="">تغيير الحالة</option>
                             <option value="pending" ${order.status === 'pending' ? 'disabled' : ''}>قيد الانتظار</option>
+                            <option value="processing" ${order.status === 'processing' ? 'disabled' : ''}>قيد التنفيذ</option>
+                            <option value="shipped" ${order.status === 'shipped' ? 'disabled' : ''}>تم الشحن</option>
                             <option value="completed" ${order.status === 'completed' ? 'disabled' : ''}>مكتملة</option>
                             <option value="cancelled" ${order.status === 'cancelled' ? 'disabled' : ''}>ملغاة</option>
                         </select>
@@ -154,6 +158,14 @@ function viewOrderDetails(orderId) {
             minute: '2-digit'
         });
 
+        const statusText = {
+            'pending': 'قيد الانتظار',
+            'processing': 'قيد التنفيذ',
+            'shipped': 'تم الشحن',
+            'completed': 'مكتملة',
+            'cancelled': 'ملغاة'
+        };
+
         let itemsHtml = order.items.map(item => `
             <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
                 <span>${item.name}</span>
@@ -190,7 +202,7 @@ function viewOrderDetails(orderId) {
                 <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
                     <p style="margin: 0.5rem 0;"><strong>رقم الطلب:</strong> ${order.orderId}</p>
                     <p style="margin: 0.5rem 0;"><strong>التاريخ:</strong> ${formattedDate}</p>
-                    <p style="margin: 0.5rem 0;"><strong>الحالة:</strong> <span class="order-status-badge status-${order.status}">${order.status === 'pending' ? 'قيد الانتظار' : order.status === 'completed' ? 'مكتملة' : 'ملغاة'}</span></p>
+                    <p style="margin: 0.5rem 0;"><strong>الحالة:</strong> <span class="order-status-badge status-${order.status}">${statusText[order.status] || order.status}</span></p>
                 </div>
                 
                 <h3 style="margin: 1.5rem 0 1rem 0;">المنتجات:</h3>

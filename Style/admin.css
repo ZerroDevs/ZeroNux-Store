@@ -173,6 +173,18 @@ body {
     border: 1px solid rgba(244, 67, 54, 0.4);
 }
 
+.status-processing {
+    background: rgba(0, 184, 148, 0.2);
+    color: #00b894;
+    border: 1px solid rgba(0, 184, 148, 0.4);
+}
+
+.status-shipped {
+    background: rgba(108, 92, 231, 0.2);
+    color: #6c5ce7;
+    border: 1px solid rgba(108, 92, 231, 0.4);
+}
+
 .order-actions {
     display: flex;
     gap: 0.5rem;

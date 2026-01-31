@@ -673,8 +673,9 @@ window.completeOrder = function () {
         lastUpdated: timestamp
     };
 
-    // Save to Firebase
-    firebase.database().ref('orders').push(orderData)
+    // Save to Firebase using the custom orderId as the key
+    // This allows us to fetch it directly by ID in track-order.html
+    firebase.database().ref('orders').child(orderId).set(orderData)
         .then(() => {
             console.log('Order saved successfully:', orderId);
         })

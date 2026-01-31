@@ -411,6 +411,7 @@ body:has(#announcement-bar[style*="display: block"]) {
     transition: all var(--transition-normal);
     position: relative;
     overflow: hidden;
+    text-decoration: none;
 }
 
 .btn::before {
