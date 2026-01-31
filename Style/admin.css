@@ -523,31 +523,71 @@ body {
 }
 
 /* Responsive */
+/* Responsive */
 @media (max-width: 768px) {
     .header-content {
         flex-direction: column;
         text-align: center;
+        gap: 0.5rem;
     }
 
     .admin-main {
-        padding: 1rem;
+        padding: 0.5rem;
     }
 
     .form-section,
     .products-section {
-        padding: 1.5rem;
+        padding: 1rem;
+    }
+
+    .admin-tabs {
+        margin: 1rem 0;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+        white-space: nowrap;
+    }
+
+    .tab-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
     }
 
     .products-grid {
         grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .product-image {
+        height: 180px;
     }
 
     .form-actions {
         flex-direction: column;
+        gap: 0.75rem;
     }
 
     .btn {
         width: 100%;
+        padding: 0.75rem;
+        /* Better touch target */
+    }
+
+    /* Better Form Touch Targets */
+    .form-group input,
+    .form-group select,
+    .btn {
+        min-height: 44px;
+        /* Apple Human Interface Guidelines */
+    }
+
+    .stat-card {
+        padding: 1rem;
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 2rem;
     }
 }
 

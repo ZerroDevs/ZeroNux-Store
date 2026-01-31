@@ -667,24 +667,57 @@ function createProductCard(id, product) {
     return card;
 }
 
-// Image File Upload handling
+// Image File Upload handling with Compression
 document.getElementById('image-file').addEventListener('change', function (e) {
-    const file = e.target.files[0];
-    if (file) {
-        // Check file size (limit to 1MB to avoid Firebase implementation limits if any, though RTDB limit is 10MB per node usually)
-        if (file.size > 1024 * 1024) {
-            showNotification('حجم الصورة كبير جداً! يرجى اختيار صورة أقل من 1 ميجابايت.', 'error');
-            this.value = ''; // Clear input
-            return;
-        }
+    handleImageUpload(e.target.files[0], 'product-image', 'image-file');
+});
 
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const base64String = e.target.result;
-            document.getElementById('product-image').value = base64String;
+// Additional Images Handling with Compression
+document.getElementById('additional-images-file').addEventListener('change', function (e) {
+    const files = Array.from(e.target.files);
 
-            // Show preview/feedback
-            const existingPreview = document.querySelector('.image-preview-feedback');
+    if (currentAdditionalImages.length + files.length > 5) {
+        showNotification('لا يمكن إضافة أكثر من 5 صور إضافية.', 'error');
+        this.value = '';
+        return;
+    }
+
+    files.forEach(file => {
+        handleImageUpload(file, null, null, true);
+    });
+
+    this.value = '';
+});
+
+// Generic Image Handler
+function handleImageUpload(file, inputId, fileInputId, isAdditional = false) {
+    if (!file) return;
+
+    // Check file type
+    if (!file.type.match('image.*')) {
+        showNotification('يرجى اختيار ملف صورة صالح', 'error');
+        return;
+    }
+
+    // Allow up to 10MB input, but we will compress it down
+    if (file.size > 10 * 1024 * 1024) {
+        showNotification('حجم الصورة كبير جداً (الحد الأقصى 10 ميجابايت)', 'error');
+        if (fileInputId) document.getElementById(fileInputId).value = '';
+        return;
+    }
+
+    showNotification('جاري معالجة الصورة...', 'success');
+
+    compressImage(file, 800, 0.7).then(base64String => {
+        if (isAdditional) {
+            currentAdditionalImages.push(base64String);
+            renderAdditionalImages();
+        } else {
+            document.getElementById(inputId).value = base64String;
+
+            // Show preview
+            const container = document.getElementById(fileInputId).parentNode;
+            const existingPreview = container.querySelector('.image-preview-feedback');
             if (existingPreview) existingPreview.remove();
 
             const preview = document.createElement('div');
@@ -694,21 +727,55 @@ document.getElementById('image-file').addEventListener('change', function (e) {
                     <img src="${base64String}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;" alt="Preview">
                     <button type="button" class="btn-remove-image" title="إزالة الصورة">✕</button>
                 </div>
-                <span style="display: block; color: #00b894; font-size: 0.85rem; margin-top: 5px;">✅ تم اختيار الصورة</span>
+                <span style="display: block; color: #00b894; font-size: 0.85rem; margin-top: 5px;">✅ تم ضغط واختيار الصورة</span>
             `;
-            document.getElementById('image-file').parentNode.appendChild(preview);
+            container.appendChild(preview);
 
-            // Add click handler for remove button
             preview.querySelector('.btn-remove-image').addEventListener('click', function () {
-                document.getElementById('image-file').value = '';
-                document.getElementById('product-image').value = '';
+                document.getElementById(fileInputId).value = '';
+                document.getElementById(inputId).value = '';
                 preview.remove();
-                showNotification('تم إزالة الصورة', 'success');
             });
-        };
+        }
+    }).catch(err => {
+        console.error('Compression error:', err);
+        showNotification('فشل معالجة الصورة. حاول بملف آخر.', 'error');
+    });
+}
+
+// Image Compression Utility
+function compressImage(file, maxWidth, quality) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
         reader.readAsDataURL(file);
-    }
-});
+        reader.onload = function (event) {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = function () {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                if (width > maxWidth) {
+                    height *= maxWidth / width;
+                    width = maxWidth;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Compress to JPEG (even if input was PNG/HEIC) to save space
+                const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                resolve(dataUrl);
+            };
+            img.onerror = error => reject(error);
+        };
+        reader.onerror = error => reject(error);
+    });
+}
 
 // Additional Images Handling
 let currentAdditionalImages = [];
