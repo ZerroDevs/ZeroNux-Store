@@ -25,7 +25,6 @@ const settingsRef = database.ref('settings');
 // Currency conversion functionality
 let EXCHANGE_RATE = 9; // Default rate, will be loaded from Firebase
 let currentCurrency = 'USD';
-let currentLanguage = 'ar'; // Default to Arabic
 
 // Load exchange rate from Firebase
 function loadExchangeRate() {
@@ -94,83 +93,6 @@ function initCurrencySwitcher() {
     });
 }
 
-// Language switcher functionality
-function switchLanguage(lang) {
-    currentLanguage = lang;
-    const t = translations[lang];
-
-    // Update HTML lang and dir attributes
-    document.documentElement.lang = lang;
-    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-
-    // Update navigation
-    document.querySelector('[data-i18n="nav-home"]').textContent = t.nav.home;
-    document.querySelector('[data-i18n="nav-products"]').textContent = t.nav.products;
-    document.querySelector('[data-i18n="nav-about"]').textContent = t.nav.about;
-    document.querySelector('[data-i18n="nav-contact"]').textContent = t.nav.contact;
-
-    // Update hero section
-    document.querySelector('[data-i18n="hero-welcome"]').textContent = t.hero.welcome;
-    document.querySelector('[data-i18n="hero-title"]').textContent = t.hero.title;
-    document.querySelector('[data-i18n="hero-description"]').textContent = t.hero.description;
-    document.querySelector('[data-i18n="hero-shop-now"]').textContent = t.hero.shopNow;
-    document.querySelector('[data-i18n="hero-view-catalog"]').textContent = t.hero.viewCatalog;
-
-    // Update products section
-    document.querySelector('[data-i18n="products-title"]').textContent = t.products.title;
-    document.querySelector('[data-i18n="products-subtitle"]').textContent = t.products.subtitle;
-
-    // Update product badges
-    const badges = document.querySelectorAll('.product-badge');
-    badges.forEach(badge => {
-        const badgeType = badge.dataset.badge;
-        if (badgeType && t.products[badgeType.toLowerCase()]) {
-            badge.textContent = t.products[badgeType.toLowerCase()];
-        }
-    });
-
-    // Update add to cart buttons
-    document.querySelectorAll('[data-i18n="add-to-cart"]').forEach(btn => {
-        btn.innerHTML = `
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 2L6 6M18 6L15 2M6 6h12l1 14H5L6 6z"/>
-            </svg>
-            ${t.products.addToCart}
-        `;
-    });
-
-    // Update newsletter
-    document.querySelector('[data-i18n="newsletter-title"]').textContent = t.newsletter.title;
-    document.querySelector('[data-i18n="newsletter-desc"]').textContent = t.newsletter.description;
-    document.querySelector('[data-i18n="newsletter-placeholder"]').placeholder = t.newsletter.placeholder;
-    document.querySelector('[data-i18n="newsletter-submit"]').textContent = t.newsletter.subscribe;
-
-    // Update footer
-    document.querySelector('[data-i18n="footer-desc"]').textContent = t.footer.description;
-    document.querySelector('[data-i18n="footer-quick-links"]').textContent = t.footer.quickLinks;
-    document.querySelector('[data-i18n="footer-customer-service"]').textContent = t.footer.customerService;
-    document.querySelector('[data-i18n="footer-contact"]').textContent = t.footer.contact;
-
-    // Update footer links
-    const footerLinks = ['home', 'products', 'about', 'contact', 'shippingInfo', 'returns', 'faq', 'support'];
-    footerLinks.forEach(link => {
-        const linkEl = document.querySelector(`[data-i18n="footer-link-${link}"]`);
-        if (linkEl && t.footer[link]) {
-            linkEl.textContent = t.footer[link];
-        } else if (linkEl && t.nav[link]) {
-            linkEl.textContent = t.nav[link];
-        }
-    });
-
-    document.querySelector('[data-i18n="footer-email"]').textContent = t.footer.email;
-    document.querySelector('[data-i18n="footer-phone"]').textContent = t.footer.phone;
-    document.querySelector('[data-i18n="footer-location"]').textContent = t.footer.location;
-    document.querySelector('[data-i18n="footer-copyright"]').textContent = t.footer.copyright;
-}
-
-// Language is locked to Arabic only - no switcher needed
-// initLanguageSwitcher function removed
-
 // Shopping cart functionality
 let cart = [];
 
@@ -190,7 +112,6 @@ function addToCart(productName, price) {
     updateCartCount();
 
     // Show feedback
-    const t = translations[currentLanguage];
     showNotification(`${productName} ${t.cart.added}`);
 }
 
@@ -224,9 +145,8 @@ function initCartButton() {
     const cartBtn = document.querySelector('.cart-btn');
 
     cartBtn.addEventListener('click', () => {
-        const t = translations[currentLanguage];
         if (cart.length === 0) {
-            showNotification(t.cart.empty);
+            showNotification('السلة فارغة! 🛒');
         } else {
             showCartModal();
         }
@@ -273,10 +193,89 @@ function showNotification(message) {
     }, 3000);
 }
 
+// Add to cart function
+// Add to cart function
+function addToCart(productName, price, image, description) {
+    cart.push({
+        name: productName,
+        price: price,
+        image: image || 'https://via.placeholder.com/100',
+        description: description || ''
+    });
+    updateCartCount();
+
+    // Show notification
+    const message = `تمت إضافة ${productName} إلى السلة! 🛒`;
+    showNotification(message);
+}
+
+// Update cart count badge
+function updateCartCount() {
+    const cartBtn = document.querySelector('.cart-btn');
+    if (!cartBtn) return;
+
+    let badge = cartBtn.querySelector('.cart-count');
+    if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'cart-count';
+        Object.assign(badge.style, {
+            position: 'absolute',
+            top: '-5px',
+            right: '-5px',
+            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            color: 'white',
+            borderRadius: '50%',
+            width: '20px',
+            height: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.75rem',
+            fontWeight: '700'
+        });
+        cartBtn.style.position = 'relative';
+        cartBtn.appendChild(badge);
+    }
+    badge.textContent = cart.length;
+    badge.style.display = cart.length > 0 ? 'flex' : 'none';
+}
+
+// Initialize cart button
+function initCartButton() {
+    const cartBtn = document.querySelector('.cart-btn');
+    if (cartBtn) {
+        cartBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            showCartModal();
+        });
+    }
+}
+
+// Initialize add to cart buttons
+function initAddToCartButtons() {
+    const addToCartBtns = document.querySelectorAll('.add-to-cart-btn');
+    addToCartBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const productName = btn.dataset.productName;
+            const productPrice = parseFloat(btn.dataset.productPrice);
+            const price = currentCurrency === 'USD' ? productPrice : (productPrice * EXCHANGE_RATE);
+            const image = btn.dataset.productImage;
+            const description = btn.dataset.productDesc;
+
+            addToCart(productName, price, image, description);
+
+            // Animation for button
+            btn.classList.add('added');
+            setTimeout(() => {
+                btn.classList.remove('added');
+            }, 1000);
+        });
+    });
+}
+
 // Cart modal
 function showCartModal() {
-    const t = translations[currentLanguage];
-
     // Create modal overlay
     const overlay = document.createElement('div');
     overlay.className = 'cart-modal-overlay';
@@ -287,7 +286,7 @@ function showCartModal() {
 
     let cartHTML = `
         <div class="cart-modal-header">
-            <h2>${t.cart.title}</h2>
+            <h2>سلة التسوق</h2>
             <button class="close-modal-btn">&times;</button>
         </div>
         <div class="cart-items">
@@ -298,9 +297,15 @@ function showCartModal() {
         total += item.price;
         cartHTML += `
             <div class="cart-item">
-                <span class="cart-item-name">${item.name}</span>
-                <span class="cart-item-price">${formatCurrency(item.price, currentCurrency)}</span>
-                <button class="remove-item-btn" data-index="${index}">${t.cart.remove}</button>
+                <div class="cart-item-image">
+                    <img src="${item.image}" alt="${item.name}">
+                </div>
+                <div class="cart-item-details">
+                    <span class="cart-item-name">${item.name}</span>
+                    <p class="cart-item-desc">${item.description || ''}</p>
+                    <span class="cart-item-price">${formatCurrency(item.price, currentCurrency)}</span>
+                </div>
+                <button class="remove-item-btn" data-index="${index}">&times;</button>
             </div>
         `;
     });
@@ -308,12 +313,12 @@ function showCartModal() {
     cartHTML += `
         </div>
         <div class="cart-total">
-            <strong>${t.cart.total}</strong>
+            <strong>المجموع:</strong>
             <strong>${formatCurrency(total, currentCurrency)}</strong>
         </div>
         <div class="cart-actions">
-            <button class="btn btn-primary checkout-btn">${t.cart.checkout}</button>
-            <button class="btn btn-secondary clear-cart-btn">${t.cart.clearCart}</button>
+            <button class="btn btn-primary checkout-btn">إتمام الطلب</button>
+            <button class="btn btn-secondary clear-cart-btn">إفراغ السلة</button>
         </div>
     `;
 
@@ -344,8 +349,24 @@ function showCartModal() {
         width: '90%',
         maxHeight: '80vh',
         overflow: 'auto',
-        animation: 'slideInUp 0.3s ease-out'
+        animation: 'slideInUp 0.3s ease-out',
+        direction: 'rtl'
     });
+
+    // Add extra styles for modal content
+    const style = document.createElement('style');
+    style.textContent = `
+        .cart-item { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 12px; margin-bottom: 1rem; position: relative; }
+        .cart-item-image { width: 60px; height: 60px; flex-shrink: 0; border-radius: 8px; overflow: hidden; background: white; }
+        .cart-item-image img { width: 100%; height: 100%; object-fit: contain; }
+        .cart-item-details { flex: 1; display: flex; flex-direction: column; gap: 0.25rem; }
+        .cart-item-name { font-weight: 700; font-size: 1rem; }
+        .cart-item-desc { font-size: 0.85rem; color: rgba(255, 255, 255, 0.6); margin: 0; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+        .cart-item-price { color: #f093fb; font-weight: 600; font-size: 0.95rem; }
+        .remove-item-btn { width: 24px; height: 24px; border-radius: 50%; background: rgba(255, 59, 48, 0.2); color: #ff3b30; border: none; display: flex; align-items: center; justifyContent: center; cursor: pointer; position: absolute; top: 10px; left: 10px; font-size: 1.2rem; line-height: 1; }
+        .remove-item-btn:hover { background: rgba(255, 59, 48, 0.4); }
+    `;
+    modal.appendChild(style);
 
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
@@ -371,7 +392,7 @@ function showCartModal() {
             if (cart.length > 0) {
                 showCartModal();
             } else {
-                showNotification(t.cart.cartEmpty);
+                showNotification('تم إفراغ السلة');
             }
         });
     });
@@ -382,7 +403,7 @@ function showCartModal() {
         cart = [];
         updateCartCount();
         closeModal(overlay);
-        showNotification(t.cart.cartCleared);
+        showNotification('تم مسح السلة بنجاح');
     });
 
     // Checkout handler
@@ -392,11 +413,9 @@ function showCartModal() {
 
         // Generate WhatsApp message
         const phoneNumber = '218916808225'; // Libyan number
-        let message = currentLanguage === 'ar'
-            ? '🛍️ *طلب جديد من متجر زيرونكس*\n\n'
-            : '🛍️ *New Order from ZeroNux Store*\n\n';
+        let message = '🛍️ *طلب جديد من متجر زيرونكس*\n\n';
 
-        message += currentLanguage === 'ar' ? '*المنتجات:*\n' : '*Products:*\n';
+        message += '*المنتجات:*\n';
 
         cart.forEach((item, index) => {
             const itemPrice = formatCurrency(item.price, currentCurrency);
@@ -406,9 +425,7 @@ function showCartModal() {
         const total = cart.reduce((sum, item) => sum + item.price, 0);
         const totalFormatted = formatCurrency(total, currentCurrency);
 
-        message += currentLanguage === 'ar'
-            ? `\n*المجموع:* ${totalFormatted}`
-            : `\n*Total:* ${totalFormatted}`;
+        message += `\n*المجموع:* ${totalFormatted}`;
 
         // Encode message for URL
         const encodedMessage = encodeURIComponent(message);
@@ -418,9 +435,7 @@ function showCartModal() {
         window.open(whatsappURL, '_blank');
 
         // Show confirmation
-        showNotification(currentLanguage === 'ar'
-            ? 'جاري فتح واتساب...'
-            : 'Opening WhatsApp...');
+        showNotification('جاري فتح واتساب...');
     });
 }
 
@@ -437,8 +452,7 @@ function initNewsletterForm() {
 
     form.addEventListener('submit', (e) => {
         e.preventDefault();
-        const t = translations[currentLanguage];
-        showNotification(t.notifications.subscribed);
+        showNotification('شكراً لاشتراكك في النشرة البريدية! 🎉');
         form.reset();
     });
 }
@@ -718,18 +732,18 @@ function showProductDetails(productId) {
                 <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/500x300?text=No+Image'">
             </div>
             <div class="product-modal-body">
-                <h3 class="features-title">${currentLanguage === 'ar' ? 'المميزات المتضمنة' : 'Included Features'}</h3>
+                <h3 class="features-title">المميزات المتضمنة</h3>
                 <div class="features-list">
                     ${featuresHTML}
                 </div>
             </div>
             <div class="product-modal-footer">
                 <div class="modal-price-section">
-                    <span class="modal-price-label">${currentLanguage === 'ar' ? 'السعر:' : 'Price:'}</span>
+                    <span class="modal-price-label">السعر:</span>
                     <span class="modal-price">${displayPrice}</span>
                 </div>
                 <button class="btn btn-primary add-to-cart-modal" data-product-name="${product.name}" data-product-price="${product.price}">
-                    ${currentLanguage === 'ar' ? 'إضافة للسلة' : 'Add to Cart'}
+                    إضافة للسلة
                 </button>
             </div>
         `;
@@ -745,7 +759,7 @@ function showProductDetails(productId) {
             background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
             border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px',
             maxWidth: '900px', width: '100%', maxHeight: '90vh', overflow: 'auto',
-            animation: 'slideInUp 0.3s ease-out', direction: currentLanguage === 'ar' ? 'rtl' : 'ltr'
+            animation: 'slideInUp 0.3s ease-out', direction: 'rtl'
         });
 
         overlay.appendChild(modal);
@@ -784,7 +798,7 @@ function showProductDetails(productId) {
             const productName = addToCartBtn.dataset.productName;
             const productPrice = parseFloat(addToCartBtn.dataset.productPrice);
             const price = currentCurrency === 'USD' ? productPrice : (productPrice * EXCHANGE_RATE);
-            addToCart(productName, price);
+            addToCart(productName, price, product.image, product.shortDesc || product.description.substring(0, 100));
             closeModal(overlay);
         });
     });
@@ -808,9 +822,6 @@ function initProductCardClick() {
 
 // About modal
 function showAboutModal() {
-    const t = translations[currentLanguage];
-    const about = t.about;
-
     const overlay = document.createElement('div');
     overlay.className = 'about-modal-overlay';
 
@@ -819,46 +830,46 @@ function showAboutModal() {
 
     modal.innerHTML = `
         <div class="about-modal-header">
-            <h2>${about.title}</h2>
+            <h2>من نحن</h2>
             <button class="close-modal-btn">&times;</button>
         </div>
         <div class="about-modal-body">
             <div class="about-description">
-                <p>${about.description}</p>
+                <p>نحن متجر زيرونكس، واجهتك الأولى للحصول على أفضل المنتجات الرقمية والاشتراكات العالمية بأسعار منافسة في ليبيا. نسعى دائماً لتقديم خدمة موثوقة وسريعة لعملائنا.</p>
             </div>
             
             <div class="about-contact">
-                <h3>${about.contactTitle}</h3>
+                <h3>معلومات التواصل</h3>
                 
                 <div class="contact-item">
                     <div class="contact-icon">📱</div>
                     <div class="contact-details">
-                        <strong>${about.phone}</strong>
-                        <a href="tel:${about.phoneNumber}">${about.phoneNumber}</a>
+                        <strong>الهاتف</strong>
+                        <a href="tel:+218916808225">+218 91 680 8225</a>
                     </div>
                 </div>
                 
                 <div class="contact-item">
                     <div class="contact-icon">📍</div>
                     <div class="contact-details">
-                        <strong>${about.location}</strong>
-                        <p>${about.locationAddress}</p>
+                        <strong>الموقع</strong>
+                        <p>ليبيا، طرابلس (متجر إلكتروني)</p>
                     </div>
                 </div>
                 
                 <div class="contact-item">
                     <div class="contact-icon">👤</div>
                     <div class="contact-details">
-                        <strong>${about.facebook}</strong>
-                        <a href="https://www.facebook.com/OsamaaAbdallatif" target="_blank">${about.facebookLink}</a>
+                        <strong>فيسبوك</strong>
+                        <a href="https://www.facebook.com/OsamaaAbdallatif" target="_blank">ZeroNux Store</a>
                     </div>
                 </div>
                 
                 <div class="contact-item">
                     <div class="contact-icon">🛟</div>
                     <div class="contact-details">
-                        <strong>${about.support}</strong>
-                        <p>${about.supportText}</p>
+                        <strong>الدعم الفني</strong>
+                        <p>متواجدون لخدمتكم على مدار الساعة</p>
                     </div>
                 </div>
             </div>
@@ -876,7 +887,7 @@ function showAboutModal() {
         background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
         border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px',
         maxWidth: '600px', width: '100%', maxHeight: '90vh', overflow: 'auto',
-        animation: 'slideInUp 0.3s ease-out', direction: currentLanguage === 'ar' ? 'rtl' : 'ltr'
+        animation: 'slideInUp 0.3s ease-out', direction: 'rtl'
     });
 
     overlay.appendChild(modal);
@@ -919,10 +930,6 @@ function initAboutLink() {
 
 // Contact modal
 function showContactModal() {
-    const t = translations[currentLanguage];
-    const contact = t.contact;
-    const about = t.about;
-
     const overlay = document.createElement('div');
     overlay.className = 'contact-modal-overlay';
 
@@ -931,51 +938,51 @@ function showContactModal() {
 
     modal.innerHTML = `
         <div class="contact-modal-header">
-            <h2>${contact.title}</h2>
+            <h2>تواصل معنا</h2>
             <button class="close-modal-btn">&times;</button>
         </div>
         <div class="contact-modal-body">
             <div class="contact-description">
-                <p>${contact.description}</p>
+                <p>هل لديك استفسار؟ نحن هنا للمساعدة، يمكنك مراسلتنا مباشرة.</p>
             </div>
             
             <form class="contact-form">
                 <div class="form-group">
-                    <label>${contact.nameLabel}</label>
-                    <input type="text" class="form-input" placeholder="${contact.namePlaceholder}" required>
+                    <label>الاسم</label>
+                    <input type="text" class="form-input" placeholder="أدخل اسمك الكريم" required>
                 </div>
                 
                 <div class="form-group">
-                    <label>${contact.emailLabel}</label>
-                    <input type="email" class="form-input" placeholder="${contact.emailPlaceholder}" required>
+                    <label>البريد الإلكتروني</label>
+                    <input type="email" class="form-input" placeholder="example@email.com" required>
                 </div>
                 
                 <div class="form-group">
-                    <label>${contact.messageLabel}</label>
-                    <textarea class="form-textarea" placeholder="${contact.messagePlaceholder}" rows="5" required></textarea>
+                    <label>الرسالة</label>
+                    <textarea class="form-textarea" placeholder="كيف يمكننا مساعدتك؟" rows="5" required></textarea>
                 </div>
                 
-                <button type="submit" class="btn btn-primary contact-submit">${contact.sendButton}</button>
+                <button type="submit" class="btn btn-primary contact-submit">إرسال الرسالة</button>
             </form>
             
             <div class="contact-divider">
-                <span>${contact.or}</span>
+                <span>أو تواصل مباشرة</span>
             </div>
             
             <div class="contact-direct">
-                <a href="tel:${about.phoneNumber}" class="contact-link">
+                <a href="tel:+218916808225" class="contact-link">
                     <div class="contact-link-icon">📱</div>
                     <div class="contact-link-text">
-                        <strong>${about.phone}</strong>
-                        <span>${about.phoneNumber}</span>
+                        <strong>اتصل بنا</strong>
+                        <span>+218 91 680 8225</span>
                     </div>
                 </a>
                 
                 <a href="https://www.facebook.com/OsamaaAbdallatif" target="_blank" class="contact-link">
                     <div class="contact-link-icon">👤</div>
                     <div class="contact-link-text">
-                        <strong>${about.facebook}</strong>
-                        <span>${about.facebookLink}</span>
+                        <strong>فيسبوك</strong>
+                        <span>ZeroNux Store</span>
                     </div>
                 </a>
             </div>
@@ -993,7 +1000,7 @@ function showContactModal() {
         background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
         border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px',
         maxWidth: '600px', width: '100%', maxHeight: '90vh', overflow: 'auto',
-        animation: 'slideInUp 0.3s ease-out', direction: currentLanguage === 'ar' ? 'rtl' : 'ltr'
+        animation: 'slideInUp 0.3s ease-out', direction: 'rtl'
     });
 
     overlay.appendChild(modal);
@@ -1195,7 +1202,7 @@ function createProductCardHTML(id, product) {
                 <p class="product-description">${product.shortDesc || product.description.substring(0, 60) + '...'}</p>
                 <div class="product-footer">
                     <span class="product-price" data-usd="${product.price}">${price}</span>
-                    <button class="add-to-cart-btn" data-product-name="${product.name}" data-product-price="${product.price}">
+                    <button class="add-to-cart-btn" data-product-name="${product.name}" data-product-price="${product.price}" data-product-image="${product.image}" data-product-desc="${product.shortDesc || product.description.substring(0, 60) + '...'}">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M9 2L6 6M18 6L15 2M6 6h12l1 14H5L6 6z" />
                         </svg>
