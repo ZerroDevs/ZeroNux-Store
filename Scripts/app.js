@@ -1164,8 +1164,11 @@ function loadProductsFromFirebase() {
         // Render products from Firebase
         Object.keys(products).forEach(id => {
             const product = products[id];
-            const productCard = createProductCardHTML(id, product);
-            productsContainer.innerHTML += productCard;
+            // Only show if visible is not false (handle legacy products without visible prop)
+            if (product.visible !== false) {
+                const productCard = createProductCardHTML(id, product);
+                productsContainer.innerHTML += productCard;
+            }
         });
 
         // Re-initialize buttons and events

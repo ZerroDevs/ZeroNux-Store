@@ -184,6 +184,12 @@ function createProductCard(id, product) {
         badgeHtml = `<span class="product-badge badge-${product.badge}">${badgeMap[product.badge]}</span>`;
     }
 
+    const visibilityBtn = `
+        <button class="btn btn-visibility ${product.visible === false ? 'btn-hidden' : ''}" onclick="toggleVisibility('${id}', ${product.visible !== false})">
+            ${product.visible === false ? '👁️‍🗨️ مخفي' : '👁️ مرئي'}
+        </button>
+    `;
+
     card.innerHTML = `
         <img src="${product.image}" alt="${product.name}" class="product-image" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
         ${badgeHtml}
@@ -191,10 +197,15 @@ function createProductCard(id, product) {
         <p class="price">$${product.price}</p>
         <p class="description">${product.description.substring(0, 100)}${product.description.length > 100 ? '...' : ''}</p>
         <div class="product-actions">
+            ${visibilityBtn}
             <button class="btn btn-edit" onclick="editProduct('${id}')">تعديل</button>
             <button class="btn btn-delete" onclick="deleteProduct('${id}')">حذف</button>
         </div>
     `;
+
+    if (product.visible === false) {
+        card.classList.add('product-hidden');
+    }
 
     return card;
 }
@@ -240,8 +251,20 @@ document.getElementById('product-form').addEventListener('submit', (e) => {
         badge: document.getElementById('product-badge').value,
         image: document.getElementById('product-image').value,
         features: parseFeatures(document.getElementById('product-features').value),
+        visible: true, // Default to visible
         timestamp: Date.now()
     };
+
+    // Preserve visibility status if editing
+    if (editingProductId) {
+        // We'll handle this by only updating specific fields or merging, 
+        // but since we overwrite, let's fetch current status or rely on backend merge if used update.
+        // Actually, update merges, but here we define the whole object.
+        // Better strategy: Don't set visible here if it's an update, OR fetch it first.
+        // Simplest for now: We will just NOT send 'visible' key on update unless we add a checkbox field.
+        // Let's modify the update logic below to exclude 'visible' from overwrite or keep it.
+        delete productData.visible;
+    }
 
     // Validate image presence
     if (!productData.image) {
@@ -318,6 +341,18 @@ window.editProduct = function (id) {
         // Scroll to form
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
+};
+
+// Toggle product visibility
+window.toggleVisibility = function (id, currentStatus) {
+    const newStatus = !currentStatus;
+    productsRef.child(id).update({ visible: newStatus })
+        .then(() => {
+            // UI will update automatically via on('value') listener
+        })
+        .catch((error) => {
+            alert('حدث خطأ: ' + error.message);
+        });
 };
 
 // Delete product
