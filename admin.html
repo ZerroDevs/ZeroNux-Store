@@ -44,198 +44,107 @@
 
         <!-- Main Content -->
         <main class="admin-main">
-            <!-- Stats Dashboard -->
-            <section class="stats-container">
-                <div class="stat-card">
-                    <div class="stat-icon">📦</div>
-                    <div class="stat-info">
-                        <h3>إجمالي المنتجات</h3>
-                        <p id="stat-total">0</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">👁️</div>
-                    <div class="stat-info">
-                        <h3>المنتجات الظاهرة</h3>
-                        <p id="stat-visible">0</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">👁️‍🗨️</div>
-                    <div class="stat-info">
-                        <h3>المنتجات المخفية</h3>
-                        <p id="stat-hidden">0</p>
-                    </div>
-                </div>
-            </section>
+            <!-- Tab Navigation -->
+            <div class="admin-tabs">
+                <button class="tab-btn active" onclick="switchTab('dashboard')">
+                    <span>📊</span> الرئيسية
+                </button>
+                <button class="tab-btn" onclick="switchTab('products')">
+                    <span>📦</span> المنتجات
+                </button>
+                <button class="tab-btn" onclick="switchTab('coupons')">
+                    <span>🎫</span> الكوبونات
+                </button>
+                <button class="tab-btn" onclick="switchTab('settings')">
+                    <span>⚙️</span> الإعدادات
+                </button>
+            </div>
 
-            <!-- Settings Section -->
-            <section class="form-section">
-                <h2>⚙️ الإعدادات</h2>
-                <form id="settings-form">
-                    <div class="form-row">
+            <!-- Dashboard Tab -->
+            <div id="tab-dashboard" class="tab-content active">
+                <section class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-icon">📦</div>
+                        <div class="stat-info">
+                            <h3>إجمالي المنتجات</h3>
+                            <p id="stat-total">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-info">
+                            <h3>القيمة الإجمالية</h3>
+                            <p id="stat-value">$0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">👁️</div>
+                        <div class="stat-info">
+                            <h3>المنتجات الظاهرة</h3>
+                            <p id="stat-visible">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">👁️‍🗨️</div>
+                        <div class="stat-info">
+                            <h3>المنتجات المخفية</h3>
+                            <p id="stat-hidden">0</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Products List -->
+                <section class="products-section">
+                    <h2>المنتجات الحالية</h2>
+                    <div id="products-list" class="products-grid">
+                        <div class="loading">جاري التحميل...</div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Products Tab -->
+            <div id="tab-products" class="tab-content">
+                <section class="form-section">
+                    <h2 id="form-title">إضافة منتج جديد</h2>
+                    <form id="product-form">
+                        <input type="hidden" id="product-id">
+
                         <div class="form-group">
-                            <label>سعر صرف الدولار (1 USD = ؟ LYD)</label>
-                            <input type="number" id="exchange-rate" placeholder="9" step="0.01" min="0" required>
-                            <small>المبلغ بالدينار الليبي الذي يعادل 1 دولار أمريكي</small>
+                            <label>اسم المنتج</label>
+                            <input type="text" id="product-name" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>السعر ($)</label>
+                                <input type="number" id="product-price" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>التصنيف</label>
+                                <select id="product-category" required>
+                                    <option value="general">عام</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>شارة المنتج</label>
+                                <select id="product-badge">
+                                    <option value="none">بدون شارة</option>
+                                    <option value="new">جديد (New)</option>
+                                    <option value="limited">عرض محدود (Limited)</option>
+                                    <option value="hot">الأكثر مبيعاً (Hot)</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div class="form-group">
-                            <label>رقم الهاتف (الواتساب)</label>
-                            <input type="text" id="contact-phone" placeholder="2189xxxxxxx" required>
-                            <small>سيتم استخدامه لزر الواتساب وفي تذييل الصفحة</small>
+                            <label>الوصف المختصر</label>
+                            <input type="text" id="product-short-desc" placeholder="وصف قصير للمنتج">
                         </div>
 
                         <div class="form-group">
-                            <label>رابط صفحة الفيسبوك</label>
-                            <input type="url" id="facebook-url" placeholder="https://facebook.com/..." required>
-                            <small>رابط صفحتك على الفيسبوك</small>
-                        </div>
-
-                        <div class="form-group">
-                            <label>البريد الإلكتروني</label>
-                            <input type="email" id="contact-email" placeholder="support@example.com" required>
-                            <small>البريد الذي سيظهر في تذييل الصفحة</small>
-                            <small>البريد الذي سيظهر في تذييل الصفحة</small>
-                        </div>
-                    </div>
-
-                    <hr style="border-color: rgba(255,255,255,0.1); margin: 2rem 0;">
-
-                    <h3>🖼️ تخصيص الواجهة (Hero Section)</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>العنوان الرئيسي</label>
-                            <input type="text" id="hero-title" placeholder="متجر زيرونكس">
-                        </div>
-                        <div class="form-group">
-                            <label>العنوان الفرعي</label>
-                            <input type="text" id="hero-subtitle" placeholder="مرحباً بك في">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>الوصف الترحيبي</label>
-                        <textarea id="hero-description" rows="3" placeholder="اكتشف منتجات عالية الجودة..."></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label>رابط صورة الخلفية</label>
-                        <input type="url" id="hero-image" placeholder="https://example.com/hero.jpg">
-                        <small>يفضل صورة عرضية عالية الدقة (1920x1080)</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label>تصنيفات المتجر</label>
-                        <input type="text" id="store-categories" placeholder="برامج, ألعاب, اشتراكات"
-                            value="برامج, ألعاب, اشتراكات">
-                        <small>اكتب التصنيفات مفصول بينها بفاصلة (,)</small>
-                    </div>
-
-                    <hr style="border-color: rgba(255,255,255,0.1); margin: 2rem 0;">
-
-                    <h3>📢 شريط الإعلانات</h3>
-                    <div class="form-group">
-                        <label style="display: flex; align-items: center; gap: 10px;">
-                            <input type="checkbox" id="announcement-enabled" style="width: auto;">
-                            تفعيل شريط الإعلانات
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label>نص الإعلان</label>
-                        <input type="text" id="announcement-text"
-                            placeholder="🔥 عرض خاص: استخدم كود ZERO10 للحصول على خصم 10%!">
-                        <small>سيظهر في أعلى الصفحة بشكل متحرك</small>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">حفظ الإعدادات</button>
-                </form>
-            </section>
-
-            <!-- Promo Codes Management -->
-            <section class="form-section">
-                <h2>🎫 إدارة كوبونات الخصم</h2>
-                <form id="promo-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>كود الخصم</label>
-                            <input type="text" id="promo-code" placeholder="RAMADAN2026" required
-                                style="text-transform: uppercase;">
-                        </div>
-                        <div class="form-group">
-                            <label>نسبة الخصم (%)</label>
-                            <input type="number" id="promo-discount" placeholder="10" min="1" max="100" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>تاريخ الانتهاء (اختياري)</label>
-                            <input type="date" id="promo-expiry">
-                        </div>
-                        <div class="form-group">
-                            <label>الحد الأقصى للاستخدام (اختياري)</label>
-                            <input type="number" id="promo-limit" placeholder="مثال: 100">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-secondary">إنشاء كوبون</button>
-                </form>
-
-                <div style="margin-top: 2rem;">
-                    <h3>الكوبونات النشطة</h3>
-                    <div id="promo-list" class="products-grid"
-                        style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));">
-                        <!-- Promo Cards will appear here -->
-                    </div>
-                </div>
-            </section>
-
-            <!-- Add/Edit Product Form -->
-            <section class="form-section">
-                <h2 id="form-title">إضافة منتج جديد</h2>
-                <form id="product-form">
-                    <input type="hidden" id="product-id">
-
-                    <div class="form-group">
-                        <label>اسم المنتج</label>
-                        <input type="text" id="product-name" required>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>السعر ($)</label>
-                            <input type="number" id="product-price" step="0.01" required>
-                        </div>
-                        <div class="form-group">
-                            <label>التصنيف</label>
-                            <select id="product-category" required>
-                                <option value="general">عام</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>شارة المنتج</label>
-                            <select id="product-badge">
-                                <option value="none">بدون شارة</option>
-                                <option value="new">جديد (New)</option>
-                                <option value="limited">عرض محدود (Limited)</option>
-                                <option value="hot">الأكثر مبيعاً (Hot)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>الوصف المختصر</label>
-                        <input type="text" id="product-short-desc" placeholder="وصف قصير للمنتج">
-                    </div>
-
-                    <div class="form-group">
-                        <label>الوصف الكامل</label>
-                        <textarea id="product-description" rows="3" placeholder="وصف تفصيلي للمنتج" required></textarea>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <option value="none">بدون شارة</option>
-                            </select>
+                            <label>الوصف الكامل</label>
+                            <textarea id="product-description" rows="3" placeholder="وصف تفصيلي للمنتج"
+                                required></textarea>
                         </div>
 
                         <div class="form-group">
@@ -248,30 +157,146 @@
                                 <input type="file" id="image-file" accept="image/*" style="margin-top: 10px;">
                             </div>
                         </div>
-                    </div>
 
-                    <div class="form-group">
-                        <label>المميزات (كل سطر ميزة، استخدم | للفصل بين الأيقونة والعنوان والوصف)</label>
-                        <textarea id="product-features" rows="6" placeholder="📱|الميزة الأولى|وصف الميزة الأولى
+                        <div class="form-group">
+                            <label>المميزات (كل سطر ميزة، استخدم | للفصل بين الأيقونة والعنوان والوصف)</label>
+                            <textarea id="product-features" rows="6" placeholder="�|الميزة الأولى|وصف الميزة الأولى
 💻|الميزة الثانية|وصف الميزة الثانية"></textarea>
-                        <small>مثال: 📱|NotebookLM|شريكك في الأبحاث</small>
-                    </div>
+                            <small>مثال: 📱|NotebookLM|شريكك في الأبحاث</small>
+                        </div>
 
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary" id="submit-btn">إضافة المنتج</button>
-                        <button type="button" class="btn btn-secondary" id="cancel-btn"
-                            style="display: none;">إلغاء</button>
-                    </div>
-                </form>
-            </section>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" id="submit-btn">إضافة المنتج</button>
+                            <button type="button" class="btn btn-secondary" id="cancel-btn"
+                                style="display: none;">إلغاء</button>
+                        </div>
+                    </form>
+                </section>
+            </div>
 
-            <!-- Products List -->
-            <section class="products-section">
-                <h2>المنتجات الحالية</h2>
-                <div id="products-list" class="products-grid">
-                    <div class="loading">جاري التحميل...</div>
-                </div>
-            </section>
+            <!-- Coupons Tab -->
+            <div id="tab-coupons" class="tab-content">
+                <section class="form-section">
+                    <h2>🎫 إدارة كوبونات الخصم</h2>
+                    <form id="promo-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>كود الخصم</label>
+                                <input type="text" id="promo-code" placeholder="RAMADAN2026" required
+                                    style="text-transform: uppercase;">
+                            </div>
+                            <div class="form-group">
+                                <label>نسبة الخصم (%)</label>
+                                <input type="number" id="promo-discount" placeholder="10" min="1" max="100" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>تاريخ الانتهاء (اختياري)</label>
+                                <input type="date" id="promo-expiry">
+                            </div>
+                            <div class="form-group">
+                                <label>الحد الأقصى للاستخدام (اختياري)</label>
+                                <input type="number" id="promo-limit" placeholder="مثال: 100">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-secondary">إنشاء كوبون</button>
+                    </form>
+
+                    <div style="margin-top: 2rem;">
+                        <h3>الكوبونات النشطة</h3>
+                        <div id="promo-list" class="products-grid"
+                            style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));">
+                            <!-- Promo Cards will appear here -->
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="tab-settings" class="tab-content">
+                <section class="form-section">
+                    <h2>⚙️ الإعدادات</h2>
+                    <form id="settings-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>سعر صرف الدولار (1 USD = ؟ LYD)</label>
+                                <input type="number" id="exchange-rate" placeholder="9" step="0.01" min="0" required>
+                                <small>المبلغ بالدينار الليبي الذي يعادل 1 دولار أمريكي</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>رقم الهاتف (الواتساب)</label>
+                                <input type="text" id="contact-phone" placeholder="2189xxxxxxx" required>
+                                <small>سيتم استخدامه لزر الواتساب وفي تذييل الصفحة</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>رابط صفحة الفيسبوك</label>
+                                <input type="url" id="facebook-url" placeholder="https://facebook.com/..." required>
+                                <small>رابط صفحتك على الفيسبوك</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>البريد الإلكتروني</label>
+                                <input type="email" id="contact-email" placeholder="support@example.com" required>
+                                <small>البريد الذي سيظهر في تذييل الصفحة</small>
+                            </div>
+                        </div>
+
+                        <hr style="border-color: rgba(255,255,255,0.1); margin: 2rem 0;">
+
+                        <h3>🖼️ تخصيص الواجهة (Hero Section)</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>العنوان الرئيسي</label>
+                                <input type="text" id="hero-title" placeholder="متجر زيرونكس">
+                            </div>
+                            <div class="form-group">
+                                <label>العنوان الفرعي</label>
+                                <input type="text" id="hero-subtitle" placeholder="مرحباً بك في">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>الوصف الترحيبي</label>
+                            <textarea id="hero-description" rows="3"
+                                placeholder="اكتشف منتجات عالية الجودة..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>رابط صورة الخلفية</label>
+                            <input type="url" id="hero-image" placeholder="https://example.com/hero.jpg">
+                            <small>يفضل صورة عرضية عالية الدقة (1920x1080)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>تصنيفات المتجر</label>
+                            <input type="text" id="store-categories" placeholder="برامج, ألعاب, اشتراكات"
+                                value="برامج, ألعاب, اشتراكات">
+                            <small>اكتب التصنيفات مفصول بينها بفاصلة (,)</small>
+                        </div>
+
+                        <hr style="border-color: rgba(255,255,255,0.1); margin: 2rem 0;">
+
+                        <h3>� شريط الإعلانات</h3>
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" id="announcement-enabled" style="width: auto;">
+                                تفعيل شريط الإعلانات
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>نص الإعلان</label>
+                            <input type="text" id="announcement-text"
+                                placeholder="� عرض خاص: استخدم كود ZERO10 للحصول على خصم 10%!">
+                            <small>سيظهر في أعلى الصفحة بشكل متحرك</small>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">حفظ الإعدادات</button>
+                    </form>
+                </section>
+            </div>
         </main>
     </div>
 

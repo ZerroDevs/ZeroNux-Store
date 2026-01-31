@@ -21,6 +21,19 @@ const settingsRef = database.ref('settings');
 const promosRef = database.ref('promos');
 
 // ============================================
+// TAB SWITCHING
+// ============================================
+function switchTab(tabName) {
+    // Remove active class from all tabs and content
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+    // Add active class to selected tab and content
+    event.target.classList.add('active');
+    document.getElementById(`tab-${tabName}`).classList.add('active');
+}
+
+// ============================================
 // PROMO CODES MANAGEMENT
 // ============================================
 // Load Promo Codes
