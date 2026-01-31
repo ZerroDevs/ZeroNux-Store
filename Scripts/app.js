@@ -1014,6 +1014,47 @@ function showProductDetails(productId) {
         const priceLYD = priceUSD * EXCHANGE_RATE;
         const displayPrice = currentCurrency === 'USD' ? formatCurrency(priceUSD, 'USD') : formatCurrency(priceLYD, 'LYD');
 
+        // Gallery Logic
+        let imageSectionHTML = '';
+        let hasGallery = false;
+
+        if (product.additionalImages && product.additionalImages.length > 0) {
+            hasGallery = true;
+            const allImages = [product.image, ...product.additionalImages];
+
+            let thumbnailsHTML = '';
+            allImages.forEach((img, index) => {
+                thumbnailsHTML += `
+                    <div class="gallery-thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainImage(this, '${img}')">
+                        <img src="${img}" alt="Thumbnail ${index + 1}">
+                    </div>
+                `;
+            });
+
+            imageSectionHTML = `
+                <div class="product-gallery">
+                    <div class="gallery-main-image">
+                        <img src="${product.image}" id="main-product-image" alt="${product.name}" 
+                             onclick="openLightbox(this.src)" 
+                             style="cursor: zoom-in;"
+                             onerror="this.src='https://via.placeholder.com/500x300?text=No+Image'">
+                    </div>
+                    <div class="gallery-thumbnails">
+                        ${thumbnailsHTML}
+                    </div>
+                </div>
+            `;
+        } else {
+            imageSectionHTML = `
+                <div class="product-modal-image">
+                    <img src="${product.image}" alt="${product.name}" 
+                         onclick="openLightbox(this.src)" 
+                         style="cursor: zoom-in;"
+                         onerror="this.src='https://via.placeholder.com/500x300?text=No+Image'">
+                </div>
+            `;
+        }
+
         modal.innerHTML = `
             <div class="product-modal-header">
                 <div class="product-modal-title">
@@ -1022,9 +1063,7 @@ function showProductDetails(productId) {
                 </div>
                 <button class="close-modal-btn">&times;</button>
             </div>
-            <div class="product-modal-image">
-                <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/500x300?text=No+Image'">
-            </div>
+            ${imageSectionHTML}
             <div class="product-modal-body">
                 <h3 class="features-title">المميزات المتضمنة</h3>
                 <div class="features-list">
@@ -1067,6 +1106,17 @@ function showProductDetails(productId) {
         .product-modal-subtitle { color: rgba(255, 255, 255, 0.7); font-size: 1.125rem; margin: 0; }
         .product-modal-image { padding: 0 2rem; }
         .product-modal-image img { width: 100%; max-height: 300px; object-fit: contain; border-radius: 12px; }
+        
+        /* Gallery Styles */
+        .product-gallery { padding: 0 2rem; display: flex; flex-direction: column; gap: 1rem; }
+        .gallery-main-image { width: 100%; height: 300px; border-radius: 12px; overflow: hidden; background: rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; }
+        .gallery-main-image img { max-width: 100%; max-height: 100%; object-fit: contain; animation: fadeIn 0.3s ease; }
+        .gallery-thumbnails { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: thin; }
+        .gallery-thumbnail { min-width: 60px; height: 60px; border-radius: 8px; overflow: hidden; cursor: pointer; border: 2px solid transparent; opacity: 0.6; transition: all 0.2s ease; }
+        .gallery-thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+        .gallery-thumbnail:hover { opacity: 1; }
+        .gallery-thumbnail.active { border-color: #667eea; opacity: 1; transform: scale(1.05); }
+
         .product-modal-body { padding: 2rem; }
         .features-title { font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 1.5rem; }
         .features-list { display: grid; gap: 1rem; }
@@ -1097,6 +1147,18 @@ function showProductDetails(productId) {
         });
     });
 }
+
+// Change main image in product details gallery
+window.changeMainImage = function (thumbnail, src) {
+    const mainImage = document.getElementById('main-product-image');
+    if (mainImage) {
+        mainImage.src = src;
+
+        // Update active class
+        document.querySelectorAll('.gallery-thumbnail').forEach(t => t.classList.remove('active'));
+        thumbnail.classList.add('active');
+    }
+};
 
 // Initialize product card click handlers
 function initProductCardClick() {
@@ -1349,6 +1411,40 @@ function showContactModal() {
         showNotification(contact.messageSent);
     });
 }
+
+// Lightbox Functionality
+window.openLightbox = function (imageUrl) {
+    const lightbox = document.createElement('div');
+    lightbox.className = 'lightbox-overlay';
+    lightbox.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.95); z-index: 10001;
+        display: flex; align-items: center; justify-content: center;
+        animation: fadeIn 0.3s ease; cursor: zoom-out;
+    `;
+
+    lightbox.innerHTML = `
+        <img src="${imageUrl}" style="max-width: 95%; max-height: 95vh; object-fit: contain; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); transform: scale(0.9); animation: zoomIn 0.3s forwards;">
+        <button style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: white; font-size: 30px; cursor: pointer;">&times;</button>
+    `;
+
+    lightbox.addEventListener('click', () => {
+        lightbox.remove();
+    });
+
+    document.body.appendChild(lightbox);
+};
+
+// Add keyframes for lightbox if not exists
+const styleSheet = document.createElement("style");
+styleSheet.innerText = `
+@keyframes zoomIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+`;
+document.head.appendChild(styleSheet);
+
 
 function initContactLink() {
     const contactLink = document.querySelector('[href="#contact"]');

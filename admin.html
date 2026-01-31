@@ -248,6 +248,23 @@
                         </div>
 
                         <div class="form-group">
+                            <label>صور إضافية (اختياري - حد أقسى 5)</label>
+                            <div class="file-upload-container">
+                                <label for="additional-images-file" class="file-upload-label"
+                                    style="background: rgba(102, 126, 234, 0.1); border-color: rgba(102, 126, 234, 0.3);">
+                                    <span>🖼️ اختر صور متعددة للمعرض</span>
+                                </label>
+                                <input type="file" id="additional-images-file" accept="image/*" multiple
+                                    style="margin-top: 10px;">
+                            </div>
+                            <small>يمكنك اختيار حتى 5 صور. الحد الأقصى 1 ميجابايت للصورة.</small>
+                            <div id="additional-images-preview"
+                                style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+                                <!-- Previews will appear here -->
+                            </div>
+                        </div>
+
+                        <div class="form-group">
                             <label>المميزات (كل سطر ميزة، استخدم | للفصل بين الأيقونة والعنوان والوصف)</label>
                             <textarea id="product-features" rows="6" placeholder="�|الميزة الأولى|وصف الميزة الأولى
 💻|الميزة الثانية|وصف الميزة الثانية"></textarea>

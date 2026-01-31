@@ -698,6 +698,66 @@ document.getElementById('image-file').addEventListener('change', function (e) {
     }
 });
 
+// Additional Images Handling
+let currentAdditionalImages = [];
+
+document.getElementById('additional-images-file').addEventListener('change', function (e) {
+    const files = Array.from(e.target.files);
+
+    // Check limits
+    if (currentAdditionalImages.length + files.length > 5) {
+        showNotification('لا يمكن إضافة أكثر من 5 صور إضافية.', 'error');
+        this.value = '';
+        return;
+    }
+
+    files.forEach(file => {
+        if (file.size > 1024 * 1024) {
+            showNotification(`حجم الملف ${file.name} كبير جداً (يجب أن يكون أقل من 1 ميجابايت).`, 'error');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            currentAdditionalImages.push(e.target.result);
+            renderAdditionalImages();
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Clear input so same files can be selected again if needed (though we handle duplicates via array)
+    this.value = '';
+});
+
+function renderAdditionalImages() {
+    const container = document.getElementById('additional-images-preview');
+    container.innerHTML = '';
+
+    currentAdditionalImages.forEach((img, index) => {
+        const div = document.createElement('div');
+        div.style.position = 'relative';
+        div.style.width = '80px';
+        div.style.height = '80px';
+
+        div.innerHTML = `
+            <img src="${img}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2);">
+            <button type="button" onclick="removeAdditionalImage(${index})" style="
+                position: absolute; top: -5px; right: -5px; 
+                background: #f44336; color: white; border: none; 
+                border-radius: 50%; width: 20px; height: 20px; 
+                display: flex; align-items: center; justify-content: center; 
+                cursor: pointer; font-size: 12px;
+            ">✕</button>
+        `;
+        container.appendChild(div);
+    });
+}
+
+window.removeAdditionalImage = function (index) {
+    currentAdditionalImages.splice(index, 1);
+    renderAdditionalImages();
+};
+
 // Toggle stock fields visibility
 document.getElementById('track-stock').addEventListener('change', function () {
     const stockFields = document.getElementById('stock-fields');
@@ -724,7 +784,9 @@ document.getElementById('product-form').addEventListener('submit', (e) => {
         // Stock Management
         trackStock: trackStock,
         stock: trackStock ? parseInt(document.getElementById('product-stock').value) || 0 : null,
-        lowStockThreshold: trackStock ? parseInt(document.getElementById('low-stock-threshold').value) || 5 : null
+        lowStockThreshold: trackStock ? parseInt(document.getElementById('low-stock-threshold').value) || 5 : null,
+        // Gallery
+        additionalImages: currentAdditionalImages
     };
 
     // Preserve visibility status if editing
@@ -814,6 +876,15 @@ window.editProduct = function (id) {
             document.getElementById('stock-fields').style.display = 'none';
         }
 
+        // Load Gallery
+        if (product.additionalImages) {
+            currentAdditionalImages = product.additionalImages;
+            renderAdditionalImages();
+        } else {
+            currentAdditionalImages = [];
+            renderAdditionalImages();
+        }
+
         editingProductId = id;
         document.getElementById('form-title').textContent = 'تعديل المنتج';
         document.getElementById('submit-btn').textContent = 'تحديث المنتج';
@@ -858,6 +929,11 @@ function resetForm() {
     document.getElementById('image-file').value = '';
     const existingPreview = document.querySelector('.image-preview-feedback');
     if (existingPreview) existingPreview.remove();
+
+    // Clear Gallery
+    currentAdditionalImages = [];
+    renderAdditionalImages();
+    document.getElementById('additional-images-file').value = '';
 
     editingProductId = null;
     document.getElementById('form-title').textContent = 'إضافة منتج جديد';
