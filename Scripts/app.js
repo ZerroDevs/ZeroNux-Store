@@ -75,6 +75,24 @@ function loadSettings() {
                 const footerEmailText = document.getElementById('footer-email-text');
                 if (footerEmailText) footerEmailText.textContent = settings.contactEmail;
             }
+
+            // 5. Update Hero Section
+            if (settings.heroTitle) {
+                const el = document.getElementById('hero-title-text');
+                if (el) el.textContent = settings.heroTitle;
+            }
+            if (settings.heroSubtitle) {
+                const el = document.getElementById('hero-subtitle-text');
+                if (el) el.textContent = settings.heroSubtitle;
+            }
+            if (settings.heroDescription) {
+                const el = document.getElementById('hero-desc-text');
+                if (el) el.textContent = settings.heroDescription;
+            }
+            if (settings.heroImage) {
+                const el = document.querySelector('.hero-image');
+                if (el) el.src = settings.heroImage;
+            }
         }
     });
 }

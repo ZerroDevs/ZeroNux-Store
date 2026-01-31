@@ -31,6 +31,12 @@ function loadSettings() {
             if (settings.phoneNumber) document.getElementById('contact-phone').value = settings.phoneNumber;
             if (settings.facebookUrl) document.getElementById('facebook-url').value = settings.facebookUrl;
             if (settings.contactEmail) document.getElementById('contact-email').value = settings.contactEmail;
+
+            // Hero Settings
+            if (settings.heroTitle) document.getElementById('hero-title').value = settings.heroTitle;
+            if (settings.heroSubtitle) document.getElementById('hero-subtitle').value = settings.heroSubtitle;
+            if (settings.heroDescription) document.getElementById('hero-description').value = settings.heroDescription;
+            if (settings.heroImage) document.getElementById('hero-image').value = settings.heroImage;
         } else {
             // Default exchange rate
             document.getElementById('exchange-rate').value = 9;
@@ -46,15 +52,25 @@ document.getElementById('settings-form').addEventListener('submit', (e) => {
     const facebookUrl = document.getElementById('facebook-url').value;
     const contactEmail = document.getElementById('contact-email').value;
 
+    // Hero Settings
+    const heroTitle = document.getElementById('hero-title').value;
+    const heroSubtitle = document.getElementById('hero-subtitle').value;
+    const heroDescription = document.getElementById('hero-description').value;
+    const heroImage = document.getElementById('hero-image').value;
+
     settingsRef.update({
         exchangeRate: exchangeRate,
         phoneNumber: phoneNumber,
         facebookUrl: facebookUrl,
         contactEmail: contactEmail,
+        heroTitle: heroTitle,
+        heroSubtitle: heroSubtitle,
+        heroDescription: heroDescription,
+        heroImage: heroImage,
         lastUpdated: Date.now()
     })
         .then(() => {
-            showNotification('تم حفظ الإعدادات بنجاح! ✅\nسيتم تحديث معلومات الاتصال في المتجر.');
+            showNotification('تم حفظ الإعدادات بنجاح! ✅\nسيتم تحديث المتجر فوراً.');
         })
         .catch((error) => {
             showNotification('حدث خطأ: ' + error.message, 'error');
