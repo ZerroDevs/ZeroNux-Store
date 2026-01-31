@@ -970,17 +970,9 @@ window.showNotification = function (message, type = 'success') {
 
 // Copy Product Link
 window.copyProductLink = function (id) {
-    // Assuming product ID is used in URL query param like ?product=ID which we might implement on main page
-    // Or just pointing to main page for now if deep linking isn't set up.
-    // Let's assume deep linking via hash or query param: index.html?product=id
-    // But wait, our main app.js doesn't handle ?product=id yet. 
-    // However, the feature request is just "Copy Product Link". 
-    // I made a note to implement deep linking later or assuming user just wants a link.
-    // Let's fallback to just website link for now if deep link logic isn't there, 
-    // BUT usually stores have it. Let's create a format: ${window.location.origin}/index.html#product-${id}
-    // We can update app.js to handle this later.
-
-    const link = `${window.location.origin}/index.html?product=${id}`;
+    // Using simple query parameter for product deep linking
+    // We hardcode the domain as per user request to avoid subpath issues
+    const link = `https://www.zeronux.store/index.html?product=${id}`;
 
     navigator.clipboard.writeText(link).then(() => {
         showNotification('تم نسخ رابط المنتج! 🔗');
