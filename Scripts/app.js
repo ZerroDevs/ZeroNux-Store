@@ -640,8 +640,43 @@ window.completeOrder = function () {
 
     const totalFormatted = formatCurrency(finalTotal, currentCurrency);
 
-    // Build message
-    let message = 'مرحباً، أود إتمام الطلب التالي:\n\n';
+    // Generate unique Order ID
+    const timestamp = Date.now();
+    const date = new Date(timestamp);
+    const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+    const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    const orderId = `ORDER_${dateStr}_${randomNum}`;
+
+    // Prepare order data for Firebase
+    const orderData = {
+        orderId: orderId,
+        items: cart.map(item => ({
+            name: item.name,
+            price: item.price,
+            image: item.image || ''
+        })),
+        total: total,
+        finalTotal: finalTotal,
+        discount: activeDiscount ? {
+            code: activeDiscount.code,
+            value: activeDiscount.value
+        } : null,
+        status: 'pending',
+        timestamp: timestamp,
+        lastUpdated: timestamp
+    };
+
+    // Save to Firebase
+    firebase.database().ref('orders').push(orderData)
+        .then(() => {
+            console.log('Order saved successfully:', orderId);
+        })
+        .catch(error => {
+            console.error('Error saving order:', error);
+        });
+
+    // Build WhatsApp message
+    let message = `مرحباً، أود إتمام الطلب التالي:\n\n📋 *رقم الطلب:* ${orderId}\n\n`;
 
     cart.forEach(item => {
         message += `📦 *${item.name}*\nالسعر: ${formatCurrency(item.price, currentCurrency)}\n\n`;
@@ -659,7 +694,6 @@ window.completeOrder = function () {
 
     // Increment Promo Usage if used
     if (activeDiscount) {
-        // Optimistic increment (we assume they send it)
         const promoRef = firebase.database().ref('promos').child(activeDiscount.id);
         promoRef.child('usedCount').transaction(current => (current || 0) + 1);
     }
@@ -668,11 +702,13 @@ window.completeOrder = function () {
     const whatsappURL = `https://wa.me/${CONTACT_NUMBER}?text=${encodedMessage}`;
     window.open(whatsappURL, '_blank');
 
-    // Clear cart (optional, maybe reset discount)
+    // Clear cart
     activeDiscount = null;
     cart = [];
     updateCartCount();
     document.querySelector('.cart-modal-overlay').remove();
+
+    showNotification(`تم إنشاء الطلب ${orderId} بنجاح! ✅`);
 };
 
 function closeModal(overlay) {

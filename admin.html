@@ -49,6 +49,9 @@
                 <button class="tab-btn active" onclick="switchTab('dashboard')">
                     <span>📊</span> الرئيسية
                 </button>
+                <button class="tab-btn" onclick="switchTab('orders')">
+                    <span>📋</span> الطلبات
+                </button>
                 <button class="tab-btn" onclick="switchTab('products')">
                     <span>📦</span> المنتجات
                 </button>
@@ -98,6 +101,64 @@
                     <h2>المنتجات الحالية</h2>
                     <div id="products-list" class="products-grid">
                         <div class="loading">جاري التحميل...</div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Orders Tab -->
+            <div id="tab-orders" class="tab-content">
+                <section class="form-section">
+                    <h2>📋 إدارة الطلبات</h2>
+
+                    <div class="orders-stats"
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                        <div class="stat-card"
+                            style="background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3);">
+                            <div class="stat-icon">⏳</div>
+                            <div class="stat-info">
+                                <h3>قيد الانتظار</h3>
+                                <p id="orders-pending">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card"
+                            style="background: rgba(76, 175, 80, 0.1); border: 1px solid rgba(76, 175, 80, 0.3);">
+                            <div class="stat-icon">✅</div>
+                            <div class="stat-info">
+                                <h3>مكتملة</h3>
+                                <p id="orders-completed">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card"
+                            style="background: rgba(244, 67, 54, 0.1); border: 1px solid rgba(244, 67, 54, 0.3);">
+                            <div class="stat-icon">❌</div>
+                            <div class="stat-info">
+                                <h3>ملغاة</h3>
+                                <p id="orders-cancelled">0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="orders-table-container">
+                        <table class="orders-table">
+                            <thead>
+                                <tr>
+                                    <th>رقم الطلب</th>
+                                    <th>التاريخ</th>
+                                    <th>عدد المنتجات</th>
+                                    <th>المجموع</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders-list">
+                                <tr>
+                                    <td colspan="6"
+                                        style="text-align: center; padding: 2rem; color: rgba(255,255,255,0.5);">
+                                        جاري التحميل...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </section>
             </div>

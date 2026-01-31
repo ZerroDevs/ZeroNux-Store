@@ -19,6 +19,7 @@ const auth = firebase.auth();
 const productsRef = database.ref('products');
 const settingsRef = database.ref('settings');
 const promosRef = database.ref('promos');
+const ordersRef = database.ref('orders');
 
 // ============================================
 // TAB SWITCHING
@@ -31,6 +32,188 @@ function switchTab(tabName) {
     // Add active class to selected tab and content
     event.target.classList.add('active');
     document.getElementById(`tab-${tabName}`).classList.add('active');
+}
+
+// ============================================
+// ORDERS MANAGEMENT
+// ============================================
+function loadOrders() {
+    const ordersList = document.getElementById('orders-list');
+    ordersList.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: rgba(255,255,255,0.5);">جاري التحميل...</td></tr>';
+
+    ordersRef.on('value', (snapshot) => {
+        const orders = snapshot.val();
+        ordersList.innerHTML = '';
+
+        if (!orders) {
+            ordersList.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: rgba(255,255,255,0.5);">لا توجد طلبات بعد</td></tr>';
+            updateOrderStats(0, 0, 0);
+            return;
+        }
+
+        const ordersArray = Object.entries(orders).map(([id, data]) => ({ id, ...data }));
+        ordersArray.sort((a, b) => b.timestamp - a.timestamp); // Newest first
+
+        let pendingCount = 0;
+        let completedCount = 0;
+        let cancelledCount = 0;
+
+        ordersArray.forEach(order => {
+            // Count by status
+            if (order.status === 'pending') pendingCount++;
+            else if (order.status === 'completed') completedCount++;
+            else if (order.status === 'cancelled') cancelledCount++;
+
+            const row = document.createElement('tr');
+            const date = new Date(order.timestamp);
+            const formattedDate = date.toLocaleDateString('ar-EG', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const statusText = {
+                'pending': 'قيد الانتظار',
+                'completed': 'مكتملة',
+                'cancelled': 'ملغاة'
+            };
+
+            row.innerHTML = `
+                <td><strong>${order.orderId}</strong></td>
+                <td>${formattedDate}</td>
+                <td>${order.items.length} منتج</td>
+                <td>$${order.finalTotal.toFixed(2)}</td>
+                <td><span class="order-status-badge status-${order.status}">${statusText[order.status]}</span></td>
+                <td>
+                    <div class="order-actions">
+                        <button class="btn btn-secondary" onclick="viewOrderDetails('${order.id}')" title="عرض التفاصيل">👁️</button>
+                        <select onchange="updateOrderStatus('${order.id}', this.value)" class="status-select" style="padding: 0.4rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 6px; cursor: pointer;">
+                            <option value="">تغيير الحالة</option>
+                            <option value="pending" ${order.status === 'pending' ? 'disabled' : ''}>قيد الانتظار</option>
+                            <option value="completed" ${order.status === 'completed' ? 'disabled' : ''}>مكتملة</option>
+                            <option value="cancelled" ${order.status === 'cancelled' ? 'disabled' : ''}>ملغاة</option>
+                        </select>
+                        <button class="btn btn-danger" onclick="deleteOrder('${order.id}')" title="حذف">🗑️</button>
+                    </div>
+                </td>
+            `;
+            ordersList.appendChild(row);
+        });
+
+        updateOrderStats(pendingCount, completedCount, cancelledCount);
+    });
+}
+
+function updateOrderStats(pending, completed, cancelled) {
+    document.getElementById('orders-pending').textContent = pending;
+    document.getElementById('orders-completed').textContent = completed;
+    document.getElementById('orders-cancelled').textContent = cancelled;
+}
+
+function updateOrderStatus(orderId, newStatus) {
+    if (!newStatus) return;
+
+    ordersRef.child(orderId).update({
+        status: newStatus,
+        lastUpdated: Date.now()
+    }).then(() => {
+        showNotification(`تم تحديث حالة الطلب إلى: ${newStatus === 'pending' ? 'قيد الانتظار' : newStatus === 'completed' ? 'مكتملة' : 'ملغاة'}`);
+    }).catch(error => {
+        showNotification('حدث خطأ: ' + error.message, 'error');
+    });
+}
+
+function deleteOrder(orderId) {
+    if (!confirm('هل أنت متأكد من حذف هذا الطلب؟ لا يمكن التراجع عن هذا الإجراء.')) return;
+
+    ordersRef.child(orderId).remove()
+        .then(() => {
+            showNotification('تم حذف الطلب بنجاح');
+        })
+        .catch(error => {
+            showNotification('حدث خطأ: ' + error.message, 'error');
+        });
+}
+
+function viewOrderDetails(orderId) {
+    ordersRef.child(orderId).once('value', (snapshot) => {
+        const order = snapshot.val();
+        if (!order) {
+            showNotification('الطلب غير موجود', 'error');
+            return;
+        }
+
+        const date = new Date(order.timestamp);
+        const formattedDate = date.toLocaleDateString('ar-EG', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        let itemsHtml = order.items.map(item => `
+            <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <span>${item.name}</span>
+                <span>$${item.price.toFixed(2)}</span>
+            </div>
+        `).join('');
+
+        const discountHtml = order.discount ? `
+            <div style="color: #4caf50; margin-top: 0.5rem;">
+                <strong>كود الخصم:</strong> ${order.discount.code} (-${order.discount.value}%)
+            </div>
+        ` : '';
+
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        `;
+
+        modal.innerHTML = `
+            <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 2rem; border-radius: 16px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; position: relative; color: white;">
+                <button onclick="this.closest('div[style*=fixed]').remove()" style="position: absolute; top: 15px; left: 20px; background: none; border: none; color: white; font-size: 28px; cursor: pointer;">&times;</button>
+                
+                <h2 style="margin: 0 0 1.5rem 0; color: #667eea;">📋 تفاصيل الطلب</h2>
+                
+                <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <p style="margin: 0.5rem 0;"><strong>رقم الطلب:</strong> ${order.orderId}</p>
+                    <p style="margin: 0.5rem 0;"><strong>التاريخ:</strong> ${formattedDate}</p>
+                    <p style="margin: 0.5rem 0;"><strong>الحالة:</strong> <span class="order-status-badge status-${order.status}">${order.status === 'pending' ? 'قيد الانتظار' : order.status === 'completed' ? 'مكتملة' : 'ملغاة'}</span></p>
+                </div>
+                
+                <h3 style="margin: 1.5rem 0 1rem 0;">المنتجات:</h3>
+                <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
+                    ${itemsHtml}
+                    <div style="display: flex; justify-content: space-between; padding: 1rem 0 0.5rem 0; margin-top: 1rem; border-top: 2px solid rgba(255,255,255,0.2); font-weight: bold;">
+                        <span>المجموع الأصلي:</span>
+                        <span>$${order.total.toFixed(2)}</span>
+                    </div>
+                    ${discountHtml}
+                    <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; font-size: 1.2rem; font-weight: bold; color: #4caf50;">
+                        <span>المجموع النهائي:</span>
+                        <span>$${order.finalTotal.toFixed(2)}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
+    });
 }
 
 // ============================================
@@ -239,6 +422,7 @@ function checkAuthState() {
             loadProducts();
             loadSettings();
             loadPromos(); // Load Promos
+            loadOrders(); // Load orders when admin logs in
         } else {
             // User is signed out
             currentUser = null;
