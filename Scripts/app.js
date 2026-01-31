@@ -33,7 +33,7 @@ function loadExchangeRate() {
         if (rate) {
             EXCHANGE_RATE = rate;
             // Update all prices on the page
-            updateAllPrices();
+            updatePrices(currentCurrency);
         }
     });
 }
@@ -1248,6 +1248,7 @@ function initWhatsAppButton() {
 document.addEventListener('DOMContentLoaded', () => {
     // Load products from Firebase
     loadProductsFromFirebase();
+    loadExchangeRate();
 
     initCurrencySwitcher();
     initAddToCartButtons();
