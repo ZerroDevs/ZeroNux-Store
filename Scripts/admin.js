@@ -718,6 +718,9 @@ function formatFeatures(features) {
 
 // Edit product
 window.editProduct = function (id) {
+    // Switch to Products tab first
+    switchTab('products');
+
     productsRef.child(id).once('value', (snapshot) => {
         const product = snapshot.val();
 
