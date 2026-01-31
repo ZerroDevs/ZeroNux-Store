@@ -1153,23 +1153,35 @@ function loadProductsFromFirebase() {
         const products = snapshot.val();
         productsContainer.innerHTML = '';
 
-        // If no products, show default Google AI Pro
         if (!products || Object.keys(products).length === 0) {
-            productsContainer.innerHTML = createDefaultProduct();
-            initAddToCartButtons();
-            initProductCardClick();
+            productsContainer.innerHTML = `
+                <div class="no-products-message" style="text-align: center; width: 100%; padding: 4rem 1rem;">
+                    <h3 style="color: rgba(255, 255, 255, 0.7); font-size: 1.5rem;">لايوجد اي عروض الان</h3>
+                </div>
+            `;
             return;
         }
 
+        let visibleCount = 0;
         // Render products from Firebase
         Object.keys(products).forEach(id => {
             const product = products[id];
-            // Only show if visible is not false (handle legacy products without visible prop)
+            // Only show if visible is not false
             if (product.visible !== false) {
                 const productCard = createProductCardHTML(id, product);
                 productsContainer.innerHTML += productCard;
+                visibleCount++;
             }
         });
+
+        // Check if all products were hidden
+        if (visibleCount === 0) {
+            productsContainer.innerHTML = `
+                <div class="no-products-message" style="text-align: center; width: 100%; padding: 4rem 1rem;">
+                    <h3 style="color: rgba(255, 255, 255, 0.7); font-size: 1.5rem;">لايوجد اي عروض الان</h3>
+                </div>
+            `;
+        }
 
         // Re-initialize buttons and events
         initAddToCartButtons();
@@ -1224,7 +1236,7 @@ function initWhatsAppButton() {
         whatsappBtn.addEventListener('click', (e) => {
             e.preventDefault();
             const phoneNumber = '218916808225';
-            const message = 'مرحباً! أرغب في الاستفسار عن Google AI Pro 👋';
+            const message = '';
             const encodedMessage = encodeURIComponent(message);
             const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
             window.open(whatsappURL, '_blank');
