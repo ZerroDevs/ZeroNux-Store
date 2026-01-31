@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الأسئلة الشائعة - متجر زيرونكس</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Cairo:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="Style/index.css">
+    <style>
+        .page-header {
+            padding: 120px 0 60px;
+            text-align: center;
+            background: linear-gradient(180deg, rgba(26, 26, 46, 0) 0%, rgba(102, 126, 234, 0.1) 100%);
+        }
+
+        .page-title {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .faq-section {
+            padding: 4rem 0;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+
+        .faq-question {
+            padding: 1.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .faq-question::after {
+            content: '+';
+            font-size: 1.5rem;
+            color: #667eea;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.active .faq-question::after {
+            transform: rotate(45deg);
+        }
+
+        .faq-answer {
+            padding: 0 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+        }
+
+        .faq-item.active .faq-answer {
+            padding: 0 1.5rem 1.5rem;
+            max-height: 500px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo" onclick="window.location.href='index.html'">
+                    <img src="Images/Logo.png" alt="ZeroNux Store Logo">
+                </div>
+                <div class="nav-links">
+                    <a href="index.html" class="nav-link">الرئيسية</a>
+                    <a href="index.html#products" class="nav-link">المنتجات</a>
+                    <a href="index.html#contact" class="nav-link">اتصل بنا</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="page-header">
+        <div class="container">
+            <h1 class="page-title">الأسئلة الشائعة</h1>
+            <p style="color: rgba(255,255,255,0.7);">كل ما تحتاج معرفته عن خدماتنا</p>
+        </div>
+    </header>
+
+    <main class="container faq-section">
+        <div class="faq-item">
+            <div class="faq-question">ما هي طرق الدفع المتوفرة؟</div>
+            <div class="faq-answer">
+                نوفر حالياً خدمات الدفع المحلي داخل ليبيا من خلال "سداد" أو "تداول"، بالإضافة إلى إمكانية الدفع عند
+                الاستلام لبعض المنتجات المادية. بالنسبة للمنتجات الرقمية، يتم تسليم الكود فور إتمام الدفع.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">كيف يتم تسليم المنتجات الرقمية؟</div>
+            <div class="faq-answer">
+                بمجرد إتمام عملية الشراء وتحويل القيمة، سيتم إرسال كود المنتج أو بيانات الاشتراك إليك عبر الواتساب أو
+                البريد الإلكتروني الذي قمت بتسجيله أثناء الطلب، وعادة ما يتم ذلك في غضون دقائق.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">هل يمكنني استرجاع المنتج؟</div>
+            <div class="faq-answer">
+                بالنسبة للمنتجات الرقمية (الأكواد والاشتراكات)، لا يمكن استرجاعها بعد التسليم إلا في حال كان الكود لا
+                يعمل. في حال واجهتك أي مشكلة، يرجى التواصل مع الدعم الفني فوراً وسنكون سعداء بحلها أو استبدال المنتج.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">كم تستغرق عملية التوصيل داخل طرابلس؟</div>
+            <div class="faq-answer">
+                للمنتجات المادية، التوصيل داخل طرابلس يستغرق عادة من 24 إلى 48 ساعة. التوصيل للمدن الأخرى قد يستغرق من 2
+                إلى 4 أيام عمل.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">كيف يمكنني التواصل مع الدعم الفني؟</div>
+            <div class="faq-answer">
+                يمكنك التواصل معنا عبر زر الواتساب الموجود في أسفل الصفحة، أو عن طريق صفحة "اتصل بنا". فريقنا متواجد
+                يومياً من الساعة 10 صباحاً وحتى 10 مساءً للرد على استفساراتكم.
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 متجر زيرونكس. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple FAQ Accordion Logic
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const item = question.parentElement;
+                item.classList.toggle('active');
+            });
+        });
+    </script>
+</body>
+
+</html>
