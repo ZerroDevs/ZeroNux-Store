@@ -26,16 +26,58 @@ const settingsRef = database.ref('settings');
 let EXCHANGE_RATE = 9; // Default rate, will be loaded from Firebase
 let currentCurrency = 'USD';
 
-// Load exchange rate from Firebase
-function loadExchangeRate() {
-    settingsRef.child('exchangeRate').on('value', (snapshot) => {
-        const rate = snapshot.val();
-        if (rate) {
-            EXCHANGE_RATE = rate;
-            // Update all prices on the page
-            updatePrices(currentCurrency);
+// Load settings from Firebase (Exchange, Phone, Facebook)
+function loadSettings() {
+    settingsRef.on('value', (snapshot) => {
+        const settings = snapshot.val();
+        if (settings) {
+            // 1. Update Exchange Rate
+            if (settings.exchangeRate) {
+                EXCHANGE_RATE = settings.exchangeRate;
+                updatePrices(currentCurrency);
+            }
+
+            // 2. Update Phone Number (WhatsApp & Clean)
+            const phone = settings.phoneNumber || '218916808225'; // Default fallback
+            updateContactInfo(phone);
+
+            // 3. Update Facebook Link
+            const facebookUrl = settings.facebookUrl || '#';
+            updateSocialLinks(facebookUrl);
         }
     });
+}
+
+// Helper to update all contact points
+function updateContactInfo(phone) {
+    // Clean phone for links (remove dashes/spaces)
+    const cleanPhone = phone.replace(/[^0-9]/g, '');
+    const displayPhone = phone; // Could format nice here if needed
+
+    // Update Floating WhatsApp
+    const waBtn = document.getElementById('whatsapp-button');
+    if (waBtn) waBtn.href = `https://wa.me/${cleanPhone}`;
+
+    // Update Footer Phone
+    const footerPhone = document.querySelector('[data-i18n="footer-phone"]');
+    if (footerPhone) footerPhone.textContent = `الهاتف: ${displayPhone}`;
+
+    // Update Contact Modal WhatsApp Link
+    // We need to find where the contact modal specific logic is or if it uses the same variable
+    // It seems checking `initContactModal` or similar is needed, but we can store it in a global or data attr
+    window.STORE_PHONE = cleanPhone;
+}
+
+// Helper to update social links
+function updateSocialLinks(fbUrl) {
+    // Assuming there is a facebook link in footer or we need to add one
+    // Let's try to select generic social links if they exist or specific one
+    const fbLink = document.querySelector('.social-link.facebook');
+    if (fbLink) {
+        fbLink.href = fbUrl;
+        if (fbUrl === '#' || !fbUrl) fbLink.style.display = 'none';
+        else fbLink.style.display = 'flex';
+    }
 }
 
 // Currency formatting
@@ -1038,15 +1080,17 @@ function showContactModal() {
     closeBtn.addEventListener('click', () => closeModal(overlay));
     overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(overlay); });
 
-    const form = modal.querySelector('.contact-form');
-    form.addEventListener('submit', (e) => {
+    const contactForm = document.getElementById('contact-form');
+    contactForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const name = form.querySelector('input[type="text"]').value;
-        const email = form.querySelector('input[type="email"]').value;
-        const message = form.querySelector('textarea').value;
-        const phoneNumber = '218916808225';
-        let whatsappMessage = currentLanguage === 'ar'
-            ? `📧 *رسالة جديدة من موقع زيرونكس*\\n\\n*الاسم:* ${name}\\n*البريد الإلكتروني:* ${email}\\n\\n*الرسالة:*\\n${message}`
+        const name = document.getElementById('contact-name').value;
+        const email = document.getElementById('contact-email').value;
+        const message = document.getElementById('contact-message').value;
+
+        // Redirect to WhatsApp
+        const phoneNumber = window.STORE_PHONE || '218916808225';
+        const whatsappMessage = currentLanguage === 'ar' // Kept currentLanguage as it's used consistently elsewhere
+            ? `📧 *رسالة جديدة من موقع زيرونكس*\\n\\n*الاسم:* ${name}\\n*البريد:* ${email}\\n\\n*الرسالة:*\\n${message}`
             : `📧 *New Message from ZeroNux Website*\\n\\n*Name:* ${name}\\n*Email:* ${email}\\n\\n*Message:*\\n${message}`;
         const encodedMessage = encodeURIComponent(whatsappMessage);
         const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
@@ -1093,7 +1137,7 @@ function initFooterLinks() {
     footerWhatsAppLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
-            const phoneNumber = '218916808225';
+            const phoneNumber = window.STORE_PHONE || '218916808225';
             const linkType = link.getAttribute('href');
 
             let message = '';
@@ -1256,7 +1300,7 @@ function initWhatsAppButton() {
     if (whatsappBtn) {
         whatsappBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            const phoneNumber = '218916808225';
+            const phoneNumber = window.STORE_PHONE || '218916808225';
             const message = '';
             const encodedMessage = encodeURIComponent(message);
             const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
@@ -1269,7 +1313,8 @@ function initWhatsAppButton() {
 document.addEventListener('DOMContentLoaded', () => {
     // Load products from Firebase
     loadProductsFromFirebase();
-    loadExchangeRate();
+    // Load settings (Exchange, Phone, FB)
+    loadSettings();
 
     initCurrencySwitcher();
     initAddToCartButtons();

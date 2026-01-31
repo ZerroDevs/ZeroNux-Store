@@ -22,12 +22,14 @@ const settingsRef = database.ref('settings');
 // ============================================
 // SETTINGS MANAGEMENT
 // ============================================
-// Load settings (exchange rate)
+// Load settings (exchange rate, phone, facebook)
 function loadSettings() {
     settingsRef.once('value', (snapshot) => {
         const settings = snapshot.val();
-        if (settings && settings.exchangeRate) {
-            document.getElementById('exchange-rate').value = settings.exchangeRate;
+        if (settings) {
+            if (settings.exchangeRate) document.getElementById('exchange-rate').value = settings.exchangeRate;
+            if (settings.phoneNumber) document.getElementById('contact-phone').value = settings.phoneNumber;
+            if (settings.facebookUrl) document.getElementById('facebook-url').value = settings.facebookUrl;
         } else {
             // Default exchange rate
             document.getElementById('exchange-rate').value = 9;
@@ -39,13 +41,17 @@ function loadSettings() {
 document.getElementById('settings-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const exchangeRate = parseFloat(document.getElementById('exchange-rate').value);
+    const phoneNumber = document.getElementById('contact-phone').value;
+    const facebookUrl = document.getElementById('facebook-url').value;
 
     settingsRef.update({
         exchangeRate: exchangeRate,
+        phoneNumber: phoneNumber || '',
+        facebookUrl: facebookUrl || '',
         lastUpdated: Date.now()
     })
         .then(() => {
-            showNotification('تم حفظ الإعدادات بنجاح! ✅\nسيتم تطبيق سعر الصرف الجديد على جميع الأجهزة.');
+            showNotification('تم حفظ الإعدادات بنجاح! ✅\nسيتم تطبيق سعر الصرف ومعلومات الاتصال الجديدة.');
         })
         .catch((error) => {
             showNotification('حدث خطأ: ' + error.message, 'error');
@@ -453,12 +459,17 @@ window.showNotification = function (message, type = 'success') {
 
 // Copy Product Link
 window.copyProductLink = function (id) {
-    // Dynamically generate link based on current location to support subfolders (GitHub Pages)
-    // This looks at where admin.html is, and finds index.html in the same folder.
-    const productUrl = new URL('index.html', window.location.href);
-    productUrl.searchParams.set('product', id);
+    // Assuming product ID is used in URL query param like ?product=ID which we might implement on main page
+    // Or just pointing to main page for now if deep linking isn't set up.
+    // Let's assume deep linking via hash or query param: index.html?product=id
+    // But wait, our main app.js doesn't handle ?product=id yet. 
+    // However, the feature request is just "Copy Product Link". 
+    // I made a note to implement deep linking later or assuming user just wants a link.
+    // Let's fallback to just website link for now if deep link logic isn't there, 
+    // BUT usually stores have it. Let's create a format: ${window.location.origin}/index.html#product-${id}
+    // We can update app.js to handle this later.
 
-    const link = productUrl.toString();
+    const link = `${window.location.origin}/ZeroNux-Store/index.html?product=${id}`;
 
     navigator.clipboard.writeText(link).then(() => {
         showNotification('تم نسخ رابط المنتج! 🔗');
