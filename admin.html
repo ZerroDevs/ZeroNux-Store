@@ -197,6 +197,34 @@
                             </div>
                         </div>
 
+                        <hr style="border-color: rgba(255,255,255,0.1); margin: 1.5rem 0;">
+                        <h3 style="margin-bottom: 1rem; color: #667eea;">📊 إدارة المخزون</h3>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 10px;">
+                                    <input type="checkbox" id="track-stock" style="width: auto;">
+                                    تفعيل تتبع المخزون
+                                </label>
+                                <small>عند التفعيل، سيتم تتبع الكمية المتاحة وإظهار حالة المخزون</small>
+                            </div>
+                        </div>
+
+                        <div class="form-row" id="stock-fields" style="display: none;">
+                            <div class="form-group">
+                                <label>الكمية المتاحة</label>
+                                <input type="number" id="product-stock" min="0" value="0" step="1">
+                                <small>عدد القطع المتوفرة في المخزون</small>
+                            </div>
+                            <div class="form-group">
+                                <label>حد المخزون المنخفض</label>
+                                <input type="number" id="low-stock-threshold" min="1" value="5" step="1">
+                                <small>عرض تنبيه "مخزون محدود" عند الوصول لهذا العدد</small>
+                            </div>
+                        </div>
+
+                        <hr style="border-color: rgba(255,255,255,0.1); margin: 1.5rem 0;">
+
                         <div class="form-group">
                             <label>الوصف المختصر</label>
                             <input type="text" id="product-short-desc" placeholder="وصف قصير للمنتج">

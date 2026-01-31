@@ -574,6 +574,38 @@ function createProductCard(id, product) {
         </button>
     `;
 
+    // Stock status display
+    let stockHtml = '';
+    if (product.trackStock) {
+        const stock = product.stock || 0;
+        const threshold = product.lowStockThreshold || 5;
+        let stockStatus = '';
+        let stockColor = '';
+
+        if (stock === 0) {
+            stockStatus = 'نفذ المخزون';
+            stockColor = '#f44336';
+        } else if (stock <= threshold) {
+            stockStatus = 'مخزون منخفض';
+            stockColor = '#ff9800';
+        } else {
+            stockStatus = 'متوفر';
+            stockColor = '#4caf50';
+        }
+
+        stockHtml = `
+            <div style="margin: 0.5rem 0; padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 6px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.9rem;">📦 المخزون:</span>
+                    <span style="font-weight: bold; color: ${stockColor};">${stock} قطعة</span>
+                </div>
+                <div style="font-size: 0.85rem; color: ${stockColor}; margin-top: 0.25rem;">
+                    ${stockStatus}
+                </div>
+            </div>
+        `;
+    }
+
     card.innerHTML = `
         <img src="${product.image}" alt="${product.name}" class="product-image" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
         ${badgeHtml}
@@ -582,6 +614,7 @@ function createProductCard(id, product) {
             $${product.price}
             ${product.category && product.category !== 'general' ? `<span style="font-size: 0.8em; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; margin-right: 5px;">${product.category}</span>` : ''}
         </p>
+        ${stockHtml}
         <p class="description">${product.description.substring(0, 100)}${product.description.length > 100 ? '...' : ''}</p>
         <div class="product-actions">
             <button class="btn btn-copy" onclick="copyProductLink('${id}')" title="نسخ الرابط">🔗</button>
@@ -641,9 +674,17 @@ document.getElementById('image-file').addEventListener('change', function (e) {
     }
 });
 
+// Toggle stock fields visibility
+document.getElementById('track-stock').addEventListener('change', function () {
+    const stockFields = document.getElementById('stock-fields');
+    stockFields.style.display = this.checked ? 'flex' : 'none';
+});
+
 // Add/Update product
 document.getElementById('product-form').addEventListener('submit', (e) => {
     e.preventDefault();
+
+    const trackStock = document.getElementById('track-stock').checked;
 
     const productData = {
         name: document.getElementById('product-name').value,
@@ -655,7 +696,11 @@ document.getElementById('product-form').addEventListener('submit', (e) => {
         image: document.getElementById('product-image').value,
         features: parseFeatures(document.getElementById('product-features').value),
         visible: true, // Default to visible
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        // Stock Management
+        trackStock: trackStock,
+        stock: trackStock ? parseInt(document.getElementById('product-stock').value) || 0 : null,
+        lowStockThreshold: trackStock ? parseInt(document.getElementById('low-stock-threshold').value) || 5 : null
     };
 
     // Preserve visibility status if editing
@@ -733,6 +778,17 @@ window.editProduct = function (id) {
         document.getElementById('product-category').value = product.category || 'general'; // Load Category
         document.getElementById('product-image').value = product.image;
         document.getElementById('product-features').value = formatFeatures(product.features);
+
+        // Load stock data
+        const trackStockCheckbox = document.getElementById('track-stock');
+        trackStockCheckbox.checked = product.trackStock || false;
+        if (product.trackStock) {
+            document.getElementById('stock-fields').style.display = 'flex';
+            document.getElementById('product-stock').value = product.stock || 0;
+            document.getElementById('low-stock-threshold').value = product.lowStockThreshold || 5;
+        } else {
+            document.getElementById('stock-fields').style.display = 'none';
+        }
 
         editingProductId = id;
         document.getElementById('form-title').textContent = 'تعديل المنتج';

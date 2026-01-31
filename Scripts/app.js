@@ -272,8 +272,9 @@ function showNotification(message) {
 
 // Add to cart function
 // Add to cart function
-function addToCart(productName, price, image, description) {
+function addToCart(productName, price, image, description, productId) {
     cart.push({
+        id: productId || null,
         name: productName,
         price: price,
         image: image || 'https://via.placeholder.com/100',
@@ -334,13 +335,14 @@ function initAddToCartButtons() {
     addToCartBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
+            const productId = btn.dataset.productId;
             const productName = btn.dataset.productName;
             const productPrice = parseFloat(btn.dataset.productPrice);
             const price = currentCurrency === 'USD' ? productPrice : (productPrice * EXCHANGE_RATE);
             const image = btn.dataset.productImage;
             const description = btn.dataset.productDesc;
 
-            addToCart(productName, price, image, description);
+            addToCart(productName, price, image, description, productId);
 
             // Animation for button
             btn.classList.add('added');
@@ -697,6 +699,21 @@ window.completeOrder = function () {
         const promoRef = firebase.database().ref('promos').child(activeDiscount.id);
         promoRef.child('usedCount').transaction(current => (current || 0) + 1);
     }
+
+    // Reduce stock for products with tracking enabled
+    cart.forEach(item => {
+        if (item.id) {
+            const productRef = firebase.database().ref('products').child(item.id);
+            productRef.once('value', (snapshot) => {
+                const product = snapshot.val();
+                if (product && product.trackStock && product.stock > 0) {
+                    productRef.update({
+                        stock: product.stock - 1
+                    });
+                }
+            });
+        }
+    });
 
     // Open WhatsApp
     const whatsappURL = `https://wa.me/${CONTACT_NUMBER}?text=${encodedMessage}`;
@@ -1707,9 +1724,30 @@ function createProductCardHTML(id, product) {
         ? `$${product.price.toFixed(2)}`
         : `${(product.price * EXCHANGE_RATE).toFixed(2)} د.ل`;
 
+    // Stock Management
+    let stockBadge = '';
+    let isOutOfStock = false;
+    let addToCartDisabled = '';
+    let buttonText = 'إضافة للسلة';
+
+    if (product.trackStock) {
+        const stock = product.stock || 0;
+        const threshold = product.lowStockThreshold || 5;
+
+        if (stock === 0) {
+            stockBadge = '<div class="stock-badge out-of-stock">نفذ المخزون</div>';
+            isOutOfStock = true;
+            addToCartDisabled = 'disabled';
+            buttonText = 'غير متوفر';
+        } else if (stock <= threshold) {
+            stockBadge = `<div class="stock-badge limited-stock">مخزون محدود (${stock} متبقي)</div>`;
+        }
+    }
+
     return `
-        <div class="product-card" data-product-id="${id}" data-category="${categoryClass}">
+        <div class="product-card ${isOutOfStock ? 'out-of-stock-card' : ''}" data-product-id="${id}" data-category="${categoryClass}">
             ${badgeHTML}
+            ${stockBadge}
             <div class="product-image">
                 <img src="${product.image}" alt="${product.name}" class="product-img" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
             </div>
@@ -1718,11 +1756,11 @@ function createProductCardHTML(id, product) {
                 <p class="product-description">${product.shortDesc || product.description.substring(0, 60) + '...'}</p>
                 <div class="product-footer">
                     <span class="product-price" data-usd="${product.price}">${price}</span>
-                    <button class="add-to-cart-btn" data-product-name="${product.name}" data-product-price="${product.price}" data-product-image="${product.image}" data-product-desc="${product.shortDesc || product.description.substring(0, 60) + '...'}">
+                    <button class="add-to-cart-btn" ${addToCartDisabled} data-product-id="${id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-image="${product.image}" data-product-desc="${product.shortDesc || product.description.substring(0, 60) + '...'}">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M9 2L6 6M18 6L15 2M6 6h12l1 14H5L6 6z" />
                         </svg>
-                        إضافة للسلة
+                        ${buttonText}
                     </button>
                 </div>
             </div>
