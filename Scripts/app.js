@@ -1906,9 +1906,54 @@ document.addEventListener('DOMContentLoaded', () => {
     initHeroShopNow();
     initWhatsAppButton();
     initMobileMenu();
+    initBottomNav();
 
     console.log('ZeroNux Store initialized successfully!');
 });
+
+// Mobile Bottom Navigation
+function initBottomNav() {
+    const searchBtn = document.getElementById('mobile-nav-search');
+    const cartBtn = document.getElementById('mobile-nav-cart');
+    const homeBtn = document.getElementById('mobile-nav-home');
+
+    if (searchBtn) {
+        searchBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const searchInput = document.getElementById('product-search');
+            const productsSection = document.getElementById('products');
+
+            if (productsSection) {
+                const offsetTop = productsSection.offsetTop - 80;
+                window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+            }
+
+            if (searchInput) {
+                setTimeout(() => {
+                    searchInput.focus();
+                    searchInput.parentElement.style.boxShadow = '0 0 0 4px rgba(102, 126, 234, 0.3)';
+                    setTimeout(() => searchInput.parentElement.style.boxShadow = '', 2000);
+                }, 500);
+            }
+        });
+    }
+
+    if (cartBtn) {
+        cartBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            showCartModal();
+        });
+
+        // Sync badge
+        setInterval(() => {
+            const badge = cartBtn.querySelector('.cart-count-badge');
+            if (badge) {
+                badge.textContent = cart.length;
+                badge.style.display = cart.length > 0 ? 'flex' : 'none';
+            }
+        }, 1000);
+    }
+}
 
 // Mobile Menu Functionality
 function initMobileMenu() {
@@ -1920,14 +1965,14 @@ function initMobileMenu() {
         mobileMenuBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             navLinks.classList.toggle('active');
-            mobileMenuBtn.textContent = navLinks.classList.contains('active') ? '✕' : '☰';
+            // Removed: mobileMenuBtn.textContent = navLinks.classList.contains('active') ? '✕' : '☰';
         });
 
         // Close when clicking outside
         document.addEventListener('click', (e) => {
             if (navLinks.classList.contains('active') && !navLinks.contains(e.target) && e.target !== mobileMenuBtn) {
                 navLinks.classList.remove('active');
-                mobileMenuBtn.textContent = '☰';
+                // Removed: mobileMenuBtn.textContent = '☰';
             }
         });
 
@@ -1935,7 +1980,7 @@ function initMobileMenu() {
         navLinks.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
                 navLinks.classList.remove('active');
-                mobileMenuBtn.textContent = '☰';
+                // Removed: mobileMenuBtn.textContent = '☰';
             });
         });
     }

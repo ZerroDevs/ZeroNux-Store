@@ -1209,7 +1209,8 @@ body:has(#announcement-bar[style*="display: block"]) {
         background: rgba(18, 18, 30, 0.98);
         backdrop-filter: blur(25px);
         -webkit-backdrop-filter: blur(25px);
-        z-index: 1000;
+        z-index: 2000;
+        /* Increased to cover button */
         transition: right 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
         border-left: 1px solid rgba(255, 255, 255, 0.1);
         box-shadow: -10px 0 50px rgba(0, 0, 0, 0.7);
@@ -1281,6 +1282,130 @@ body:has(#announcement-bar[style*="display: block"]) {
     .mobile-menu-btn {
         display: flex !important;
         position: relative;
-        z-index: 1002;
+        z-index: 999;
+        /* Lower than nav-links */
     }
+
+    /* 2-Column Product Grid Fix */
+    .products-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        padding: 0 5px;
+    }
+
+    .product-card {
+        border-radius: 12px;
+    }
+
+    .product-info {
+        padding: 0.75rem;
+    }
+
+    .product-name {
+        font-size: 1rem !important;
+        margin-bottom: 0.25rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .product-description {
+        font-size: 0.8rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        /* Limit lines */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+
+    .product-footer {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .product-price {
+        font-size: 1.1rem !important;
+    }
+
+    .add-to-cart-btn {
+        padding: 0.5rem !important;
+        font-size: 0.85rem !important;
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Sticky Bottom Nav Styles */
+    .mobile-bottom-nav {
+        display: flex !important;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(18, 18, 30, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 10px 0 20px;
+        /* Extra padding for safe area */
+        z-index: 9999;
+        justify-content: space-around;
+        align-items: center;
+        box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .mobile-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-decoration: none;
+        color: rgba(255, 255, 255, 0.6);
+        gap: 4px;
+        transition: all 0.3s ease;
+        position: relative;
+        cursor: pointer;
+    }
+
+    .mobile-nav-item.active,
+    .mobile-nav-item:hover {
+        color: var(--primary);
+        transform: translateY(-2px);
+    }
+
+    .nav-icon {
+        font-size: 1.4rem;
+        line-height: 1;
+    }
+
+    .nav-label {
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+
+    .cart-count-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: #ff4757;
+        color: white;
+        font-size: 0.6rem;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+
+    /* Hide default WhatsApp button on mobile since it's in the bar */
+    .whatsapp-float {
+        display: none !important;
+    }
+}
+
+/* Base styles for bottom nav (hidden on desktop) */
+.mobile-bottom-nav {
+    display: none;
 }
