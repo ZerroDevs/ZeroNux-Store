@@ -733,3 +733,61 @@ to {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(63, 43, 150, 0.4);
 }
+
+/* ============================================
+   FORM ELEMENT FIXES
+   ============================================ */
+
+/* Fix select dropdown text visibility */
+select {
+    color: white !important;
+    background-color: rgba(26, 26, 46, 0.8) !important;
+}
+
+select option {
+    background-color: #1a1a2e;
+    color: white;
+}
+
+/* Custom Checkbox Styling */
+input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(102, 126, 234, 0.5);
+    border-radius: 4px;
+    background: rgba(26, 26, 46, 0.5);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+input[type="checkbox"]:hover {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
+}
+
+input[type="checkbox"]:checked {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+}
+
+input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Small text styling */
+small {
+    display: block;
+    margin-top: 0.25rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+}
