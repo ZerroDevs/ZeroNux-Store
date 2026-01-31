@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تم الطلب بنجاح - متجر زيرونكس</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Cairo:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="Style/index.css">
+    <style>
+        .success-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .success-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 3rem;
+            max-width: 500px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+            animation: slideInUp 0.5s ease-out;
+        }
+
+        .success-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .order-id-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+        }
+
+        .order-label {
+            display: block;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 0.5rem;
+        }
+
+        .order-value {
+            font-family: monospace;
+            font-size: 1.2rem;
+            color: #667eea;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .btn-whatsapp {
+            background: #25D366;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-whatsapp:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);
+        }
+
+        .btn-home {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            border-radius: 12px;
+            transition: background 0.2s ease;
+        }
+
+        .btn-home:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0);
+            }
+
+            60% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="success-page">
+        <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <h1>تم استلام طلبك بنجاح!</h1>
+            <p>شكراً لثقتك بنا. سيتم مراجعة طلبك والتواصل معك قريباً لإتمام العملية.</p>
+
+            <div class="order-id-box">
+                <span class="order-label">رقم الطلب</span>
+                <span class="order-value" id="order-id">...</span>
+            </div>
+
+            <a href="#" id="whatsapp-btn" class="btn-whatsapp">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.654-.698c1.02.592 1.973.889 3.059.889l.002.006c3.181 0 5.768-2.586 5.768-5.766 0-3.18-2.587-5.767-5.768-5.767zm12 6.091c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 2.55.824 4.92 2.205 6.851l-2.238 8.172 8.359-2.193c1.825 1.07 3.934 1.692 6.191 1.692 6.627 0 12-5.373 12-12zm-8.52 7.681l-.662-1.649c-.562.28-1.503.719-2.091.719-1.921 0-3.08-1.428-3.08-3.056 0-1.742 1.258-3.081 2.871-3.081.719 0 1.487.359 1.94.59l.716-1.696c-.668-.396-1.55-.733-2.618-.733-2.731 0-4.832 2.112-4.832 4.939s2.001 4.961 5.341 4.961c1.078 0 1.909-.239 2.534-.45l-.119-.544z" />
+                </svg>
+                أكمل طلبك عبر واتساب
+            </a>
+
+            <a href="index.html" class="btn-home">العودة للرئيسية</a>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (Just for config if needed, but mainly we use URL params here) -->
+    <!-- We actually just need simple JS to parse query params and set links -->
+    <script>
+        // Use the same contact number as in app.js
+        const CONTACT_NUMBER = "218916808225";
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get order ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('orderId');
+
+            const orderIdEl = document.getElementById('order-id');
+            const whatsappBtn = document.getElementById('whatsapp-btn');
+
+            if (orderId) {
+                orderIdEl.textContent = orderId;
+
+                // Prepare WhatsApp Message
+                const message = `مرحباً، قمت للتو بطلب جديد من المتجر.\nرقم الطلب: ${orderId}\nأرغب في إتمام عملية الدفع والتوصيل.`;
+                const encodedMessage = encodeURIComponent(message);
+                whatsappBtn.href = `https://wa.me/${CONTACT_NUMBER}?text=${encodedMessage}`;
+            } else {
+                orderIdEl.textContent = "غير متوفر";
+                whatsappBtn.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+
+</html>

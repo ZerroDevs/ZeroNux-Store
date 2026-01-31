@@ -721,16 +721,14 @@ window.completeOrder = function () {
     });
 
     // Open WhatsApp
-    const whatsappURL = `https://wa.me/${CONTACT_NUMBER}?text=${encodedMessage}`;
-    window.open(whatsappURL, '_blank');
-
-    // Clear cart
+    // Clear cart and redirect to success page
     activeDiscount = null;
     cart = [];
     updateCartCount();
     document.querySelector('.cart-modal-overlay').remove();
 
-    showNotification(`تم إنشاء الطلب ${orderId} بنجاح! ✅`);
+    // Redirect to success page
+    window.location.href = `success.html?orderId=${orderId}`;
 };
 
 function closeModal(overlay) {
