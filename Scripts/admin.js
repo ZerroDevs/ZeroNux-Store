@@ -258,7 +258,12 @@ document.getElementById('image-file').addEventListener('change', function (e) {
 
             const preview = document.createElement('div');
             preview.className = 'image-preview-feedback';
-            preview.innerHTML = `<span style="color: #00b894; font-size: 0.9rem;">✅ تم تحميل الصورة بنجاح: ${file.name}</span>`;
+            preview.innerHTML = `
+                <div style="margin-top: 10px; position: relative; width: 100px; height: 100px; overflow: hidden; border-radius: 8px; border: 2px solid #00b894;">
+                    <img src="${base64String}" style="width: 100%; height: 100%; object-fit: cover;" alt="Preview">
+                </div>
+                <span style="display: block; color: #00b894; font-size: 0.85rem; margin-top: 5px;">✅ تم اختيار الصورة</span>
+            `;
             document.getElementById('image-file').parentNode.appendChild(preview);
         };
         reader.readAsDataURL(file);
