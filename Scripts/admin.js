@@ -22,7 +22,7 @@ const settingsRef = database.ref('settings');
 // ============================================
 // SETTINGS MANAGEMENT
 // ============================================
-// Load settings (exchange rate, phone, facebook)
+// Load settings (exchange rate, phone, facebook, email)
 function loadSettings() {
     settingsRef.once('value', (snapshot) => {
         const settings = snapshot.val();
@@ -30,6 +30,7 @@ function loadSettings() {
             if (settings.exchangeRate) document.getElementById('exchange-rate').value = settings.exchangeRate;
             if (settings.phoneNumber) document.getElementById('contact-phone').value = settings.phoneNumber;
             if (settings.facebookUrl) document.getElementById('facebook-url').value = settings.facebookUrl;
+            if (settings.contactEmail) document.getElementById('contact-email').value = settings.contactEmail;
         } else {
             // Default exchange rate
             document.getElementById('exchange-rate').value = 9;
@@ -43,15 +44,17 @@ document.getElementById('settings-form').addEventListener('submit', (e) => {
     const exchangeRate = parseFloat(document.getElementById('exchange-rate').value);
     const phoneNumber = document.getElementById('contact-phone').value;
     const facebookUrl = document.getElementById('facebook-url').value;
+    const contactEmail = document.getElementById('contact-email').value;
 
     settingsRef.update({
         exchangeRate: exchangeRate,
-        phoneNumber: phoneNumber || '',
-        facebookUrl: facebookUrl || '',
+        phoneNumber: phoneNumber,
+        facebookUrl: facebookUrl,
+        contactEmail: contactEmail,
         lastUpdated: Date.now()
     })
         .then(() => {
-            showNotification('تم حفظ الإعدادات بنجاح! ✅\nسيتم تطبيق سعر الصرف ومعلومات الاتصال الجديدة.');
+            showNotification('تم حفظ الإعدادات بنجاح! ✅\nسيتم تحديث معلومات الاتصال في المتجر.');
         })
         .catch((error) => {
             showNotification('حدث خطأ: ' + error.message, 'error');
