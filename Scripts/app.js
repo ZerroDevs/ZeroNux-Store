@@ -93,6 +93,11 @@ function loadSettings() {
                 const el = document.querySelector('.hero-image');
                 if (el) el.src = settings.heroImage;
             }
+
+            // 6. Update Categories
+            if (settings.storeCategories) {
+                renderCategoryTabs(settings.storeCategories);
+            }
         }
     });
 }
@@ -1266,6 +1271,81 @@ function loadProductsFromFirebase() {
     });
 }
 
+let currentCategoryFilter = 'all';
+
+// Render Category Tabs (Called from loadSettings)
+function renderCategoryTabs(categoriesString) {
+    const tabsContainer = document.getElementById('categories-tabs');
+    if (!tabsContainer || !categoriesString) return;
+
+    const categories = categoriesString.split(',').map(c => c.trim()).filter(c => c);
+
+    // Start with "All"
+    let html = `<button class="category-tab ${currentCategoryFilter === 'all' ? 'active' : ''}" data-category="all">الكل</button>`;
+
+    categories.forEach(cat => {
+        const isActive = currentCategoryFilter === cat ? 'active' : '';
+        html += `<button class="category-tab ${isActive}" data-category="${cat}">${cat}</button>`;
+    });
+
+    tabsContainer.innerHTML = html;
+
+    // Add click listeners
+    const tabs = tabsContainer.querySelectorAll('.category-tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            // Remove active from all
+            tabs.forEach(t => t.classList.remove('active'));
+            // Add to clicked
+            tab.classList.add('active');
+
+            const selectedCategory = tab.getAttribute('data-category');
+            currentCategoryFilter = selectedCategory;
+            filterProductsByCategory(selectedCategory);
+        });
+    });
+}
+
+// Filter products by category
+function filterProductsByCategory(category) {
+    const products = document.querySelectorAll('.product-card');
+    const productsContainer = document.getElementById('products-container');
+    let visibleCount = 0;
+
+    products.forEach(card => {
+        const cardCategory = card.getAttribute('data-category') || 'general';
+
+        if (category === 'all' || cardCategory === category) {
+            card.style.display = 'block';
+            card.style.animation = 'fadeInUp 0.5s ease-out forwards';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    // Handle empty state
+    const noResultsMsg = document.querySelector('.no-results-category');
+    if (visibleCount === 0) {
+        if (!noResultsMsg) {
+            const msg = document.createElement('div');
+            msg.className = 'no-results-category';
+            msg.style.textAlign = 'center';
+            msg.style.width = '100%';
+            msg.style.gridColumn = '1 / -1';
+            msg.style.padding = '4rem 1rem';
+            msg.style.color = 'rgba(255,255,255,0.7)';
+            msg.innerHTML = `
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📂</div>
+                <h3 style="font-size: 1.5rem;">لا توجد منتجات في هذا التصنيف حالياً</h3>
+                <p>تفضل بزيارة التصنيفات الأخرى</p>
+            `;
+            productsContainer.appendChild(msg);
+        }
+    } else {
+        if (noResultsMsg) noResultsMsg.remove();
+    }
+}
 
 // Create product card HTML from Firebase data
 function createProductCardHTML(id, product) {
@@ -1279,12 +1359,14 @@ function createProductCardHTML(id, product) {
         ? `<div class="product-badge" data-badge="${product.badge}">${badgeMap[product.badge]}</div>`
         : '';
 
+    const categoryClass = product.category || 'general';
+
     const price = currentCurrency === 'USD'
         ? `$${product.price.toFixed(2)}`
         : `${(product.price * EXCHANGE_RATE).toFixed(2)} د.ل`;
 
     return `
-        <div class="product-card" data-product-id="${id}">
+        <div class="product-card" data-product-id="${id}" data-category="${categoryClass}">
             ${badgeHTML}
             <div class="product-image">
                 <img src="${product.image}" alt="${product.name}" class="product-img" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">

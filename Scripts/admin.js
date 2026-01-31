@@ -37,11 +37,41 @@ function loadSettings() {
             if (settings.heroSubtitle) document.getElementById('hero-subtitle').value = settings.heroSubtitle;
             if (settings.heroDescription) document.getElementById('hero-description').value = settings.heroDescription;
             if (settings.heroImage) document.getElementById('hero-image').value = settings.heroImage;
+
+            // Populate Categories Dropdown and Input
+            if (settings.storeCategories) {
+                document.getElementById('store-categories').value = settings.storeCategories;
+                populateCategoryDropdown(settings.storeCategories);
+            } else {
+                // Default defaults
+                populateCategoryDropdown('برامج, ألعاب, اشتراكات');
+            }
         } else {
             // Default exchange rate
             document.getElementById('exchange-rate').value = 9;
+            populateCategoryDropdown('برامج, ألعاب, اشتراكات');
         }
     });
+}
+
+function populateCategoryDropdown(categoriesString) {
+    const select = document.getElementById('product-category');
+    const currentVal = select.value;
+    select.innerHTML = '<option value="general">عام</option>';
+
+    if (categoriesString) {
+        const categories = categoriesString.split(',').map(c => c.trim()).filter(c => c);
+        categories.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat;
+            option.textContent = cat;
+            select.appendChild(option);
+        });
+    }
+
+    // Restore selection if possible, otherwise default
+    // We only restore if the option exists now
+    // Actually for 'Edit' mode, we need to set value AFTER populating.
 }
 
 // Save settings
@@ -57,6 +87,7 @@ document.getElementById('settings-form').addEventListener('submit', (e) => {
     const heroSubtitle = document.getElementById('hero-subtitle').value;
     const heroDescription = document.getElementById('hero-description').value;
     const heroImage = document.getElementById('hero-image').value;
+    const storeCategories = document.getElementById('store-categories').value;
 
     settingsRef.update({
         exchangeRate: exchangeRate,
@@ -67,10 +98,13 @@ document.getElementById('settings-form').addEventListener('submit', (e) => {
         heroSubtitle: heroSubtitle,
         heroDescription: heroDescription,
         heroImage: heroImage,
+        storeCategories: storeCategories,
         lastUpdated: Date.now()
     })
         .then(() => {
             showNotification('تم حفظ الإعدادات بنجاح! ✅\nسيتم تحديث المتجر فوراً.');
+            // Update dropdown immediately
+            populateCategoryDropdown(storeCategories);
         })
         .catch((error) => {
             showNotification('حدث خطأ: ' + error.message, 'error');
@@ -244,7 +278,10 @@ function createProductCard(id, product) {
         <img src="${product.image}" alt="${product.name}" class="product-image" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
         ${badgeHtml}
         <h3>${product.name}</h3>
-        <p class="price">$${product.price}</p>
+        <p class="price">
+            $${product.price}
+            ${product.category && product.category !== 'general' ? `<span style="font-size: 0.8em; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; margin-right: 5px;">${product.category}</span>` : ''}
+        </p>
         <p class="description">${product.description.substring(0, 100)}${product.description.length > 100 ? '...' : ''}</p>
         <div class="product-actions">
             <button class="btn btn-copy" onclick="copyProductLink('${id}')" title="نسخ الرابط">🔗</button>
@@ -314,6 +351,7 @@ document.getElementById('product-form').addEventListener('submit', (e) => {
         shortDesc: document.getElementById('product-short-desc').value,
         description: document.getElementById('product-description').value,
         badge: document.getElementById('product-badge').value,
+        category: document.getElementById('product-category').value,
         image: document.getElementById('product-image').value,
         features: parseFeatures(document.getElementById('product-features').value),
         visible: true, // Default to visible
@@ -322,12 +360,6 @@ document.getElementById('product-form').addEventListener('submit', (e) => {
 
     // Preserve visibility status if editing
     if (editingProductId) {
-        // We'll handle this by only updating specific fields or merging, 
-        // but since we overwrite, let's fetch current status or rely on backend merge if used update.
-        // Actually, update merges, but here we define the whole object.
-        // Better strategy: Don't set visible here if it's an update, OR fetch it first.
-        // Simplest for now: We will just NOT send 'visible' key on update unless we add a checkbox field.
-        // Let's modify the update logic below to exclude 'visible' from overwrite or keep it.
         delete productData.visible;
     }
 
@@ -395,6 +427,7 @@ window.editProduct = function (id) {
         document.getElementById('product-short-desc').value = product.shortDesc || '';
         document.getElementById('product-description').value = product.description;
         document.getElementById('product-badge').value = product.badge;
+        document.getElementById('product-category').value = product.category || 'general'; // Load Category
         document.getElementById('product-image').value = product.image;
         document.getElementById('product-features').value = formatFeatures(product.features);
 
