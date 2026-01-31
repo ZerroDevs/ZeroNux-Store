@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - متجر زيرونكس</title>
+    <link rel="icon" type="image/png" href="Images/Logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="Style/admin.css">
+</head>
+
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-container">
+        <div class="login-box">
+            <h1>🔐 لوحة التحكم</h1>
+            <p>متجر زيرونكس - إدارة المنتجات</p>
+            <form id="login-form">
+                <div class="form-group">
+                    <input type="email" id="admin-email" placeholder="البريد الإلكتروني" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="admin-password" placeholder="كلمة المرور" required>
+                </div>
+                <button type="submit" class="btn btn-primary">دخول</button>
+                <p class="error-message" id="login-error"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="admin-dashboard" class="dashboard-container" style="display: none;">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="header-content">
+                <h1>لوحة التحكم - متجر زيرونكس</h1>
+                <div class="header-actions">
+                    <a href="index.html" class="btn btn-secondary" target="_blank">عرض المتجر</a>
+                    <button id="logout-btn" class="btn btn-danger">تسجيل الخروج</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Settings Section -->
+            <section class="form-section">
+                <h2>⚙️ الإعدادات</h2>
+                <form id="settings-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>سعر صرف الدولار (1 USD = ؟ LYD)</label>
+                            <input type="number" id="exchange-rate" placeholder="9" step="0.01" min="0" required>
+                            <small>المبلغ بالدينار الليبي الذي يعادل 1 دولار أمريكي</small>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">حفظ الإعدادات</button>
+                </form>
+            </section>
+
+            <!-- Add/Edit Product Form -->
+            <section class="form-section">
+                <h2 id="form-title">إضافة منتج جديد</h2>
+                <form id="product-form">
+                    <input type="hidden" id="product-id">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>اسم المنتج</label>
+                            <input type="text" id="product-name" placeholder="مثال: Google AI Pro" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>السعر (USD)</label>
+                            <input type="number" id="product-price" placeholder="5" step="0.01" min="0" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>الوصف المختصر</label>
+                        <input type="text" id="product-short-desc" placeholder="وصف قصير للمنتج">
+                    </div>
+
+                    <div class="form-group">
+                        <label>الوصف الكامل</label>
+                        <textarea id="product-description" rows="3" placeholder="وصف تفصيلي للمنتج" required></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>الشارة</label>
+                            <select id="product-badge">
+                                <option value="new">جديد</option>
+                                <option value="limited">عرض محدود</option>
+                                <option value="hot">الأكثر مبيعاً</option>
+                                <option value="none">بدون شارة</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>رابط الصورة</label>
+                            <input type="url" id="product-image" placeholder="https://example.com/image.png" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>المميزات (كل سطر ميزة، استخدم | للفصل بين الأيقونة والعنوان والوصف)</label>
+                        <textarea id="product-features" rows="6" placeholder="📱|الميزة الأولى|وصف الميزة الأولى
+💻|الميزة الثانية|وصف الميزة الثانية"></textarea>
+                        <small>مثال: 📱|NotebookLM|شريكك في الأبحاث</small>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="submit-btn">إضافة المنتج</button>
+                        <button type="button" class="btn btn-secondary" id="cancel-btn"
+                            style="display: none;">إلغاء</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Products List -->
+            <section class="products-section">
+                <h2>المنتجات الحالية</h2>
+                <div id="products-list" class="products-grid">
+                    <div class="loading">جاري التحميل...</div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <!-- Admin Script -->
+    <script src="Scripts/admin.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,1247 @@
+// ============================================
+// FIREBASE CONFIGURATION
+// ============================================
+const firebaseConfig = {
+    apiKey: "AIzaSyCiS9TwRDxlpQ1Z_A6QcBi0f6307vI49ws",
+    authDomain: "zeronuxstore.firebaseapp.com",
+    databaseURL: "https://zeronuxstore-default-rtdb.firebaseio.com", // YOU NEED TO CREATE DATABASE AND UPDATE THIS!
+    projectId: "zeronuxstore",
+    storageBucket: "zeronuxstore.firebasestorage.app",
+    messagingSenderId: "372553296362",
+    appId: "1:372553296362:web:4bca9efd5bc12e3f0f6a93",
+    measurementId: "G-HSL9HN8V61"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+const productsRef = database.ref('products');
+const settingsRef = database.ref('settings');
+
+// ============================================
+// ZERONUX STORE APPLICATION
+// ============================================
+
+// Currency conversion functionality
+let EXCHANGE_RATE = 9; // Default rate, will be loaded from Firebase
+let currentCurrency = 'USD';
+let currentLanguage = 'ar'; // Default to Arabic
+
+// Load exchange rate from Firebase
+function loadExchangeRate() {
+    settingsRef.child('exchangeRate').on('value', (snapshot) => {
+        const rate = snapshot.val();
+        if (rate) {
+            EXCHANGE_RATE = rate;
+            // Update all prices on the page
+            updateAllPrices();
+        }
+    });
+}
+
+// Currency formatting
+function formatCurrency(amount, currency) {
+    if (currency === 'USD') {
+        return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    } else {
+        return `${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} د.ل`;
+    }
+}
+
+// Update all prices on the page
+function updatePrices(currency) {
+    const priceElements = document.querySelectorAll('.product-price');
+
+    priceElements.forEach(priceEl => {
+        const usdPrice = parseFloat(priceEl.dataset.usd);
+
+        let displayPrice;
+        if (currency === 'USD') {
+            displayPrice = formatCurrency(usdPrice, 'USD');
+        } else {
+            // Calculate LYD price dynamically using the exchange rate
+            const lydPrice = usdPrice * EXCHANGE_RATE;
+            displayPrice = formatCurrency(lydPrice, 'LYD');
+        }
+
+        // Animate price change
+        priceEl.style.transform = 'scale(1.1)';
+        setTimeout(() => {
+            priceEl.textContent = displayPrice;
+            priceEl.style.transform = 'scale(1)';
+        }, 150);
+    });
+}
+
+// Currency switcher functionality
+function initCurrencySwitcher() {
+    const currencyButtons = document.querySelectorAll('.currency-btn');
+
+    currencyButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active class from all buttons
+            currencyButtons.forEach(b => b.classList.remove('active'));
+
+            // Add active class to clicked button
+            btn.classList.add('active');
+
+            // Update current currency
+            currentCurrency = btn.dataset.currency;
+
+            // Update all prices
+            updatePrices(currentCurrency);
+        });
+    });
+}
+
+// Language switcher functionality
+function switchLanguage(lang) {
+    currentLanguage = lang;
+    const t = translations[lang];
+
+    // Update HTML lang and dir attributes
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+
+    // Update navigation
+    document.querySelector('[data-i18n="nav-home"]').textContent = t.nav.home;
+    document.querySelector('[data-i18n="nav-products"]').textContent = t.nav.products;
+    document.querySelector('[data-i18n="nav-about"]').textContent = t.nav.about;
+    document.querySelector('[data-i18n="nav-contact"]').textContent = t.nav.contact;
+
+    // Update hero section
+    document.querySelector('[data-i18n="hero-welcome"]').textContent = t.hero.welcome;
+    document.querySelector('[data-i18n="hero-title"]').textContent = t.hero.title;
+    document.querySelector('[data-i18n="hero-description"]').textContent = t.hero.description;
+    document.querySelector('[data-i18n="hero-shop-now"]').textContent = t.hero.shopNow;
+    document.querySelector('[data-i18n="hero-view-catalog"]').textContent = t.hero.viewCatalog;
+
+    // Update products section
+    document.querySelector('[data-i18n="products-title"]').textContent = t.products.title;
+    document.querySelector('[data-i18n="products-subtitle"]').textContent = t.products.subtitle;
+
+    // Update product badges
+    const badges = document.querySelectorAll('.product-badge');
+    badges.forEach(badge => {
+        const badgeType = badge.dataset.badge;
+        if (badgeType && t.products[badgeType.toLowerCase()]) {
+            badge.textContent = t.products[badgeType.toLowerCase()];
+        }
+    });
+
+    // Update add to cart buttons
+    document.querySelectorAll('[data-i18n="add-to-cart"]').forEach(btn => {
+        btn.innerHTML = `
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 2L6 6M18 6L15 2M6 6h12l1 14H5L6 6z"/>
+            </svg>
+            ${t.products.addToCart}
+        `;
+    });
+
+    // Update newsletter
+    document.querySelector('[data-i18n="newsletter-title"]').textContent = t.newsletter.title;
+    document.querySelector('[data-i18n="newsletter-desc"]').textContent = t.newsletter.description;
+    document.querySelector('[data-i18n="newsletter-placeholder"]').placeholder = t.newsletter.placeholder;
+    document.querySelector('[data-i18n="newsletter-submit"]').textContent = t.newsletter.subscribe;
+
+    // Update footer
+    document.querySelector('[data-i18n="footer-desc"]').textContent = t.footer.description;
+    document.querySelector('[data-i18n="footer-quick-links"]').textContent = t.footer.quickLinks;
+    document.querySelector('[data-i18n="footer-customer-service"]').textContent = t.footer.customerService;
+    document.querySelector('[data-i18n="footer-contact"]').textContent = t.footer.contact;
+
+    // Update footer links
+    const footerLinks = ['home', 'products', 'about', 'contact', 'shippingInfo', 'returns', 'faq', 'support'];
+    footerLinks.forEach(link => {
+        const linkEl = document.querySelector(`[data-i18n="footer-link-${link}"]`);
+        if (linkEl && t.footer[link]) {
+            linkEl.textContent = t.footer[link];
+        } else if (linkEl && t.nav[link]) {
+            linkEl.textContent = t.nav[link];
+        }
+    });
+
+    document.querySelector('[data-i18n="footer-email"]').textContent = t.footer.email;
+    document.querySelector('[data-i18n="footer-phone"]').textContent = t.footer.phone;
+    document.querySelector('[data-i18n="footer-location"]').textContent = t.footer.location;
+    document.querySelector('[data-i18n="footer-copyright"]').textContent = t.footer.copyright;
+}
+
+// Language is locked to Arabic only - no switcher needed
+// initLanguageSwitcher function removed
+
+// Shopping cart functionality
+let cart = [];
+
+function updateCartCount() {
+    const cartCount = document.querySelector('.cart-count');
+    cartCount.textContent = cart.length;
+
+    // Animate cart count
+    cartCount.style.transform = 'scale(1.3)';
+    setTimeout(() => {
+        cartCount.style.transform = 'scale(1)';
+    }, 200);
+}
+
+function addToCart(productName, price) {
+    cart.push({ name: productName, price: price });
+    updateCartCount();
+
+    // Show feedback
+    const t = translations[currentLanguage];
+    showNotification(`${productName} ${t.cart.added}`);
+}
+
+// Add to cart button functionality
+function initAddToCartButtons() {
+    const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+
+    addToCartButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            const productCard = btn.closest('.product-card');
+            const productName = productCard.querySelector('.product-name').textContent;
+            const priceElement = productCard.querySelector('.product-price');
+            const usdPrice = parseFloat(priceElement.dataset.usd);
+            const price = currentCurrency === 'USD' ? usdPrice : usdPrice * EXCHANGE_RATE;
+
+            addToCart(productName, price);
+
+            // Button animation
+            btn.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                btn.style.transform = 'scale(1)';
+            }, 100);
+        });
+    });
+}
+
+// Cart button click handler
+function initCartButton() {
+    const cartBtn = document.querySelector('.cart-btn');
+
+    cartBtn.addEventListener('click', () => {
+        const t = translations[currentLanguage];
+        if (cart.length === 0) {
+            showNotification(t.cart.empty);
+        } else {
+            showCartModal();
+        }
+    });
+}
+
+// Notification system
+function showNotification(message) {
+    // Remove existing notification if any
+    const existingNotification = document.querySelector('.notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.textContent = message;
+
+    // Add styles
+    Object.assign(notification.style, {
+        position: 'fixed',
+        top: '100px',
+        right: '20px',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white',
+        padding: '1rem 1.5rem',
+        borderRadius: '12px',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+        zIndex: '10000',
+        fontWeight: '600',
+        animation: 'slideInRight 0.3s ease-out',
+        maxWidth: '300px'
+    });
+
+    document.body.appendChild(notification);
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.3s ease-out';
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+
+// Cart modal
+function showCartModal() {
+    const t = translations[currentLanguage];
+
+    // Create modal overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'cart-modal-overlay';
+
+    // Create modal
+    const modal = document.createElement('div');
+    modal.className = 'cart-modal';
+
+    let cartHTML = `
+        <div class="cart-modal-header">
+            <h2>${t.cart.title}</h2>
+            <button class="close-modal-btn">&times;</button>
+        </div>
+        <div class="cart-items">
+    `;
+
+    let total = 0;
+    cart.forEach((item, index) => {
+        total += item.price;
+        cartHTML += `
+            <div class="cart-item">
+                <span class="cart-item-name">${item.name}</span>
+                <span class="cart-item-price">${formatCurrency(item.price, currentCurrency)}</span>
+                <button class="remove-item-btn" data-index="${index}">${t.cart.remove}</button>
+            </div>
+        `;
+    });
+
+    cartHTML += `
+        </div>
+        <div class="cart-total">
+            <strong>${t.cart.total}</strong>
+            <strong>${formatCurrency(total, currentCurrency)}</strong>
+        </div>
+        <div class="cart-actions">
+            <button class="btn btn-primary checkout-btn">${t.cart.checkout}</button>
+            <button class="btn btn-secondary clear-cart-btn">${t.cart.clearCart}</button>
+        </div>
+    `;
+
+    modal.innerHTML = cartHTML;
+
+    // Add styles
+    Object.assign(overlay.style, {
+        position: 'fixed',
+        top: '0',
+        left: '0',
+        right: '0',
+        bottom: '0',
+        background: 'rgba(0, 0, 0, 0.8)',
+        backdropFilter: 'blur(10px)',
+        zIndex: '9999',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        animation: 'fadeIn 0.3s ease-out'
+    });
+
+    Object.assign(modal.style, {
+        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        borderRadius: '16px',
+        padding: '2rem',
+        maxWidth: '500px',
+        width: '90%',
+        maxHeight: '80vh',
+        overflow: 'auto',
+        animation: 'slideInUp 0.3s ease-out'
+    });
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    // Close modal handlers
+    const closeBtn = modal.querySelector('.close-modal-btn');
+    closeBtn.addEventListener('click', () => closeModal(overlay));
+
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            closeModal(overlay);
+        }
+    });
+
+    // Remove item handlers
+    const removeButtons = modal.querySelectorAll('.remove-item-btn');
+    removeButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const index = parseInt(btn.dataset.index);
+            cart.splice(index, 1);
+            updateCartCount();
+            closeModal(overlay);
+            if (cart.length > 0) {
+                showCartModal();
+            } else {
+                showNotification(t.cart.cartEmpty);
+            }
+        });
+    });
+
+    // Clear cart handler
+    const clearCartBtn = modal.querySelector('.clear-cart-btn');
+    clearCartBtn.addEventListener('click', () => {
+        cart = [];
+        updateCartCount();
+        closeModal(overlay);
+        showNotification(t.cart.cartCleared);
+    });
+
+    // Checkout handler
+    const checkoutBtn = modal.querySelector('.checkout-btn');
+    checkoutBtn.addEventListener('click', () => {
+        closeModal(overlay);
+
+        // Generate WhatsApp message
+        const phoneNumber = '218916808225'; // Libyan number
+        let message = currentLanguage === 'ar'
+            ? '🛍️ *طلب جديد من متجر زيرونكس*\n\n'
+            : '🛍️ *New Order from ZeroNux Store*\n\n';
+
+        message += currentLanguage === 'ar' ? '*المنتجات:*\n' : '*Products:*\n';
+
+        cart.forEach((item, index) => {
+            const itemPrice = formatCurrency(item.price, currentCurrency);
+            message += `${index + 1}. ${item.name} - ${itemPrice}\n`;
+        });
+
+        const total = cart.reduce((sum, item) => sum + item.price, 0);
+        const totalFormatted = formatCurrency(total, currentCurrency);
+
+        message += currentLanguage === 'ar'
+            ? `\n*المجموع:* ${totalFormatted}`
+            : `\n*Total:* ${totalFormatted}`;
+
+        // Encode message for URL
+        const encodedMessage = encodeURIComponent(message);
+
+        // Open WhatsApp
+        const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+        window.open(whatsappURL, '_blank');
+
+        // Show confirmation
+        showNotification(currentLanguage === 'ar'
+            ? 'جاري فتح واتساب...'
+            : 'Opening WhatsApp...');
+    });
+}
+
+function closeModal(overlay) {
+    overlay.style.animation = 'fadeOut 0.3s ease-out';
+    setTimeout(() => {
+        overlay.remove();
+    }, 300);
+}
+
+// Newsletter form
+function initNewsletterForm() {
+    const form = document.querySelector('.newsletter-form');
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const t = translations[currentLanguage];
+        showNotification(t.notifications.subscribed);
+        form.reset();
+    });
+}
+
+// Smooth scrolling for navigation links
+function initSmoothScrolling() {
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            const targetId = link.getAttribute('href');
+            if (targetId.startsWith('#')) {
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    const offsetTop = targetSection.offsetTop - 80; // Account for fixed navbar
+
+                    window.scrollTo({
+                        top: offsetTop,
+                        behavior: 'smooth'
+                    });
+
+                    // Update active link
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                }
+            }
+        });
+    });
+}
+
+// Navbar scroll effect
+function initNavbarScroll() {
+    const navbar = document.querySelector('.navbar');
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            navbar.style.background = 'rgba(15, 15, 30, 0.95)';
+            navbar.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
+        } else {
+            navbar.style.background = 'rgba(15, 15, 30, 0.8)';
+            navbar.style.boxShadow = 'none';
+        }
+    });
+}
+
+// Product card animation on scroll
+function initScrollAnimations() {
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    const productCards = document.querySelectorAll('.product-card');
+    productCards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+        observer.observe(card);
+    });
+
+    const featureCards = document.querySelectorAll('.feature-card');
+    featureCards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+        observer.observe(card);
+    });
+}
+
+// Add dynamic animations to CSS
+function addDynamicStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideOutRight {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .cart-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .cart-modal-header h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.75rem;
+            margin: 0;
+        }
+        
+        .close-modal-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+        
+        .close-modal-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .cart-items {
+            margin-bottom: 1.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+        }
+        
+        .cart-item-name {
+            flex: 1;
+            font-weight: 600;
+        }
+        
+        .cart-item-price {
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .remove-item-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(245, 87, 108, 0.2);
+            border: 1px solid #f5576c;
+            border-radius: 6px;
+            color: #f5576c;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .remove-item-btn:hover {
+            background: #f5576c;
+            color: white;
+        }
+        
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 1.5rem 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+        }
+        
+        .cart-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .cart-actions .btn {
+            flex: 1;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Product details modal - Updated for Firebase
+function showProductDetails(productId) {
+    // Fetch product from Firebase
+    productsRef.child(productId).once('value', (snapshot) => {
+        const product = snapshot.val();
+        if (!product) {
+            alert('المنتج غير موجود');
+            return;
+        }
+
+        const overlay = document.createElement('div');
+        overlay.className = 'product-modal-overlay';
+
+        const modal = document.createElement('div');
+        modal.className = 'product-modal';
+
+        // Build features HTML
+        let featuresHTML = '';
+        if (product.features && product.features.length > 0) {
+            product.features.forEach(feature => {
+                featuresHTML += `
+                    <div class="feature-item">
+                        <div class="feature-icon-large">${feature.icon}</div>
+                        <div class="feature-content">
+                            <h4>${feature.title}</h4>
+                            <p>${feature.description}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        } else {
+            featuresHTML = `<p>${product.description}</p>`;
+        }
+
+        const priceUSD = product.price;
+        const priceLYD = priceUSD * EXCHANGE_RATE;
+        const displayPrice = currentCurrency === 'USD' ? formatCurrency(priceUSD, 'USD') : formatCurrency(priceLYD, 'LYD');
+
+        modal.innerHTML = `
+            <div class="product-modal-header">
+                <div class="product-modal-title">
+                    <h2>${product.name}</h2>
+                    <p class="product-modal-subtitle">${product.shortDesc || product.description.substring(0, 100)}</p>
+                </div>
+                <button class="close-modal-btn">&times;</button>
+            </div>
+            <div class="product-modal-image">
+                <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/500x300?text=No+Image'">
+            </div>
+            <div class="product-modal-body">
+                <h3 class="features-title">${currentLanguage === 'ar' ? 'المميزات المتضمنة' : 'Included Features'}</h3>
+                <div class="features-list">
+                    ${featuresHTML}
+                </div>
+            </div>
+            <div class="product-modal-footer">
+                <div class="modal-price-section">
+                    <span class="modal-price-label">${currentLanguage === 'ar' ? 'السعر:' : 'Price:'}</span>
+                    <span class="modal-price">${displayPrice}</span>
+                </div>
+                <button class="btn btn-primary add-to-cart-modal" data-product-name="${product.name}" data-product-price="${product.price}">
+                    ${currentLanguage === 'ar' ? 'إضافة للسلة' : 'Add to Cart'}
+                </button>
+            </div>
+        `;
+
+        Object.assign(overlay.style, {
+            position: 'fixed', top: '0', left: '0', right: '0', bottom: '0',
+            background: 'rgba(0, 0, 0, 0.9)', backdropFilter: 'blur(10px)', zIndex: '10000',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            animation: 'fadeIn 0.3s ease-out', padding: '1rem', overflowY: 'auto'
+        });
+
+        Object.assign(modal.style, {
+            background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+            border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px',
+            maxWidth: '900px', width: '100%', maxHeight: '90vh', overflow: 'auto',
+            animation: 'slideInUp 0.3s ease-out', direction: currentLanguage === 'ar' ? 'rtl' : 'ltr'
+        });
+
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        // Styles for modal content
+        const modalStyles = document.createElement('style');
+        modalStyles.textContent = `
+        .product-modal-header { padding: 2rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-between; align-items: flex-start; }
+        .product-modal-title h2 { font-family: 'Outfit', sans-serif; font-size: 2rem; margin: 0 0 0.5rem 0; }
+        .product-modal-subtitle { color: rgba(255, 255, 255, 0.7); font-size: 1.125rem; margin: 0; }
+        .product-modal-image { padding: 0 2rem; }
+        .product-modal-image img { width: 100%; max-height: 300px; object-fit: contain; border-radius: 12px; }
+        .product-modal-body { padding: 2rem; }
+        .features-title { font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 1.5rem; }
+        .features-list { display: grid; gap: 1rem; }
+        .feature-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; transition: all 0.2s ease; }
+        .feature-item:hover { background: rgba(255, 255, 255, 0.05); border-color: rgba(102, 126, 234, 0.5); }
+        .feature-icon-large { font-size: 2rem; min-width: 40px; }
+        .feature-content h4 { font-size: 1.125rem; margin: 0 0 0.5rem 0; }
+        .feature-content p { color: rgba(255, 255, 255, 0.7); margin: 0; line-height: 1.6; }
+        .product-modal-footer { padding: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-between; align-items: center; gap: 2rem; flex-wrap: wrap; }
+        .modal-price-section { display: flex; flex-direction: column; gap: 0.5rem; }
+        .modal-price-label { color: rgba(255, 255, 255, 0.7); font-size: 0.875rem; }
+        .modal-price { font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .add-to-cart-modal { padding: 1rem 2rem; white-space: nowrap; }
+    `;
+        document.head.appendChild(modalStyles);
+
+        const closeBtn = modal.querySelector('.close-modal-btn');
+        closeBtn.addEventListener('click', () => closeModal(overlay));
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(overlay); });
+
+        const addToCartBtn = modal.querySelector('.add-to-cart-modal');
+        addToCartBtn.addEventListener('click', () => {
+            const productName = addToCartBtn.dataset.productName;
+            const productPrice = parseFloat(addToCartBtn.dataset.productPrice);
+            const price = currentCurrency === 'USD' ? productPrice : (productPrice * EXCHANGE_RATE);
+            addToCart(productName, price);
+            closeModal(overlay);
+        });
+    });
+}
+
+// Initialize product card click handlers
+function initProductCardClick() {
+    const productCards = document.querySelectorAll('.product-card');
+    productCards.forEach(card => {
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', (e) => {
+            if (!e.target.closest('.add-to-cart-btn')) {
+                const productId = card.dataset.productId;
+                if (productId) {
+                    showProductDetails(productId);
+                }
+            }
+        });
+    });
+}
+
+// About modal
+function showAboutModal() {
+    const t = translations[currentLanguage];
+    const about = t.about;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'about-modal-overlay';
+
+    const modal = document.createElement('div');
+    modal.className = 'about-modal';
+
+    modal.innerHTML = `
+        <div class="about-modal-header">
+            <h2>${about.title}</h2>
+            <button class="close-modal-btn">&times;</button>
+        </div>
+        <div class="about-modal-body">
+            <div class="about-description">
+                <p>${about.description}</p>
+            </div>
+            
+            <div class="about-contact">
+                <h3>${about.contactTitle}</h3>
+                
+                <div class="contact-item">
+                    <div class="contact-icon">📱</div>
+                    <div class="contact-details">
+                        <strong>${about.phone}</strong>
+                        <a href="tel:${about.phoneNumber}">${about.phoneNumber}</a>
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <div class="contact-icon">📍</div>
+                    <div class="contact-details">
+                        <strong>${about.location}</strong>
+                        <p>${about.locationAddress}</p>
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <div class="contact-icon">👤</div>
+                    <div class="contact-details">
+                        <strong>${about.facebook}</strong>
+                        <a href="https://www.facebook.com/OsamaaAbdallatif" target="_blank">${about.facebookLink}</a>
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <div class="contact-icon">🛟</div>
+                    <div class="contact-details">
+                        <strong>${about.support}</strong>
+                        <p>${about.supportText}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    Object.assign(overlay.style, {
+        position: 'fixed', top: '0', left: '0', right: '0', bottom: '0',
+        background: 'rgba(0, 0, 0, 0.9)', backdropFilter: 'blur(10px)', zIndex: '10000',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        animation: 'fadeIn 0.3s ease-out', padding: '1rem', overflowY: 'auto'
+    });
+
+    Object.assign(modal.style, {
+        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+        border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px',
+        maxWidth: '600px', width: '100%', maxHeight: '90vh', overflow: 'auto',
+        animation: 'slideInUp 0.3s ease-out', direction: currentLanguage === 'ar' ? 'rtl' : 'ltr'
+    });
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    // Styles for about modal
+    const aboutStyles = document.createElement('style');
+    aboutStyles.textContent = `
+        .about-modal-header { padding: 2rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-between; align-items: center; }
+        .about-modal-header h2 { font-family: 'Outfit', sans-serif; font-size: 2rem; margin: 0; }
+        .about-modal-body { padding: 2rem; }
+        .about-description { margin-bottom: 2rem; }
+        .about-description p { font-size: 1.125rem; line-height: 1.8; color: rgba(255, 255, 255, 0.8); margin: 0; }
+        .about-contact h3 { font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 1.5rem; }
+        .contact-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; margin-bottom: 1rem; transition: all 0.2s ease; }
+        .contact-item:hover { background: rgba(255, 255, 255, 0.05); border-color: rgba(102, 126, 234, 0.5); }
+        .contact-icon { font-size: 2rem; min-width: 40px; }
+        .contact-details { flex: 1; }
+        .contact-details strong { display: block; font-size: 1rem; margin-bottom: 0.25rem; color: rgba(255, 255, 255, 0.9); }
+        .contact-details p { margin: 0; color: rgba(255, 255, 255, 0.7); }
+        .contact-details a { color: #4facfe; text-decoration: none; transition: color 0.2s ease; }
+        .contact-details a:hover { color: #667eea; text-decoration: underline; }
+    `;
+    document.head.appendChild(aboutStyles);
+
+    const closeBtn = modal.querySelector('.close-modal-btn');
+    closeBtn.addEventListener('click', () => closeModal(overlay));
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(overlay); });
+}
+
+function initAboutLink() {
+    const aboutLink = document.querySelector('[href="#about"]');
+    if (aboutLink) {
+        aboutLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showAboutModal();
+        });
+    }
+}
+
+// Contact modal
+function showContactModal() {
+    const t = translations[currentLanguage];
+    const contact = t.contact;
+    const about = t.about;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'contact-modal-overlay';
+
+    const modal = document.createElement('div');
+    modal.className = 'contact-modal';
+
+    modal.innerHTML = `
+        <div class="contact-modal-header">
+            <h2>${contact.title}</h2>
+            <button class="close-modal-btn">&times;</button>
+        </div>
+        <div class="contact-modal-body">
+            <div class="contact-description">
+                <p>${contact.description}</p>
+            </div>
+            
+            <form class="contact-form">
+                <div class="form-group">
+                    <label>${contact.nameLabel}</label>
+                    <input type="text" class="form-input" placeholder="${contact.namePlaceholder}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>${contact.emailLabel}</label>
+                    <input type="email" class="form-input" placeholder="${contact.emailPlaceholder}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>${contact.messageLabel}</label>
+                    <textarea class="form-textarea" placeholder="${contact.messagePlaceholder}" rows="5" required></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary contact-submit">${contact.sendButton}</button>
+            </form>
+            
+            <div class="contact-divider">
+                <span>${contact.or}</span>
+            </div>
+            
+            <div class="contact-direct">
+                <a href="tel:${about.phoneNumber}" class="contact-link">
+                    <div class="contact-link-icon">📱</div>
+                    <div class="contact-link-text">
+                        <strong>${about.phone}</strong>
+                        <span>${about.phoneNumber}</span>
+                    </div>
+                </a>
+                
+                <a href="https://www.facebook.com/OsamaaAbdallatif" target="_blank" class="contact-link">
+                    <div class="contact-link-icon">👤</div>
+                    <div class="contact-link-text">
+                        <strong>${about.facebook}</strong>
+                        <span>${about.facebookLink}</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    `;
+
+    Object.assign(overlay.style, {
+        position: 'fixed', top: '0', left: '0', right: '0', bottom: '0',
+        background: 'rgba(0, 0, 0, 0.9)', backdropFilter: 'blur(10px)', zIndex: '10000',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        animation: 'fadeIn 0.3s ease-out', padding: '1rem', overflowY: 'auto'
+    });
+
+    Object.assign(modal.style, {
+        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+        border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px',
+        maxWidth: '600px', width: '100%', maxHeight: '90vh', overflow: 'auto',
+        animation: 'slideInUp 0.3s ease-out', direction: currentLanguage === 'ar' ? 'rtl' : 'ltr'
+    });
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    const contactStyles = document.createElement('style');
+    contactStyles.textContent = `
+        .contact-modal-header { padding: 2rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-between; align-items: center; }
+        .contact-modal-header h2 { font-family: 'Outfit', sans-serif; font-size: 2rem; margin: 0; }
+        .contact-modal-body { padding: 2rem; }
+        .contact-description { margin-bottom: 2rem; }
+        .contact-description p { font-size: 1.125rem; line-height: 1.8; color: rgba(255, 255, 255, 0.8); margin: 0; }
+        .contact-form { margin-bottom: 2rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: rgba(255, 255, 255, 0.9); }
+        .form-input, .form-textarea { width: 100%; padding: 1rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; color: white; font-family: inherit; font-size: 1rem; transition: all 0.2s ease; }
+        .form-input:focus, .form-textarea:focus { outline: none; border-color: #667eea; background: rgba(255, 255, 255, 0.08); box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+        .form-input::placeholder, .form-textarea::placeholder { color: rgba(255, 255, 255, 0.4); }
+        .form-textarea { resize: vertical; min-height: 120px; }
+        .contact-submit { width: 100%; padding: 1rem 2rem; font-size: 1.125rem; }
+        .contact-divider { text-align: center; margin: 2rem 0; position: relative; }
+        .contact-divider::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: rgba(255, 255, 255, 0.1); }
+        .contact-divider span { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 0 1rem; position: relative; color: rgba(255, 255, 255, 0.6); }
+        .contact-direct { display: flex; flex-direction: column; gap: 1rem; }
+        .contact-link { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; text-decoration: none; transition: all 0.2s ease; }
+        .contact-link:hover { background: rgba(255, 255, 255, 0.05); border-color: rgba(102, 126, 234, 0.5); }
+        .contact-link-icon { font-size: 2rem; min-width: 40px; }
+        .contact-link-text { display: flex; flex-direction: column; gap: 0.25rem; }
+        .contact-link-text strong { color: rgba(255, 255, 255, 0.9); font-size: 1rem; }
+        .contact-link-text span { color: #4facfe; font-size: 0.875rem; }
+    `;
+    document.head.appendChild(contactStyles);
+
+    const closeBtn = modal.querySelector('.close-modal-btn');
+    closeBtn.addEventListener('click', () => closeModal(overlay));
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(overlay); });
+
+    const form = modal.querySelector('.contact-form');
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = form.querySelector('input[type="text"]').value;
+        const email = form.querySelector('input[type="email"]').value;
+        const message = form.querySelector('textarea').value;
+        const phoneNumber = '218916808225';
+        let whatsappMessage = currentLanguage === 'ar'
+            ? `📧 *رسالة جديدة من موقع زيرونكس*\\n\\n*الاسم:* ${name}\\n*البريد الإلكتروني:* ${email}\\n\\n*الرسالة:*\\n${message}`
+            : `📧 *New Message from ZeroNux Website*\\n\\n*Name:* ${name}\\n*Email:* ${email}\\n\\n*Message:*\\n${message}`;
+        const encodedMessage = encodeURIComponent(whatsappMessage);
+        const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+        window.open(whatsappURL, '_blank');
+        closeModal(overlay);
+        showNotification(contact.messageSent);
+    });
+}
+
+function initContactLink() {
+    const contactLink = document.querySelector('[href="#contact"]');
+    if (contactLink) {
+        contactLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showContactModal();
+        });
+    }
+}
+
+// Footer links handler
+function initFooterLinks() {
+    // About and Contact links in footer
+    const footerAboutLink = document.querySelector('.footer-section a[href="#about"]');
+    const footerContactLink = document.querySelector('.footer-section a[href="#contact"]');
+
+    if (footerAboutLink) {
+        footerAboutLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showAboutModal();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
+    if (footerContactLink) {
+        footerContactLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showContactModal();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
+    // FAQ and Support links (WhatsApp)
+    const footerWhatsAppLinks = document.querySelectorAll('.footer-whatsapp-link');
+    footerWhatsAppLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const phoneNumber = '218916808225';
+            const linkType = link.getAttribute('href');
+
+            let message = '';
+            if (linkType === '#footer-faq') {
+                message = currentLanguage === 'ar'
+                    ? 'مرحباً، لدي سؤال حول منتجاتكم.'
+                    : 'Hello, I have a question about your products.';
+            } else if (linkType === '#footer-support') {
+                message = currentLanguage === 'ar'
+                    ? 'مرحباً، أحتاج إلى المساعدة.'
+                    : 'Hello, I need assistance.';
+            }
+
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+            window.open(whatsappURL, '_blank');
+        });
+    });
+}
+
+// Logo click handler
+function initLogoClick() {
+    const logo = document.querySelector('.logo');
+    if (logo) {
+        logo.style.cursor = 'pointer';
+        logo.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+}
+
+// Hero shop now button handler
+function initHeroShopNow() {
+    const shopNowBtn = document.querySelector('.hero-shop-now');
+    if (shopNowBtn) {
+        shopNowBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const productsSection = document.querySelector('#products');
+            if (productsSection) {
+                const offsetTop = productsSection.offsetTop - 80;
+                window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+            }
+        });
+    }
+}
+
+// ============================================
+// LOAD PRODUCTS FROM FIREBASE
+// ============================================
+function loadProductsFromFirebase() {
+    const productsContainer = document.getElementById('products-container');
+
+    // Show loading state
+    productsContainer.innerHTML = '<div class="loading-products">جاري تحميل المنتجات...</div>';
+
+    productsRef.on('value', (snapshot) => {
+        const products = snapshot.val();
+        productsContainer.innerHTML = '';
+
+        // If no products, show default Google AI Pro
+        if (!products || Object.keys(products).length === 0) {
+            productsContainer.innerHTML = createDefaultProduct();
+            initAddToCartButtons();
+            initProductCardClick();
+            return;
+        }
+
+        // Render products from Firebase
+        Object.keys(products).forEach(id => {
+            const product = products[id];
+            const productCard = createProductCardHTML(id, product);
+            productsContainer.innerHTML += productCard;
+        });
+
+        // Re-initialize buttons and events
+        initAddToCartButtons();
+        initProductCardClick();
+    });
+}
+
+
+// Create product card HTML from Firebase data
+function createProductCardHTML(id, product) {
+    const badgeMap = {
+        'new': 'جديد',
+        'limited': 'عرض محدود',
+        'hot': 'الأكثر مبيعاً'
+    };
+
+    const badgeHTML = product.badge && product.badge !== 'none'
+        ? `<div class="product-badge" data-badge="${product.badge}">${badgeMap[product.badge]}</div>`
+        : '';
+
+    const price = currentCurrency === 'USD'
+        ? `$${product.price.toFixed(2)}`
+        : `${(product.price * EXCHANGE_RATE).toFixed(2)} د.ل`;
+
+    return `
+        <div class="product-card" data-product-id="${id}">
+            ${badgeHTML}
+            <div class="product-image">
+                <img src="${product.image}" alt="${product.name}" class="product-img" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+            </div>
+            <div class="product-info">
+                <h3 class="product-name">${product.name}</h3>
+                <p class="product-description">${product.shortDesc || product.description.substring(0, 60) + '...'}</p>
+                <div class="product-footer">
+                    <span class="product-price" data-usd="${product.price}">${price}</span>
+                    <button class="add-to-cart-btn" data-product-name="${product.name}" data-product-price="${product.price}">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 2L6 6M18 6L15 2M6 6h12l1 14H5L6 6z" />
+                        </svg>
+                        إضافة للسلة
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// WhatsApp floating button
+function initWhatsAppButton() {
+    const whatsappBtn = document.getElementById('whatsapp-button');
+    if (whatsappBtn) {
+        whatsappBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const phoneNumber = '218916808225';
+            const message = 'مرحباً! أرغب في الاستفسار عن Google AI Pro 👋';
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+            window.open(whatsappURL, '_blank');
+        });
+    }
+}
+
+// Initialize all functionality when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Load products from Firebase
+    loadProductsFromFirebase();
+
+    initCurrencySwitcher();
+    initAddToCartButtons();
+    initCartButton();
+    initNewsletterForm();
+    initSmoothScrolling();
+    initNavbarScroll();
+    initScrollAnimations();
+    addDynamicStyles();
+    initProductCardClick();
+    initAboutLink();
+    initContactLink();
+    initFooterLinks();
+    initLogoClick();
+    initHeroShopNow();
+    initWhatsAppButton();
+
+    console.log('ZeroNux Store initialized successfully!');
+});

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeroNux Store - Premium Online Shopping</title>
+    <meta name="description"
+        content="ZeroNux Store - Your premier online shopping destination in Libya. Shop the latest products with secure payment and fast delivery.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700&family=Cairo:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="Style/index.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">
+                    <img src="Images/Logo.png" alt="ZeroNux Store Logo">
+                </div>
+
+                <div class="nav-links">
+                    <a href="#home" class="nav-link active" data-i18n="nav-home">الرئيسية</a>
+                    <a href="#products" class="nav-link" data-i18n="nav-products">المنتجات</a>
+                    <a href="#about" class="nav-link" data-i18n="nav-about">من نحن</a>
+                    <a href="#contact" class="nav-link" data-i18n="nav-contact">اتصل بنا</a>
+                </div>
+
+                <div class="nav-actions">
+                    <div class="currency-switcher">
+                        <button class="currency-btn active" data-currency="USD">
+                            <span class="currency-symbol">$</span>
+                            <span class="currency-code">USD</span>
+                        </button>
+                        <button class="currency-btn" data-currency="LYD">
+                            <span class="currency-symbol">د.ل</span>
+                            <span class="currency-code">LYD</span>
+                        </button>
+                    </div>
+                    <button class="cart-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M9 2L6 6M18 6L15 2M6 6h12l1 14H5L6 6z" />
+                        </svg>
+                        <span class="cart-count">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-background">
+            <img src="Images/Storefull.png" alt="ZeroNux Store" class="hero-image">
+            <div class="hero-overlay"></div>
+        </div>
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="hero-subtitle" data-i18n="hero-welcome">مرحباً بك في</span>
+                    <span data-i18n="hero-title">متجر زيرونكس</span>
+                </h1>
+                <p class="hero-description" data-i18n="hero-description">اكتشف منتجات عالية الجودة بأسعار لا تُقاوم.
+                    تسوق بثقة واستمتع بتوصيل سريع في جميع أنحاء ليبيا.</p>
+                <div class="hero-buttons">
+                    <a href="#products" class="btn btn-primary hero-shop-now" data-i18n="hero-shop-now">تسوق الآن</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="products" id="products">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title" data-i18n="products-title">المنتجات المميزة</h2>
+                <p class="section-subtitle" data-i18n="products-subtitle">استكشف مجموعتنا المختارة من المنتجات الفاخرة
+                </p>
+            </div>
+
+            <div class="products-grid" id="products-container">
+                <!-- Google Ai Pro Product -->
+                <div class="product-card">
+                    <div class="product-badge" data-badge="New">جديد</div>
+                    <div class="product-image">
+                        <img src="Images/GoogleAiPro.png" alt="Google Ai Pro" class="product-img">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name" data-i18n="product-googleaipro-name">جوجل اي برو</h3>
+                        <p class="product-description" data-i18n="product-googleaipro-desc">حلول الذكاء الاصطناعي
+                            المتقدمة لأعمالك</p>
+                        <div class="product-footer">
+                            <span class="product-price" data-usd="5">$5.00</span>
+                            <button class="add-to-cart-btn" data-i18n="add-to-cart">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M9 2L6 6M18 6L15 2M6 6h12l1 14H5L6 6z" />
+                                </svg>
+                                إضافة للسلة
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="newsletter">
+        <div class="container">
+            <div class="newsletter-content">
+                <h2 data-i18n="newsletter-title">ابق على اطلاع</h2>
+                <p data-i18n="newsletter-desc">اشترك للحصول على عروض خاصة وهدايا مجانية وصفقات حصرية.</p>
+                <form class="newsletter-form">
+                    <input type="email" data-i18n="newsletter-placeholder" placeholder="أدخل بريدك الإلكتروني" required>
+                    <button type="submit" class="btn btn-primary" data-i18n="newsletter-submit">اشترك</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>ZeroNux Store</h3>
+                    <p data-i18n="footer-desc">وجهتك الأولى للتسوق عبر الإنترنت في ليبيا.</p>
+                </div>
+                <div class="footer-section">
+                    <h4 data-i18n="footer-quick-links">روابط سريعة</h4>
+                    <ul>
+                        <li><a href="#home" data-i18n="footer-link-home">الرئيسية</a></li>
+                        <li><a href="#products" data-i18n="footer-link-products">المنتجات</a></li>
+                        <li><a href="#about" data-i18n="footer-link-about">من نحن</a></li>
+                        <li><a href="#contact" data-i18n="footer-link-contact">اتصل بنا</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4 data-i18n="footer-customer-service">خدمة العملاء</h4>
+                    <ul>
+                        <li><a href="#footer-faq" class="footer-whatsapp-link" data-i18n="footer-link-faq">الأسئلة
+                                الشائعة</a></li>
+                        <li><a href="#footer-support" class="footer-whatsapp-link"
+                                data-i18n="footer-link-support">الدعم</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4 data-i18n="footer-contact">اتصل بنا</h4>
+                    <ul>
+                        <li data-i18n="footer-email">البريد الإلكتروني: support@zeronux.store</li>
+                        <li data-i18n="footer-phone">الهاتف: +218 916808225</li>
+                        <li data-i18n="footer-location">ليبيا</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p data-i18n="footer-copyright">&copy; 2026 متجر زيرونكس. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- WhatsApp Floating Button -->
+    <a href="https://wa.me/218916808225" target="_blank" class="whatsapp-float" id="whatsapp-button">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <path
+                d="M16 0C7.164 0 0 7.164 0 16c0 2.828.744 5.484 2.04 7.788L0 32l8.408-2.02A15.925 15.925 0 0016 32c8.836 0 16-7.164 16-16S24.836 0 16 0z"
+                fill="#25D366" />
+            <path
+                d="M25.36 22.88c-.36 1.02-2.12 1.88-2.92 2-.78.12-1.8.16-2.9-.18-.68-.2-1.56-.48-2.68-.94-4.68-1.96-7.72-6.68-7.96-6.98-.24-.3-1.92-2.56-1.92-4.88 0-2.32 1.22-3.46 1.64-3.94.44-.48.96-.6 1.28-.6.32 0 .64.02.92.02.3 0 .68-.12 1.08.82.4 1 1.36 3.32 1.48 3.56.12.24.2.52.04.84-.16.32-.24.52-.48.8-.24.28-.5.62-.72.84-.24.24-.48.5-.2.98.28.48 1.24 2.04 2.66 3.3 1.84 1.62 3.38 2.12 3.86 2.36.48.24.76.2 1.04-.12.28-.32 1.2-1.4 1.52-1.88.32-.48.64-.4 1.08-.24.44.16 2.8 1.32 3.28 1.56.48.24.8.36.92.56.12.2.12 1.16-.24 2.28z"
+                fill="white" />
+        </svg>
+        <span class="whatsapp-tooltip">تواصل معنا</span>
+    </a>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <script src="Scripts/app.js"></script>
+</body>
+
+</html>
