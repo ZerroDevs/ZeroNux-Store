@@ -453,17 +453,12 @@ window.showNotification = function (message, type = 'success') {
 
 // Copy Product Link
 window.copyProductLink = function (id) {
-    // Assuming product ID is used in URL query param like ?product=ID which we might implement on main page
-    // Or just pointing to main page for now if deep linking isn't set up.
-    // Let's assume deep linking via hash or query param: index.html?product=id
-    // But wait, our main app.js doesn't handle ?product=id yet. 
-    // However, the feature request is just "Copy Product Link". 
-    // I made a note to implement deep linking later or assuming user just wants a link.
-    // Let's fallback to just website link for now if deep link logic isn't there, 
-    // BUT usually stores have it. Let's create a format: ${window.location.origin}/index.html#product-${id}
-    // We can update app.js to handle this later.
+    // Dynamically generate link based on current location to support subfolders (GitHub Pages)
+    // This looks at where admin.html is, and finds index.html in the same folder.
+    const productUrl = new URL('index.html', window.location.href);
+    productUrl.searchParams.set('product', id);
 
-    const link = `${window.location.origin}/index.html?product=${id}`;
+    const link = productUrl.toString();
 
     navigator.clipboard.writeText(link).then(() => {
         showNotification('تم نسخ رابط المنتج! 🔗');
