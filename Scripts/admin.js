@@ -463,23 +463,7 @@ window.copyProductLink = function (id) {
     // BUT usually stores have it. Let's create a format: ${window.location.origin}/index.html#product-${id}
     // We can update app.js to handle this later.
 
-    // Generate link based on current location to support subdirectories/GitHub Pages
-    // This replaces "admin.html" (or just the current folder end) with "index.html"
-    const currentUrl = window.location.href;
-    const adminPage = 'admin.html';
-
-    let baseUrl;
-    if (currentUrl.includes(adminPage)) {
-        baseUrl = currentUrl.replace(adminPage, 'index.html');
-    } else {
-        // Fallback for clean URLs or if admin.html isn't in URL
-        baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/')) + '/index.html';
-    }
-
-    // Remove any existing query params from the base URL if they stuck around (rare but possible in replace)
-    const urlObj = new URL(baseUrl);
-    urlObj.search = `?product=${id}`;
-    const link = urlObj.toString();
+    const link = `${window.location.origin}/index.html?product=${id}`;
 
     navigator.clipboard.writeText(link).then(() => {
         showNotification('تم نسخ رابط المنتج! 🔗');
