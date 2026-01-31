@@ -98,6 +98,17 @@ function loadSettings() {
             if (settings.storeCategories) {
                 renderCategoryTabs(settings.storeCategories);
             }
+
+            // 7. Update Announcement Bar
+            const announcementBar = document.getElementById('announcement-bar');
+            const announcementText = document.getElementById('announcement-text');
+
+            if (settings.announcementEnabled && settings.announcementText) {
+                announcementText.textContent = settings.announcementText;
+                announcementBar.style.display = 'block';
+            } else {
+                announcementBar.style.display = 'none';
+            }
         }
     });
 }

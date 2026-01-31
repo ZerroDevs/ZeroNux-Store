@@ -131,6 +131,14 @@ function loadSettings() {
                 // Default defaults
                 populateCategoryDropdown('برامج, ألعاب, اشتراكات');
             }
+
+            // Announcement Bar
+            if (settings.announcementEnabled !== undefined) {
+                document.getElementById('announcement-enabled').checked = settings.announcementEnabled;
+            }
+            if (settings.announcementText) {
+                document.getElementById('announcement-text').value = settings.announcementText;
+            }
         } else {
             // Default exchange rate
             document.getElementById('exchange-rate').value = 9;
@@ -174,6 +182,10 @@ document.getElementById('settings-form').addEventListener('submit', (e) => {
     const heroImage = document.getElementById('hero-image').value;
     const storeCategories = document.getElementById('store-categories').value;
 
+    // Announcement Bar
+    const announcementEnabled = document.getElementById('announcement-enabled').checked;
+    const announcementText = document.getElementById('announcement-text').value;
+
     settingsRef.update({
         exchangeRate: exchangeRate,
         phoneNumber: phoneNumber,
@@ -184,6 +196,8 @@ document.getElementById('settings-form').addEventListener('submit', (e) => {
         heroDescription: heroDescription,
         heroImage: heroImage,
         storeCategories: storeCategories,
+        announcementEnabled: announcementEnabled,
+        announcementText: announcementText,
         lastUpdated: Date.now()
     })
         .then(() => {
