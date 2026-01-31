@@ -12,126 +12,33 @@
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Cairo:wght@400;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="Style/index.css">
-    <style>
-        .success-page {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            padding: 2rem;
-            text-align: center;
-        }
-
-        .success-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 3rem;
-            max-width: 500px;
-            width: 100%;
-            backdrop-filter: blur(10px);
-            animation: slideInUp 0.5s ease-out;
-        }
-
-        .success-icon {
-            font-size: 5rem;
-            margin-bottom: 1.5rem;
-            animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-
-        h1 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        p {
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 2rem;
-            font-size: 1.1rem;
-            line-height: 1.6;
-        }
-
-        .order-id-box {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 1rem;
-            border-radius: 12px;
-            margin-bottom: 2rem;
-            border: 1px dashed rgba(255, 255, 255, 0.2);
-        }
-
-        .order-label {
-            display: block;
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.6);
-            margin-bottom: 0.5rem;
-        }
-
-        .order-value {
-            font-family: monospace;
-            font-size: 1.2rem;
-            color: #667eea;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-
-        .btn-whatsapp {
-            background: #25D366;
-            color: white;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            font-weight: bold;
-            margin-bottom: 1rem;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .btn-whatsapp:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);
-        }
-
-        .btn-home {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            text-decoration: none;
-            display: inline-block;
-            padding: 0.8rem 2rem;
-            border-radius: 12px;
-            transition: background 0.2s ease;
-        }
-
-        .btn-home:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        @keyframes bounceIn {
-            0% {
-                transform: scale(0);
-            }
-
-            60% {
-                transform: scale(1.1);
-            }
-
-            100% {
-                transform: scale(1);
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="Style/success.css">
 </head>
 
 <body>
     <div class="success-page">
+        <!-- New Floating Navbar for Mobile -->
+        <style>
+            .mobile-home-btn {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                background: rgba(255, 255, 255, 0.1);
+                padding: 10px;
+                border-radius: 8px;
+                color: white;
+                text-decoration: none;
+                display: none;
+            }
+
+            @media (max-width: 768px) {
+                .mobile-home-btn {
+                    display: block;
+                }
+            }
+        </style>
+        <a href="index.html" class="mobile-home-btn">🏠</a>
+
         <div class="success-card">
             <div class="success-icon">🎉</div>
             <h1>تم استلام طلبك بنجاح!</h1>

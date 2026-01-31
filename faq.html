@@ -12,77 +12,7 @@
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Cairo:wght@400;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="Style/index.css">
-    <style>
-        .page-header {
-            padding: 120px 0 60px;
-            text-align: center;
-            background: linear-gradient(180deg, rgba(26, 26, 46, 0) 0%, rgba(102, 126, 234, 0.1) 100%);
-        }
-
-        .page-title {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .faq-section {
-            padding: 4rem 0;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .faq-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            margin-bottom: 1rem;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .faq-item:hover {
-            border-color: rgba(102, 126, 234, 0.5);
-        }
-
-        .faq-question {
-            padding: 1.5rem;
-            font-weight: 600;
-            font-size: 1.1rem;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: white;
-        }
-
-        .faq-question::after {
-            content: '+';
-            font-size: 1.5rem;
-            color: #667eea;
-            transition: transform 0.3s ease;
-        }
-
-        .faq-item.active .faq-question::after {
-            transform: rotate(45deg);
-        }
-
-        .faq-answer {
-            padding: 0 1.5rem;
-            max-height: 0;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            color: rgba(255, 255, 255, 0.7);
-            line-height: 1.6;
-        }
-
-        .faq-item.active .faq-answer {
-            padding: 0 1.5rem 1.5rem;
-            max-height: 500px;
-        }
-    </style>
+    <link rel="stylesheet" href="Style/faq.css">
 </head>
 
 <body>
@@ -93,6 +23,9 @@
                 <div class="logo" onclick="window.location.href='index.html'">
                     <img src="Images/Logo.png" alt="ZeroNux Store Logo">
                 </div>
+
+                <button class="mobile-menu-btn" aria-label="Toggle Menu">☰</button>
+
                 <div class="nav-links">
                     <a href="index.html" class="nav-link">الرئيسية</a>
                     <a href="index.html#products" class="nav-link">المنتجات</a>
@@ -101,6 +34,16 @@
             </div>
         </div>
     </nav>
+    <script>
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const navLinks = document.querySelector('.nav-links');
+        if (mobileMenuBtn && navLinks) {
+            mobileMenuBtn.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+                mobileMenuBtn.textContent = navLinks.classList.contains('active') ? '✕' : '☰';
+            });
+        }
+    </script>
 
     <header class="page-header">
         <div class="container">

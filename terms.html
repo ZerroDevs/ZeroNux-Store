@@ -12,64 +12,7 @@
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Cairo:wght@400;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="Style/index.css">
-    <style>
-        .page-header {
-            padding: 120px 0 60px;
-            text-align: center;
-            background: linear-gradient(180deg, rgba(26, 26, 46, 0) 0%, rgba(102, 126, 234, 0.1) 100%);
-        }
-
-        .page-title {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .terms-content {
-            padding: 4rem 0;
-            max-width: 900px;
-            margin: 0 auto;
-            color: rgba(255, 255, 255, 0.85);
-            line-height: 1.8;
-            font-size: 1.1rem;
-        }
-
-        .terms-section {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 2.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .terms-section h2 {
-            font-family: 'Outfit', sans-serif;
-            color: #667eea;
-            font-size: 1.8rem;
-            margin-bottom: 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 1rem;
-        }
-
-        .terms-section h3 {
-            color: white;
-            font-size: 1.3rem;
-            margin: 1.5rem 0 0.5rem;
-        }
-
-        .terms-section ul {
-            list-style-type: disc;
-            padding-right: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .terms-section li {
-            margin-bottom: 0.5rem;
-        }
-    </style>
+    <link rel="stylesheet" href="Style/terms.css">
 </head>
 
 <body>
@@ -80,6 +23,9 @@
                 <div class="logo" onclick="window.location.href='index.html'">
                     <img src="Images/Logo.png" alt="ZeroNux Store Logo">
                 </div>
+
+                <button class="mobile-menu-btn" aria-label="Toggle Menu">☰</button>
+
                 <div class="nav-links">
                     <a href="index.html" class="nav-link">الرئيسية</a>
                     <a href="index.html#products" class="nav-link">المنتجات</a>
@@ -88,6 +34,16 @@
             </div>
         </div>
     </nav>
+    <script>
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const navLinks = document.querySelector('.nav-links');
+        if (mobileMenuBtn && navLinks) {
+            mobileMenuBtn.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+                mobileMenuBtn.textContent = navLinks.classList.contains('active') ? '✕' : '☰';
+            });
+        }
+    </script>
 
     <header class="page-header">
         <div class="container">
