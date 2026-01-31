@@ -111,6 +111,11 @@ function loadSettings() {
             } else {
                 announcementBar.style.display = 'none';
             }
+
+            // 8. Check Maintenance Mode
+            if (settings.maintenanceEnabled) {
+                showMaintenanceMode(settings.maintenancePreset, settings.maintenanceCustomMessage);
+            }
         }
     });
 }
@@ -1856,4 +1861,76 @@ function initSearch() {
             }
         });
     }
+}
+// ============================================
+// MAINTENANCE MODE
+// ============================================
+function showMaintenanceMode(preset, customMessage) {
+    // Preset messages
+    const presetMessages = {
+        maintenance: {
+            icon: '🔧',
+            title: 'الموقع تحت الصيانة',
+            message: 'نعتذر عن الإزعاج، نحن نعمل على تحسين الموقع. سنعود قريباً!'
+        },
+        locked: {
+            icon: '🔒',
+            title: 'الموقع مغلق حالياً',
+            message: 'الموقع غير متاح في الوقت الحالي. يرجى المحاولة لاحقاً.'
+        },
+        soon: {
+            icon: '⏰',
+            title: 'سنعود قريباً',
+            message: 'الموقع قيد التحديث. شكراً لصبركم!'
+        }
+    };
+
+    // Get message content
+    let messageContent;
+    if (preset === 'custom' && customMessage) {
+        messageContent = {
+            icon: '📢',
+            title: 'إشعار',
+            message: customMessage
+        };
+    } else {
+        messageContent = presetMessages[preset] || presetMessages.maintenance;
+    }
+
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'maintenance-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+        z-index: 999999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.5s ease-out;
+    `;
+
+    overlay.innerHTML = `
+        <div style="text-align: center; max-width: 600px; padding: 2rem;">
+            <div style="font-size: 6rem; animation: bounce 2s infinite; margin-bottom: 2rem;">
+                ${messageContent.icon}
+            </div>
+            <h1 style="color: white; font-size: 2.5rem; margin-bottom: 1rem; font-family: 'Outfit', sans-serif;">
+                ${messageContent.title}
+            </h1>
+            <p style="color: rgba(255, 255, 255, 0.7); font-size: 1.25rem; line-height: 1.8;">
+                ${messageContent.message}
+            </p>
+        </div>
+    `;
+
+    // Add to page
+    document.body.appendChild(overlay);
+
+    // Hide all page content
+    document.body.style.overflow = 'hidden';
 }

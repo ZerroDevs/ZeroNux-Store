@@ -335,6 +335,22 @@ function loadSettings() {
             if (settings.announcementText) {
                 document.getElementById('announcement-text').value = settings.announcementText;
             }
+
+            // Maintenance Mode
+            if (settings.maintenanceEnabled !== undefined) {
+                const checkbox = document.getElementById('maintenance-enabled');
+                checkbox.checked = settings.maintenanceEnabled;
+                document.getElementById('maintenance-fields').style.display = settings.maintenanceEnabled ? 'flex' : 'none';
+            }
+            if (settings.maintenancePreset) {
+                document.getElementById('maintenance-preset').value = settings.maintenancePreset;
+                if (settings.maintenancePreset === 'custom') {
+                    document.getElementById('custom-message-field').style.display = 'block';
+                }
+            }
+            if (settings.maintenanceCustomMessage) {
+                document.getElementById('maintenance-custom-message').value = settings.maintenanceCustomMessage;
+            }
         } else {
             // Default exchange rate
             document.getElementById('exchange-rate').value = 9;
@@ -382,6 +398,11 @@ document.getElementById('settings-form').addEventListener('submit', (e) => {
     const announcementEnabled = document.getElementById('announcement-enabled').checked;
     const announcementText = document.getElementById('announcement-text').value;
 
+    // Maintenance Mode
+    const maintenanceEnabled = document.getElementById('maintenance-enabled').checked;
+    const maintenancePreset = document.getElementById('maintenance-preset').value;
+    const maintenanceCustomMessage = document.getElementById('maintenance-custom-message').value;
+
     settingsRef.update({
         exchangeRate: exchangeRate,
         phoneNumber: phoneNumber,
@@ -394,6 +415,9 @@ document.getElementById('settings-form').addEventListener('submit', (e) => {
         storeCategories: storeCategories,
         announcementEnabled: announcementEnabled,
         announcementText: announcementText,
+        maintenanceEnabled: maintenanceEnabled,
+        maintenancePreset: maintenancePreset,
+        maintenanceCustomMessage: maintenanceCustomMessage,
         lastUpdated: Date.now()
     })
         .then(() => {
@@ -892,6 +916,26 @@ window.copyProductLink = function (id) {
 // ============================================
 // INITIALIZATION
 // ============================================
+// Maintenance Mode Toggle Handlers
+document.getElementById('maintenance-enabled').addEventListener('change', function () {
+    const maintenanceFields = document.getElementById('maintenance-fields');
+    maintenanceFields.style.display = this.checked ? 'flex' : 'none';
+    if (!this.checked) {
+        document.getElementById('custom-message-field').style.display = 'none';
+    } else {
+        // Show custom field if preset is custom
+        const preset = document.getElementById('maintenance-preset').value;
+        if (preset === 'custom') {
+            document.getElementById('custom-message-field').style.display = 'block';
+        }
+    }
+});
+
+document.getElementById('maintenance-preset').addEventListener('change', function () {
+    const customField = document.getElementById('custom-message-field');
+    customField.style.display = this.value === 'custom' ? 'block' : 'none';
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     // Check authentication state
     checkAuthState();

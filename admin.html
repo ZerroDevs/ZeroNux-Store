@@ -382,6 +382,36 @@
                             <small>سيظهر في أعلى الصفحة بشكل متحرك</small>
                         </div>
 
+                        <hr style="border-color: rgba(255,255,255,0.1); margin: 2rem 0;">
+
+                        <h3>🔧 وضع الصيانة</h3>
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" id="maintenance-enabled" style="width: auto;">
+                                تفعيل وضع الصيانة (إيقاف الموقع مؤقتاً)
+                            </label>
+                            <small>عند التفعيل، سيتم إخفاء الموقع وعرض رسالة الصيانة للزوار</small>
+                        </div>
+
+                        <div class="form-row" id="maintenance-fields" style="display: none;">
+                            <div class="form-group">
+                                <label>نوع الرسالة</label>
+                                <select id="maintenance-preset">
+                                    <option value="maintenance">🔧 الموقع تحت الصيانة</option>
+                                    <option value="locked">🔒 الموقع مغلق حالياً</option>
+                                    <option value="soon">⏰ سنعود قريباً</option>
+                                    <option value="custom">✏️ رسالة مخصصة</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="custom-message-field" style="display: none;">
+                            <label>الرسالة المخصصة</label>
+                            <textarea id="maintenance-custom-message" rows="3"
+                                placeholder="اكتب رسالتك هنا..."></textarea>
+                            <small>سيتم عرض هذه الرسالة للزوار عند تفعيل وضع الصيانة</small>
+                        </div>
+
                         <button type="submit" class="btn btn-primary">حفظ الإعدادات</button>
                     </form>
                 </section>
