@@ -29,6 +29,7 @@ let currentCurrency = 'USD';
 // Global Contact Info
 let CONTACT_NUMBER = '218916808225'; // Default
 let FACEBOOK_URL = '';
+let CONTACT_EMAIL = ''; // Will be loaded from Firebase
 
 // Load settings (Exchange Rate & Contact Info)
 function loadSettings() {
@@ -72,6 +73,7 @@ function loadSettings() {
 
             // 4. Update Email
             if (settings.contactEmail) {
+                CONTACT_EMAIL = settings.contactEmail; // Store globally
                 const footerEmailText = document.getElementById('footer-email-text');
                 if (footerEmailText) footerEmailText.textContent = settings.contactEmail;
             }
@@ -1300,11 +1302,139 @@ function initContactLink() {
     }
 }
 
+// Refund Policy Modal
+function showRefundModal() {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        animation: fadeIn 0.3s ease-out;
+    `;
+
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 2.5rem;
+        max-width: 600px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        position: relative;
+        direction: rtl;
+        color: white;
+    `;
+
+    modal.innerHTML = `
+        <button class="close-modal-btn" style="position: absolute; top: 15px; right: 20px; background: none; border: none; color: white; font-size: 28px; cursor: pointer; line-height: 1;">&times;</button>
+        
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <div style="font-size: 3rem; margin-bottom: 0.5rem;">🔄</div>
+            <h2 style="margin: 0; font-size: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">سياسة الاسترجاع والاستبدال</h2>
+        </div>
+
+        <div style="line-height: 1.8; font-size: 1rem;">
+            <div style="background: rgba(102, 126, 234, 0.1); border-left: 4px solid #667eea; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                <p style="margin: 0; color: rgba(255,255,255,0.9);">
+                    <strong>في متجر زيرونكس</strong>، نحن ملتزمون بتقديم أفضل خدمة لعملائنا. نرجو قراءة سياسة الاسترجاع بعناية قبل إتمام عملية الشراء.
+                </p>
+            </div>
+
+            <h3 style="color: #00b894; margin-top: 1.5rem; margin-bottom: 1rem;">✅ المنتجات القابلة للاسترجاع</h3>
+            <div style="background: rgba(0, 184, 148, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                <p style="margin: 0 0 0.5rem 0;"><strong>الاشتراكات والخدمات:</strong></p>
+                <ul style="margin: 0; padding-right: 1.5rem;">
+                    <li>إذا لم يعمل الاشتراك للمدة الكاملة المتفق عليها، يحق لك طلب استرجاع كامل المبلغ</li>
+                    <li>يجب تقديم طلب الاسترجاع خلال <strong>7 أيام</strong> من تاريخ الشراء</li>
+                    <li>يتم معالجة طلبات الاسترجاع خلال <strong>3-5 أيام عمل</strong></li>
+                </ul>
+            </div>
+
+            <h3 style="color: #ff7675; margin-top: 1.5rem; margin-bottom: 1rem;">❌ المنتجات غير القابلة للاسترجاع</h3>
+            <div style="background: rgba(255, 118, 117, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                <p style="margin: 0 0 0.5rem 0;"><strong>المنتجات الرقمية الفورية:</strong></p>
+                <ul style="margin: 0; padding-right: 1.5rem;">
+                    <li>بطاقات شحن الألعاب (Steam, PlayStation, Xbox, إلخ)</li>
+                    <li>أكواد التفعيل الفورية</li>
+                    <li>بطاقات الهدايا الرقمية</li>
+                    <li>أي منتج تم استخدامه أو تفعيله بالفعل</li>
+                </ul>
+            </div>
+
+            <h3 style="color: #6c5ce7; margin-top: 1.5rem; margin-bottom: 1rem;">📋 شروط الاسترجاع</h3>
+            <div style="background: rgba(108, 92, 231, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                <ol style="margin: 0; padding-right: 1.5rem;">
+                    <li>يجب تقديم إثبات الشراء (رقم الطلب أو لقطة شاشة من المحادثة)</li>
+                    <li>يجب توضيح سبب طلب الاسترجاع بشكل واضح</li>
+                    <li>في حالة وجود مشكلة تقنية، يجب إرسال لقطات شاشة توضح المشكلة</li>
+                    <li>الاسترجاع يتم بنفس طريقة الدفع الأصلية</li>
+                </ol>
+            </div>
+
+            <h3 style="color: #fdcb6e; margin-top: 1.5rem; margin-bottom: 1rem;">💬 كيفية طلب الاسترجاع</h3>
+            <div style="background: rgba(253, 203, 110, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                <p style="margin: 0;">
+                    للتواصل معنا بخصوص طلب استرجاع، يرجى التواصل عبر:
+                </p>
+                <ul style="margin: 0.5rem 0 0 0; padding-right: 1.5rem;">
+                    <li><strong>واتساب:</strong> <span id="refund-whatsapp" style="color: #00b894;"></span></li>
+                    <li><strong>البريد الإلكتروني:</strong> <span id="refund-email" style="color: #00b894;"></span></li>
+                </ul>
+            </div>
+
+            <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; margin-top: 1.5rem; text-align: center;">
+                <p style="margin: 0; font-size: 0.9rem; color: rgba(255,255,255,0.7);">
+                    <strong>ملاحظة:</strong> نحن نسعى دائماً لحل أي مشكلة قد تواجهك. لا تتردد في التواصل معنا قبل طلب الاسترجاع، وسنبذل قصارى جهدنا لمساعدتك! 💙
+                </p>
+            </div>
+        </div>
+    `;
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    // Populate contact info
+    setTimeout(() => {
+        const whatsappSpan = document.getElementById('refund-whatsapp');
+        const emailSpan = document.getElementById('refund-email');
+        if (whatsappSpan) whatsappSpan.textContent = CONTACT_NUMBER || 'سيتم التحديث قريباً';
+        if (emailSpan) emailSpan.textContent = CONTACT_EMAIL || 'سيتم التحديث قريباً';
+    }, 0);
+
+    // Close handlers
+    const closeBtn = modal.querySelector('.close-modal-btn');
+    closeBtn.addEventListener('click', () => overlay.remove());
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.remove();
+    });
+}
+
+function initRefundLink() {
+    const refundLink = document.querySelector('[href="#refund"]');
+    if (refundLink) {
+        refundLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showRefundModal();
+        });
+    }
+}
+
 // Footer links handler
 function initFooterLinks() {
     // About and Contact links in footer
     const footerAboutLink = document.querySelector('.footer-section a[href="#about"]');
     const footerContactLink = document.querySelector('.footer-section a[href="#contact"]');
+    const footerRefundLink = document.querySelector('.footer-section a[href="#refund"]');
 
     if (footerAboutLink) {
         footerAboutLink.addEventListener('click', (e) => {
@@ -1322,6 +1452,13 @@ function initFooterLinks() {
         });
     }
 
+    if (footerRefundLink) {
+        footerRefundLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showRefundModal();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
     // FAQ and Support links (WhatsApp)
     const footerWhatsAppLinks = document.querySelectorAll('.footer-whatsapp-link');
     footerWhatsAppLinks.forEach(link => {
