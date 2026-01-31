@@ -136,6 +136,43 @@
                 </form>
             </section>
 
+            <!-- Promo Codes Management -->
+            <section class="form-section">
+                <h2>🎫 إدارة كوبونات الخصم</h2>
+                <form id="promo-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>كود الخصم</label>
+                            <input type="text" id="promo-code" placeholder="RAMADAN2026" required
+                                style="text-transform: uppercase;">
+                        </div>
+                        <div class="form-group">
+                            <label>نسبة الخصم (%)</label>
+                            <input type="number" id="promo-discount" placeholder="10" min="1" max="100" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>تاريخ الانتهاء (اختياري)</label>
+                            <input type="date" id="promo-expiry">
+                        </div>
+                        <div class="form-group">
+                            <label>الحد الأقصى للاستخدام (اختياري)</label>
+                            <input type="number" id="promo-limit" placeholder="مثال: 100">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-secondary">إنشاء كوبون</button>
+                </form>
+
+                <div style="margin-top: 2rem;">
+                    <h3>الكوبونات النشطة</h3>
+                    <div id="promo-list" class="products-grid"
+                        style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));">
+                        <!-- Promo Cards will appear here -->
+                    </div>
+                </div>
+            </section>
+
             <!-- Add/Edit Product Form -->
             <section class="form-section">
                 <h2 id="form-title">إضافة منتج جديد</h2>

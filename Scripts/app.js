@@ -348,46 +348,6 @@ function showCartModal() {
     const modal = document.createElement('div');
     modal.className = 'cart-modal';
 
-    let cartHTML = `
-        <div class="cart-modal-header">
-            <h2>سلة التسوق</h2>
-            <button class="close-modal-btn">&times;</button>
-        </div>
-        <div class="cart-items">
-    `;
-
-    let total = 0;
-    cart.forEach((item, index) => {
-        total += item.price;
-        cartHTML += `
-            <div class="cart-item">
-                <div class="cart-item-image">
-                    <img src="${item.image}" alt="${item.name}">
-                </div>
-                <div class="cart-item-details">
-                    <span class="cart-item-name">${item.name}</span>
-                    <p class="cart-item-desc">${item.description || ''}</p>
-                    <span class="cart-item-price">${formatCurrency(item.price, currentCurrency)}</span>
-                </div>
-                <button class="remove-item-btn" data-index="${index}">&times;</button>
-            </div>
-        `;
-    });
-
-    cartHTML += `
-        </div>
-        <div class="cart-total">
-            <strong>المجموع:</strong>
-            <strong>${formatCurrency(total, currentCurrency)}</strong>
-        </div>
-        <div class="cart-actions">
-            <button class="btn btn-primary checkout-btn">إتمام الطلب</button>
-            <button class="btn btn-secondary clear-cart-btn">إفراغ السلة</button>
-        </div>
-    `;
-
-    modal.innerHTML = cartHTML;
-
     // Add styles
     Object.assign(overlay.style, {
         position: 'fixed',
@@ -416,6 +376,127 @@ function showCartModal() {
         animation: 'slideInUp 0.3s ease-out',
         direction: 'rtl'
     });
+
+    /* REWRITING CONTENT GENERATION */
+    let contentHTML = '';
+
+    if (cart.length === 0) {
+        contentHTML = `
+            <span class="close-modal-btn" style="position:absolute; top:10px; right:20px; font-size:28px; cursor:pointer;">&times;</span>
+            <div class="empty-cart">
+                <div style="font-size: 3rem; margin-bottom: 1rem">🛒</div>
+                <h3>سلة المشتريات فارغة</h3>
+                <p>تصفح المنتجات وأضف ما يعجبك!</p>
+                <button class="btn btn-primary" onclick="document.querySelector('.cart-modal-overlay').remove()">تصفح المنتجات</button>
+            </div>
+        `;
+    } else {
+        let cartHTML = '';
+        cart.forEach((item, index) => {
+            cartHTML += `
+                <div class="cart-item">
+                    <div class="cart-item-image">
+                        <img src="${item.image}" alt="${item.name}">
+                    </div>
+                    <div class="cart-item-details">
+                        <div class="cart-item-name">${item.name}</div>
+                        <div class="cart-item-desc">${item.description}</div>
+                        <div class="cart-item-price">${formatCurrency(item.price, currentCurrency)}</div>
+                    </div>
+                    <button class="remove-item-btn" data-index="${index}">&times;</button>
+                </div>
+            `;
+        });
+
+        const total = cart.reduce((sum, item) => sum + item.price, 0);
+        const displayTotal = activeDiscount ? (total * (1 - activeDiscount.value / 100)) : total;
+        const totalFormatted = formatCurrency(total, currentCurrency);
+        const displayTotalFormatted = formatCurrency(displayTotal, currentCurrency);
+
+        let priceHtml = `<div class="cart-total-value">${displayTotalFormatted}</div>`;
+        if (activeDiscount) {
+            priceHtml = `
+                <div class="cart-total-value" style="display:flex; flex-direction:column; align-items:flex-end;">
+                    <span style="text-decoration:line-through; font-size:0.9rem; opacity:0.7;">${totalFormatted}</span>
+                    <span style="color:#00b894;">${displayTotalFormatted} (${activeDiscount.code})</span>
+                </div>
+            `;
+        }
+
+        contentHTML = `
+            <span class="close-modal-btn" style="position:absolute; top:10px; right:20px; font-size:28px; cursor:pointer;">&times;</span>
+            <h2 style="margin-top:0;">سلة المشتريات</h2>
+            <div class="cart-items">
+                ${cartHTML}
+            </div>
+
+             <!-- Promo Code Section -->
+            <div class="promo-section" style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="cart-promo-input" placeholder="هل لديك كود خصم؟" style="flex:1; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.2); color:white;">
+                    <button onclick="applyPromoCode()" style="padding:0 20px; background:#6c5ce7; border:none; border-radius:8px; color:white; cursor:pointer;">تطبيق</button>
+                </div>
+                <div id="promo-message" style="margin-top:5px; font-size:0.9rem;"></div>
+            </div>
+
+            <div class="cart-total">
+                <span>المجموع:</span>
+                ${priceHtml}
+            </div>
+            <div class="cart-actions">
+                <button class="btn btn-secondary clear-cart-btn">مسح السلة</button>
+                <button class="btn btn-primary" onclick="completeOrder()">إتمام الطلب (واتساب)</button>
+            </div>
+        `;
+    }
+
+    modal.innerHTML = contentHTML;
+
+    // Attach Listeners
+    setTimeout(() => {
+        // Pre-fill input
+        if (activeDiscount && document.getElementById('cart-promo-input')) {
+            const input = document.getElementById('cart-promo-input');
+            input.value = activeDiscount.code;
+            input.disabled = true;
+            const msg = document.getElementById('promo-message');
+            if (msg) {
+                msg.textContent = `تم تطبيق خصم ${activeDiscount.value}% بنجاح! ✅`;
+                msg.style.color = '#00b894';
+            }
+        }
+
+        // Close
+        const clsBtn = modal.querySelector('.close-modal-btn');
+        if (clsBtn) clsBtn.addEventListener('click', () => document.querySelector('.cart-modal-overlay').remove());
+
+        // Remove Item
+        const removeButtons = modal.querySelectorAll('.remove-item-btn');
+        removeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const index = parseInt(btn.dataset.index);
+                cart.splice(index, 1);
+                updateCartCount();
+                document.querySelector('.cart-modal-overlay').remove();
+                if (cart.length > 0) showCartModal(); else showNotification('تم إفراغ السلة');
+            });
+        });
+
+        // Clear Cart
+        const clrBtn = modal.querySelector('.clear-cart-btn');
+        if (clrBtn) {
+            clrBtn.addEventListener('click', () => {
+                cart = [];
+                updateCartCount();
+                activeDiscount = null; // Reset discount on clear
+                document.querySelector('.cart-modal-overlay').remove();
+                showNotification('تم مسح السلة بنجاح');
+            });
+        }
+    }, 0);
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
 
     // Add extra styles for modal content
     const style = document.createElement('style');
@@ -452,7 +533,7 @@ function showCartModal() {
             const index = parseInt(btn.dataset.index);
             cart.splice(index, 1);
             updateCartCount();
-            closeModal(overlay);
+            document.querySelector('.cart-modal-overlay').remove();
             if (cart.length > 0) {
                 showCartModal();
             } else {
@@ -466,43 +547,120 @@ function showCartModal() {
     clearCartBtn.addEventListener('click', () => {
         cart = [];
         updateCartCount();
-        closeModal(overlay);
+        document.querySelector('.cart-modal-overlay').remove();
         showNotification('تم مسح السلة بنجاح');
     });
-
-    // Checkout handler
-    const checkoutBtn = modal.querySelector('.checkout-btn');
-    checkoutBtn.addEventListener('click', () => {
-        closeModal(overlay);
-
-        // Generate WhatsApp message
-        const phoneNumber = '218916808225'; // Libyan number
-        let message = '🛍️ *طلب جديد من متجر زيرونكس*\n\n';
-
-        message += '*المنتجات:*\n';
-
-        cart.forEach((item, index) => {
-            const itemPrice = formatCurrency(item.price, currentCurrency);
-            message += `${index + 1}. ${item.name} - ${itemPrice}\n`;
-        });
-
-        const total = cart.reduce((sum, item) => sum + item.price, 0);
-        const totalFormatted = formatCurrency(total, currentCurrency);
-
-        message += `\n*المجموع:* ${totalFormatted}`;
-
-        // Encode message for URL
-        const encodedMessage = encodeURIComponent(message);
-
-        // Open WhatsApp
-        // Use global CONTACT_NUMBER
-        const whatsappURL = `https://wa.me/${CONTACT_NUMBER}?text=${encodedMessage}`;
-        window.open(whatsappURL, '_blank');
-
-        // Show confirmation
-        showNotification('جاري فتح واتساب...');
-    });
 }
+
+// Global Discount State
+let activeDiscount = null; // { code: 'ZERO10', value: 10, id: 'firebase_id' }
+
+// Apply Promo Code Logic
+window.applyPromoCode = function () {
+    const code = document.getElementById('cart-promo-input').value.toUpperCase().trim();
+    const msg = document.getElementById('promo-message');
+
+    if (!code) return;
+
+    msg.textContent = 'جاري التحقق...';
+    msg.style.color = 'white';
+
+    // Verify with Firebase
+    firebase.database().ref('promos').orderByChild('code').equalTo(code).once('value')
+        .then(snapshot => {
+            const val = snapshot.val();
+            if (!val) {
+                msg.textContent = 'الكود غير صحيح ❌';
+                msg.style.color = '#ff7675';
+                activeDiscount = null;
+                return;
+            }
+
+            // Get first match (id)
+            const id = Object.keys(val)[0];
+            const promo = val[id];
+
+            // Check Expiry
+            if (promo.expiryDate && Date.now() > promo.expiryDate) {
+                msg.textContent = 'عذراً، انتهت صلاحية هذا الكوبون ⌛';
+                msg.style.color = '#ff7675';
+                activeDiscount = null;
+                return;
+            }
+
+            // Check Usage Limit
+            if (promo.maxUses && promo.usedCount >= promo.maxUses) {
+                msg.textContent = 'عذراً، وصل الكوبون للحد الأقصى من الاستخدام 🚫';
+                msg.style.color = '#ff7675';
+                activeDiscount = null;
+                return;
+            }
+
+            // Success
+            activeDiscount = {
+                id: id,
+                code: promo.code,
+                value: promo.discount
+            };
+
+            msg.textContent = `تم تطبيق خصم ${promo.discount}%! 🎉`;
+            msg.style.color = '#00b894';
+
+            // Refresh Cart to show new prices
+            document.querySelector('.cart-modal-overlay').remove();
+            showCartModal();
+
+        })
+        .catch(err => {
+            console.error(err);
+            msg.textContent = 'حدث خطأ أثناء التحقق';
+        });
+};
+
+// Complete Order (WhatsApp)
+window.completeOrder = function () {
+    if (cart.length === 0) return;
+
+    // Calculate total
+    const total = cart.reduce((sum, item) => sum + item.price, 0);
+    const finalTotal = activeDiscount ? (total * (1 - activeDiscount.value / 100)) : total;
+
+    const totalFormatted = formatCurrency(finalTotal, currentCurrency);
+
+    // Build message
+    let message = 'مرحباً، أود إتمام الطلب التالي:\n\n';
+
+    cart.forEach(item => {
+        message += `📦 *${item.name}*\nالسعر: ${formatCurrency(item.price, currentCurrency)}\n\n`;
+    });
+
+    if (activeDiscount) {
+        message += `🎟️ *كود خصم:* ${activeDiscount.code} (${activeDiscount.value}%)\n`;
+        message += `💰 *المجموع قبل الخصم:* ${formatCurrency(total, currentCurrency)}\n`;
+    }
+
+    message += `\n*المجموع النهائي:* ${totalFormatted}`;
+
+    // Encode message for URL
+    const encodedMessage = encodeURIComponent(message);
+
+    // Increment Promo Usage if used
+    if (activeDiscount) {
+        // Optimistic increment (we assume they send it)
+        const promoRef = firebase.database().ref('promos').child(activeDiscount.id);
+        promoRef.child('usedCount').transaction(current => (current || 0) + 1);
+    }
+
+    // Open WhatsApp
+    const whatsappURL = `https://wa.me/${CONTACT_NUMBER}?text=${encodedMessage}`;
+    window.open(whatsappURL, '_blank');
+
+    // Clear cart (optional, maybe reset discount)
+    activeDiscount = null;
+    cart = [];
+    updateCartCount();
+    document.querySelector('.cart-modal-overlay').remove();
+};
 
 function closeModal(overlay) {
     overlay.style.animation = 'fadeOut 0.3s ease-out';

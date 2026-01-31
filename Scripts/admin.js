@@ -18,6 +18,91 @@ const database = firebase.database();
 const auth = firebase.auth();
 const productsRef = database.ref('products');
 const settingsRef = database.ref('settings');
+const promosRef = database.ref('promos');
+
+// ============================================
+// PROMO CODES MANAGEMENT
+// ============================================
+// Load Promo Codes
+function loadPromos() {
+    const promoList = document.getElementById('promo-list');
+    promoList.innerHTML = '<p style="color:white; opacity:0.7;">جاري التحميل...</p>';
+
+    promosRef.on('value', (snapshot) => {
+        const promos = snapshot.val();
+        promoList.innerHTML = '';
+
+        if (!promos || Object.keys(promos).length === 0) {
+            promoList.innerHTML = '<p style="color:white; opacity:0.5; grid-column: 1/-1;">لا توجد كوبونات نشطة حالياً</p>';
+            return;
+        }
+
+        Object.keys(promos).forEach(id => {
+            const promo = promos[id];
+            const promoCard = document.createElement('div');
+            promoCard.className = 'product-card'; // Reuse style
+            promoCard.style.padding = '1rem';
+            promoCard.style.border = '1px solid rgba(0, 184, 148, 0.3)';
+
+            // Format Date
+            let expiryText = 'غير محدد';
+            if (promo.expiryDate) {
+                expiryText = new Date(promo.expiryDate).toLocaleDateString('ar-EG');
+            }
+
+            // Usage
+            const usageText = promo.maxUses ? `${promo.usedCount || 0}/${promo.maxUses}` : `${promo.usedCount || 0} (مفتوح)`;
+
+            promoCard.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <h3 style="margin:0; color:#00b894; font-family:monospace; font-size:1.2rem;">${promo.code}</h3>
+                    <span style="background:#00b894; color:white; padding:2px 8px; border-radius:4px;">${promo.discount}%-</span>
+                </div>
+                <div style="font-size:0.9rem; color:rgba(255,255,255,0.7); line-height:1.6;">
+                    <p style="margin:0;">📅 ينتهي: ${expiryText}</p>
+                    <p style="margin:0;">👥 الاستخدام: ${usageText}</p>
+                </div>
+                <button onclick="deletePromo('${id}')" style="width:100%; margin-top:10px; background:rgba(245, 87, 108, 0.1); color:#f5576c; border:1px solid #f5576c; padding:5px; border-radius:4px; cursor:pointer;">حذف الكوبون</button>
+            `;
+            promoList.appendChild(promoCard);
+        });
+    });
+}
+
+// Add New Promo
+document.getElementById('promo-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const code = document.getElementById('promo-code').value.toUpperCase().trim();
+    const discount = parseInt(document.getElementById('promo-discount').value);
+    const expiry = document.getElementById('promo-expiry').value;
+    const limit = document.getElementById('promo-limit').value;
+
+    if (!code || !discount) return;
+
+    const newPromo = {
+        code: code,
+        discount: discount,
+        expiryDate: expiry ? new Date(expiry).getTime() : null,
+        maxUses: limit ? parseInt(limit) : null,
+        usedCount: 0,
+        createdAt: Date.now()
+    };
+
+    promosRef.push(newPromo)
+        .then(() => {
+            showNotification('تم إنشاء الكوبون بنجاح! 🎟️');
+            document.getElementById('promo-form').reset();
+        })
+        .catch(err => showNotification('خطأ: ' + err.message, 'error'));
+});
+
+// Delete Promo
+window.deletePromo = function (id) {
+    if (confirm('هل أنت متأكد من حذف هذا الكوبون؟')) {
+        promosRef.child(id).remove();
+    }
+};
 
 // ============================================
 // SETTINGS MANAGEMENT
@@ -125,7 +210,8 @@ function checkAuthState() {
             currentUser = user;
             showDashboard();
             loadProducts();
-            loadSettings();  // Load exchange rate settings
+            loadSettings();
+            loadPromos(); // Load Promos
         } else {
             // User is signed out
             currentUser = null;
