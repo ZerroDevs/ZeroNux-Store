@@ -980,7 +980,7 @@ window.copyProductLink = function (id) {
     // BUT usually stores have it. Let's create a format: ${window.location.origin}/index.html#product-${id}
     // We can update app.js to handle this later.
 
-    const link = `${window.location.origin}/ZeroNux-Store/index.html?product=${id}`;
+    const link = `${window.location.origin}/index.html?product=${id}`;
 
     navigator.clipboard.writeText(link).then(() => {
         showNotification('تم نسخ رابط المنتج! 🔗');
