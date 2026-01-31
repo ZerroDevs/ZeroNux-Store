@@ -315,7 +315,76 @@ window.deletePromo = function (id) {
 // ============================================
 // SETTINGS MANAGEMENT
 // ============================================
-// Load settings (exchange rate, phone, facebook, email)
+// Theme Presets Logic
+window.applyThemePreset = function (preset) {
+    const primaryInput = document.getElementById('theme-primary');
+    const secondaryInput = document.getElementById('theme-secondary');
+    const accentInput = document.getElementById('theme-accent');
+    const bgPrimaryInput = document.getElementById('theme-bg-primary');
+    const bgSecondaryInput = document.getElementById('theme-bg-secondary');
+    const textPrimaryInput = document.getElementById('theme-text-primary');
+    const textSecondaryInput = document.getElementById('theme-text-secondary');
+
+    const presetNameInput = document.getElementById('theme-preset-name');
+
+    if (preset === 'purple') {
+        primaryInput.value = '#667eea';
+        secondaryInput.value = '#f5576c';
+        accentInput.value = '#4facfe';
+        bgPrimaryInput.value = '#0f0f1e';
+        bgSecondaryInput.value = '#1a1a2e';
+        textPrimaryInput.value = '#ffffff';
+        textSecondaryInput.value = '#b3b3b3';
+        presetNameInput.value = 'purple';
+    } else if (preset === 'red') {
+        primaryInput.value = '#e53935';
+        secondaryInput.value = '#ff5252';
+        accentInput.value = '#ff1744';
+        bgPrimaryInput.value = '#1a0505';
+        bgSecondaryInput.value = '#2d0a0a';
+        textPrimaryInput.value = '#ffffff';
+        textSecondaryInput.value = '#ffa8a8';
+        presetNameInput.value = 'red';
+    } else if (preset === 'blue') {
+        primaryInput.value = '#1e88e5';
+        secondaryInput.value = '#42a5f5';
+        accentInput.value = '#2979ff';
+        bgPrimaryInput.value = '#05131a';
+        bgSecondaryInput.value = '#0a232e';
+        textPrimaryInput.value = '#ffffff';
+        textSecondaryInput.value = '#a8d5ff';
+        presetNameInput.value = 'blue';
+    } else if (preset === 'pitchblack') {
+        primaryInput.value = '#ffffff';
+        secondaryInput.value = '#333333';
+        accentInput.value = '#ffffff';
+        bgPrimaryInput.value = '#000000';
+        bgSecondaryInput.value = '#0a0a0a';
+        textPrimaryInput.value = '#e0e0e0';
+        textSecondaryInput.value = '#888888';
+        presetNameInput.value = 'pitchblack';
+    } else if (preset === 'light') {
+        primaryInput.value = '#2563eb';
+        secondaryInput.value = '#1d4ed8';
+        accentInput.value = '#3b82f6';
+        bgPrimaryInput.value = '#f3f4f6';
+        bgSecondaryInput.value = '#ffffff';
+        textPrimaryInput.value = '#111827';
+        textSecondaryInput.value = '#4b5563';
+        presetNameInput.value = 'light';
+    } else {
+        presetNameInput.value = 'custom';
+    }
+};
+
+// Listen for color changes to set preset to custom
+['theme-primary', 'theme-secondary', 'theme-accent', 'theme-bg-primary', 'theme-bg-secondary', 'theme-text-primary', 'theme-text-secondary'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+        document.getElementById('theme-preset-name').value = 'custom';
+    });
+});
+
+// Load settings (exchange rate, phone, facebook, email, theme)
 function loadSettings() {
     settingsRef.once('value', (snapshot) => {
         const settings = snapshot.val();
@@ -362,6 +431,18 @@ function loadSettings() {
             }
             if (settings.maintenanceCustomMessage) {
                 document.getElementById('maintenance-custom-message').value = settings.maintenanceCustomMessage;
+            }
+
+            // Theme Settings
+            if (settings.theme) {
+                if (settings.theme.primary) document.getElementById('theme-primary').value = settings.theme.primary;
+                if (settings.theme.secondary) document.getElementById('theme-secondary').value = settings.theme.secondary;
+                if (settings.theme.accent) document.getElementById('theme-accent').value = settings.theme.accent;
+                if (settings.theme.bgPrimary) document.getElementById('theme-bg-primary').value = settings.theme.bgPrimary;
+                if (settings.theme.bgSecondary) document.getElementById('theme-bg-secondary').value = settings.theme.bgSecondary;
+                if (settings.theme.textPrimary) document.getElementById('theme-text-primary').value = settings.theme.textPrimary;
+                if (settings.theme.textSecondary) document.getElementById('theme-text-secondary').value = settings.theme.textSecondary;
+                if (settings.theme.preset) document.getElementById('theme-preset-name').value = settings.theme.preset;
             }
         } else {
             // Default exchange rate
@@ -415,6 +496,18 @@ document.getElementById('settings-form').addEventListener('submit', (e) => {
     const maintenancePreset = document.getElementById('maintenance-preset').value;
     const maintenanceCustomMessage = document.getElementById('maintenance-custom-message').value;
 
+    // Theme Settings
+    const themeSettings = {
+        primary: document.getElementById('theme-primary').value,
+        secondary: document.getElementById('theme-secondary').value,
+        accent: document.getElementById('theme-accent').value,
+        bgPrimary: document.getElementById('theme-bg-primary').value,
+        bgSecondary: document.getElementById('theme-bg-secondary').value,
+        textPrimary: document.getElementById('theme-text-primary').value,
+        textSecondary: document.getElementById('theme-text-secondary').value,
+        preset: document.getElementById('theme-preset-name').value
+    };
+
     settingsRef.update({
         exchangeRate: exchangeRate,
         phoneNumber: phoneNumber,
@@ -430,6 +523,7 @@ document.getElementById('settings-form').addEventListener('submit', (e) => {
         maintenanceEnabled: maintenanceEnabled,
         maintenancePreset: maintenancePreset,
         maintenanceCustomMessage: maintenanceCustomMessage,
+        theme: themeSettings,
         lastUpdated: Date.now()
     })
         .then(() => {

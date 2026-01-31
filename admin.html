@@ -429,7 +429,79 @@
                             <small>سيتم عرض هذه الرسالة للزوار عند تفعيل وضع الصيانة</small>
                         </div>
 
-                        <button type="submit" class="btn btn-primary">حفظ الإعدادات</button>
+                        <hr style="border-color: rgba(255,255,255,0.1); margin: 2rem 0;">
+
+                        <h3>🎨 تخصيص المظهر (Theme)</h3>
+                        <div class="form-group">
+                            <label>اختر مظهر جاهز</label>
+                            <div class="theme-presets"
+                                style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                                <button type="button" class="btn"
+                                    style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: 2px solid white;"
+                                    onclick="applyThemePreset('purple')">الأساسي (Purple)</button>
+                                <button type="button" class="btn"
+                                    style="background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white; opacity: 0.8;"
+                                    onclick="applyThemePreset('red')">أحمر (Red)</button>
+                                <button type="button" class="btn"
+                                    style="background: linear-gradient(135deg, #2193b0, #6dd5ed); color: white; opacity: 0.8;"
+                                    onclick="applyThemePreset('blue')">أزرق (Blue)</button>
+                                <button type="button" class="btn"
+                                    style="background: #000000; color: white; border: 1px solid #333;"
+                                    onclick="applyThemePreset('pitchblack')">داكن جداً (Pitch Black)</button>
+                                <button type="button" class="btn"
+                                    style="background: #ffffff; color: #333; border: 1px solid #ccc; opacity: 0.8;"
+                                    onclick="applyThemePreset('light')">فاتح (Light Mode) ☀️</button>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>اللون الأساسي (Primary)</label>
+                                <input type="color" id="theme-primary" value="#667eea"
+                                    style="height: 50px; cursor: pointer;">
+                            </div>
+                            <div class="form-group">
+                                <label>اللون الثانوي (Secondary)</label>
+                                <input type="color" id="theme-secondary" value="#f5576c"
+                                    style="height: 50px; cursor: pointer;">
+                            </div>
+                            <div class="form-group">
+                                <label>لون التمييز (Accent)</label>
+                                <input type="color" id="theme-accent" value="#4facfe"
+                                    style="height: 50px; cursor: pointer;">
+                            </div>
+                        </div>
+
+                        <h4
+                            style="margin: 1rem 0; color: rgba(255,255,255,0.7); border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                            الخلفيات والنصوص (Deep Theme)</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>خلفية الصفحة (Bg Primary)</label>
+                                <input type="color" id="theme-bg-primary" value="#0f0f1e"
+                                    style="height: 50px; cursor: pointer;">
+                            </div>
+                            <div class="form-group">
+                                <label>خلفية الأقسام (Bg Secondary)</label>
+                                <input type="color" id="theme-bg-secondary" value="#1a1a2e"
+                                    style="height: 50px; cursor: pointer;">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>لون النص الأساسي</label>
+                                <input type="color" id="theme-text-primary" value="#ffffff"
+                                    style="height: 50px; cursor: pointer;">
+                            </div>
+                            <div class="form-group">
+                                <label>لون النص الثانوي</label>
+                                <input type="color" id="theme-text-secondary" value="#b3b3b3"
+                                    style="height: 50px; cursor: pointer;">
+                            </div>
+                        </div>
+                        <input type="hidden" id="theme-preset-name" value="custom">
+
+                        <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">حفظ الإعدادات</button>
                     </form>
                 </section>
             </div>

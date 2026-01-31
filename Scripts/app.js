@@ -116,6 +116,31 @@ function loadSettings() {
             if (settings.maintenanceEnabled) {
                 showMaintenanceMode(settings.maintenancePreset, settings.maintenanceCustomMessage);
             }
+
+            // 9. Apply Theme Settings
+            if (settings.theme) {
+                const root = document.documentElement;
+                if (settings.theme.primary) {
+                    root.style.setProperty('--primary', settings.theme.primary);
+                    // Update gradient based on primary if needed, or just let primary do the work
+                    // For now, let's update gradients if possible or just primary colors
+                    // To make gradients work dynamically, we might need more complex logic or just set primary
+                    // Let's sticking to simple primary/secondary for now. 
+                    // Actually, let's try to update the gradient variable too if we want full effect
+                    root.style.setProperty('--primary-gradient', `linear-gradient(135deg, ${settings.theme.primary} 0%, ${settings.theme.secondary || '#764ba2'} 100%)`);
+                }
+                if (settings.theme.secondary) {
+                    root.style.setProperty('--secondary', settings.theme.secondary);
+                    root.style.setProperty('--secondary-gradient', `linear-gradient(135deg, #f093fb 0%, ${settings.theme.secondary} 100%)`);
+                }
+                if (settings.theme.accent) {
+                    root.style.setProperty('--accent', settings.theme.accent);
+                }
+                if (settings.theme.bgPrimary) root.style.setProperty('--bg-primary', settings.theme.bgPrimary);
+                if (settings.theme.bgSecondary) root.style.setProperty('--bg-secondary', settings.theme.bgSecondary);
+                if (settings.theme.textPrimary) root.style.setProperty('--text-primary', settings.theme.textPrimary);
+                if (settings.theme.textSecondary) root.style.setProperty('--text-secondary', settings.theme.textSecondary);
+            }
         }
     });
 }
