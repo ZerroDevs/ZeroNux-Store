@@ -1314,6 +1314,7 @@ body:has(#announcement-bar[style*="display: block"]) {
         font-size: 0.8rem;
         display: -webkit-box;
         -webkit-line-clamp: 1;
+        line-clamp: 1;
         /* Limit lines */
         -webkit-box-orient: vertical;
         overflow: hidden;
