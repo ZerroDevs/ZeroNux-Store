@@ -511,6 +511,7 @@ function loadProducts() {
         let totalStats = 0;
         let visibleStats = 0;
         let hiddenStats = 0;
+        let totalValue = 0; // Track total value
 
         if (!products || Object.keys(products).length === 0) {
             productsList.innerHTML = `
@@ -519,7 +520,7 @@ function loadProducts() {
                     <p>ابدأ بإضافة منتجك الأول!</p>
                 </div>
             `;
-            updateStats(0, 0, 0);
+            updateStats(0, 0, 0, 0);
             return;
         }
 
@@ -528,6 +529,7 @@ function loadProducts() {
 
             // Count stats
             totalStats++;
+            totalValue += parseFloat(product.price) || 0; // Add product price to total
             if (product.visible !== false) {
                 visibleStats++;
             } else {
@@ -539,15 +541,16 @@ function loadProducts() {
         });
 
         // Update UI
-        updateStats(totalStats, visibleStats, hiddenStats);
+        updateStats(totalStats, visibleStats, hiddenStats, totalValue);
     });
 }
 
 // Update stats UI
-function updateStats(total, visible, hidden) {
+function updateStats(total, visible, hidden, value) {
     document.getElementById('stat-total').textContent = total;
     document.getElementById('stat-visible').textContent = visible;
     document.getElementById('stat-hidden').textContent = hidden;
+    document.getElementById('stat-value').textContent = `$${value.toFixed(2)}`;
 }
 
 // Create product card element
