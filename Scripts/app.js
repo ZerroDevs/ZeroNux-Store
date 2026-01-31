@@ -1316,6 +1316,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initSmoothScrolling();
     initNavbarScroll();
     initScrollAnimations();
+    initSearch();
     addDynamicStyles();
     initProductCardClick();
     initAboutLink();
@@ -1327,3 +1328,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
     console.log('ZeroNux Store initialized successfully!');
 });
+
+// Search functionality
+function initSearch() {
+    const searchInput = document.getElementById('product-search');
+    const productsContainer = document.getElementById('products-container');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            const productCards = document.querySelectorAll('.product-card');
+            let hasVisibleProduct = false;
+
+            productCards.forEach(card => {
+                const productName = card.querySelector('.product-name').textContent.toLowerCase();
+                // Also search in description for better results
+                const productDesc = card.querySelector('.product-description').textContent.toLowerCase();
+
+                if (productName.includes(query) || productDesc.includes(query)) {
+                    card.style.display = 'block';
+                    // Re-run animation for found items
+                    card.style.animation = 'none';
+                    card.offsetHeight; /* trigger reflow */
+                    card.style.animation = 'fadeInUp 0.5s ease-out forwards';
+                    hasVisibleProduct = true;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Handle no results
+            const noResultsMsg = document.querySelector('.no-results-search');
+            if (!hasVisibleProduct && query !== '') {
+                if (!noResultsMsg) {
+                    const msg = document.createElement('div');
+                    msg.className = 'no-results-search';
+                    msg.style.textAlign = 'center';
+                    msg.style.width = '100%';
+                    msg.style.gridColumn = '1 / -1';
+                    msg.style.padding = '2rem';
+                    msg.style.color = 'rgba(255,255,255,0.7)';
+                    msg.innerHTML = '<h3>لا توجد نتائج مطابقة لبحثك 🔍</h3>';
+                    productsContainer.appendChild(msg);
+                }
+            } else {
+                if (noResultsMsg) noResultsMsg.remove();
+            }
+        });
+    }
+}
