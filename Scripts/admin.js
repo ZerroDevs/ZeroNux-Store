@@ -151,6 +151,11 @@ function loadProducts() {
         const products = snapshot.val();
         productsList.innerHTML = '';
 
+        // Reset stats
+        let totalStats = 0;
+        let visibleStats = 0;
+        let hiddenStats = 0;
+
         if (!products || Object.keys(products).length === 0) {
             productsList.innerHTML = `
                 <div class="empty-state">
@@ -158,15 +163,35 @@ function loadProducts() {
                     <p>ابدأ بإضافة منتجك الأول!</p>
                 </div>
             `;
+            updateStats(0, 0, 0);
             return;
         }
 
         Object.keys(products).forEach(id => {
             const product = products[id];
+
+            // Count stats
+            totalStats++;
+            if (product.visible !== false) {
+                visibleStats++;
+            } else {
+                hiddenStats++;
+            }
+
             const card = createProductCard(id, product);
             productsList.appendChild(card);
         });
+
+        // Update UI
+        updateStats(totalStats, visibleStats, hiddenStats);
     });
+}
+
+// Update stats UI
+function updateStats(total, visible, hidden) {
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-visible').textContent = visible;
+    document.getElementById('stat-hidden').textContent = hidden;
 }
 
 // Create product card element
