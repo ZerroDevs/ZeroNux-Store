@@ -100,7 +100,13 @@
 
                         <div class="form-group">
                             <label>رابط الصورة</label>
-                            <input type="url" id="product-image" placeholder="https://example.com/image.png" required>
+                            <input type="url" id="product-image" placeholder="https://example.com/image.png">
+                            <div class="file-upload-container">
+                                <label for="image-file" class="file-upload-label">
+                                    <span>📸 أو اختر صورة من جهازك</span>
+                                </label>
+                                <input type="file" id="image-file" accept="image/*" style="margin-top: 10px;">
+                            </div>
                         </div>
                     </div>
 

@@ -199,6 +199,35 @@ function createProductCard(id, product) {
     return card;
 }
 
+// Image File Upload handling
+document.getElementById('image-file').addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (file) {
+        // Check file size (limit to 1MB to avoid Firebase implementation limits if any, though RTDB limit is 10MB per node usually)
+        if (file.size > 1024 * 1024) {
+            alert('حجم الصورة كبير جداً! يرجى اختيار صورة أقل من 1 ميجابايت.');
+            this.value = ''; // Clear input
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const base64String = e.target.result;
+            document.getElementById('product-image').value = base64String;
+
+            // Show preview/feedback
+            const existingPreview = document.querySelector('.image-preview-feedback');
+            if (existingPreview) existingPreview.remove();
+
+            const preview = document.createElement('div');
+            preview.className = 'image-preview-feedback';
+            preview.innerHTML = `<span style="color: #00b894; font-size: 0.9rem;">✅ تم تحميل الصورة بنجاح: ${file.name}</span>`;
+            document.getElementById('image-file').parentNode.appendChild(preview);
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
 // Add/Update product
 document.getElementById('product-form').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -213,6 +242,12 @@ document.getElementById('product-form').addEventListener('submit', (e) => {
         features: parseFeatures(document.getElementById('product-features').value),
         timestamp: Date.now()
     };
+
+    // Validate image presence
+    if (!productData.image) {
+        alert('يرجى إضافة رابط صورة أو اختيار صورة من جهازك');
+        return;
+    }
 
     if (editingProductId) {
         // Update existing product
@@ -302,6 +337,12 @@ window.deleteProduct = function (id) {
 function resetForm() {
     document.getElementById('product-form').reset();
     document.getElementById('product-id').value = '';
+
+    // Clear custom file input
+    document.getElementById('image-file').value = '';
+    const existingPreview = document.querySelector('.image-preview-feedback');
+    if (existingPreview) existingPreview.remove();
+
     editingProductId = null;
     document.getElementById('form-title').textContent = 'إضافة منتج جديد';
     document.getElementById('submit-btn').textContent = 'إضافة المنتج';
