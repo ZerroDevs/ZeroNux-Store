@@ -694,6 +694,7 @@ window.completeOrder = function () {
             value: activeDiscount.value
         } : null,
         status: 'pending',
+        currency: currentCurrency, // Save the currency used (USD or LYD)
         timestamp: timestamp,
         lastUpdated: timestamp
     };

@@ -86,7 +86,7 @@ function loadOrders() {
                 <td><strong>${order.orderId}</strong></td>
                 <td>${formattedDate}</td>
                 <td>${order.items.length} منتج</td>
-                <td>$${order.finalTotal.toFixed(2)}</td>
+                <td>${order.currency === 'LYD' ? `${order.finalTotal.toFixed(2)} د.ل` : `$${order.finalTotal.toFixed(2)}`}</td>
                 <td><span class="order-status-badge status-${order.status}">${statusText[order.status] || order.status}</span></td>
                 <td>
                     <div class="order-actions">
@@ -169,7 +169,7 @@ function viewOrderDetails(orderId) {
         let itemsHtml = order.items.map(item => `
             <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
                 <span>${item.name}</span>
-                <span>$${item.price.toFixed(2)}</span>
+                <span>${order.currency === 'LYD' ? `${item.price.toFixed(2)} د.ل` : `$${item.price.toFixed(2)}`}</span>
             </div>
         `).join('');
 
@@ -210,12 +210,12 @@ function viewOrderDetails(orderId) {
                     ${itemsHtml}
                     <div style="display: flex; justify-content: space-between; padding: 1rem 0 0.5rem 0; margin-top: 1rem; border-top: 2px solid rgba(255,255,255,0.2); font-weight: bold;">
                         <span>المجموع الأصلي:</span>
-                        <span>$${order.total.toFixed(2)}</span>
+                        <span>${order.currency === 'LYD' ? `${order.total.toFixed(2)} د.ل` : `$${order.total.toFixed(2)}`}</span>
                     </div>
                     ${discountHtml}
                     <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; font-size: 1.2rem; font-weight: bold; color: #4caf50;">
                         <span>المجموع النهائي:</span>
-                        <span>$${order.finalTotal.toFixed(2)}</span>
+                        <span>${order.currency === 'LYD' ? `${order.finalTotal.toFixed(2)} د.ل` : `$${order.finalTotal.toFixed(2)}`}</span>
                     </div>
                 </div>
             </div>
