@@ -203,6 +203,7 @@ function viewOrderDetails(orderId) {
                     <p style="margin: 0.5rem 0;"><strong>رقم الطلب:</strong> ${order.orderId}</p>
                     <p style="margin: 0.5rem 0;"><strong>التاريخ:</strong> ${formattedDate}</p>
                     <p style="margin: 0.5rem 0;"><strong>الحالة:</strong> <span class="order-status-badge status-${order.status}">${statusText[order.status] || order.status}</span></p>
+                    ${order.customerPhone ? `<p style="margin: 0.5rem 0; color: #4facfe;"><strong>📞 رقم الهاتف:</strong> ${order.customerPhone}</p>` : ''}
                 </div>
                 
                 <h3 style="margin: 1.5rem 0 1rem 0;">المنتجات:</h3>

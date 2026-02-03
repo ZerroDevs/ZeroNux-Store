@@ -488,6 +488,11 @@ function showCartModal() {
                 <span>المجموع:</span>
                 ${priceHtml}
             </div>
+
+            <div class="phone-input-section" style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                <input type="tel" id="customer-phone" placeholder="📞 رقم الهاتف (اختياري)" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; margin-bottom: 5px;">
+                <small style="color: rgba(255,255,255,0.5); font-size: 0.8rem;">أضف رقمك لتسهيل التواصل بخصوص الطلب</small>
+            </div>
             <div class="cart-actions">
                 <button class="btn btn-secondary clear-cart-btn">مسح السلة</button>
                 <button class="btn btn-primary" onclick="completeOrder()">إتمام الطلب (واتساب)</button>
@@ -679,6 +684,9 @@ window.completeOrder = function () {
     const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
     const orderId = `ORDER_${dateStr}_${randomNum}`;
 
+    // Get customer phone if provided
+    const customerPhone = document.getElementById('customer-phone') ? document.getElementById('customer-phone').value.trim() : '';
+
     // Prepare order data for Firebase
     const orderData = {
         orderId: orderId,
@@ -695,6 +703,7 @@ window.completeOrder = function () {
         } : null,
         status: 'pending',
         currency: currentCurrency, // Save the currency used (USD or LYD)
+        customerPhone: customerPhone, // Optional phone number
         timestamp: timestamp,
         lastUpdated: timestamp
     };
@@ -711,6 +720,10 @@ window.completeOrder = function () {
 
     // Build WhatsApp message
     let message = `مرحباً، أود إتمام الطلب التالي:\n\n📋 *رقم الطلب:* ${orderId}\n\n`;
+
+    if (customerPhone) {
+        message += `📱 *رقم الهاتف:* ${customerPhone}\n\n`;
+    }
 
     cart.forEach(item => {
         message += `📦 *${item.name}*\nالسعر: ${formatCurrency(item.price, currentCurrency)}\n\n`;
