@@ -473,32 +473,31 @@ function populateCategoryDropdown(categoriesString) {
     // Actually for 'Edit' mode, we need to set value AFTER populating.
 }
 
-// Save settings
+// Save settings handler
 document.getElementById('settings-form').addEventListener('submit', (e) => {
     e.preventDefault();
+
     const exchangeRate = parseFloat(document.getElementById('exchange-rate').value);
     const phoneNumber = document.getElementById('contact-phone').value;
     const facebookUrl = document.getElementById('facebook-url').value;
     const contactEmail = document.getElementById('contact-email').value;
 
-    // Hero Settings
     const heroTitle = document.getElementById('hero-title').value;
     const heroSubtitle = document.getElementById('hero-subtitle').value;
     const heroDescription = document.getElementById('hero-description').value;
     const heroImage = document.getElementById('hero-image').value;
+
     const storeCategories = document.getElementById('store-categories').value;
 
-    // Announcement Bar
     const announcementEnabled = document.getElementById('announcement-enabled').checked;
     const announcementText = document.getElementById('announcement-text').value;
 
-    // Maintenance Mode
     const maintenanceEnabled = document.getElementById('maintenance-enabled').checked;
     const maintenancePreset = document.getElementById('maintenance-preset').value;
     const maintenanceCustomMessage = document.getElementById('maintenance-custom-message').value;
 
-    // Theme Settings
-    const themeSettings = {
+    // Theme Data
+    const themeData = {
         primary: document.getElementById('theme-primary').value,
         secondary: document.getElementById('theme-secondary').value,
         accent: document.getElementById('theme-accent').value,
@@ -506,10 +505,12 @@ document.getElementById('settings-form').addEventListener('submit', (e) => {
         bgSecondary: document.getElementById('theme-bg-secondary').value,
         textPrimary: document.getElementById('theme-text-primary').value,
         textSecondary: document.getElementById('theme-text-secondary').value,
-        preset: document.getElementById('theme-preset-name').value
+        preset: document.getElementById('theme-preset-name').value,
+        // Save Effect
+        effect: document.getElementById('theme-effect').value
     };
 
-    settingsRef.update({
+    const settingsData = {
         exchangeRate: exchangeRate,
         phoneNumber: phoneNumber,
         facebookUrl: facebookUrl,
@@ -524,11 +525,13 @@ document.getElementById('settings-form').addEventListener('submit', (e) => {
         maintenanceEnabled: maintenanceEnabled,
         maintenancePreset: maintenancePreset,
         maintenanceCustomMessage: maintenanceCustomMessage,
-        theme: themeSettings,
-        lastUpdated: Date.now()
-    })
+        theme: themeData,
+        lastUpdated: Date.now() // Keep lastUpdated
+    };
+
+    settingsRef.update(settingsData) // Use update instead of set to avoid overwriting entire settings
         .then(() => {
-            showNotification('تم حفظ الإعدادات بنجاح! ✅\nسيتم تحديث المتجر فوراً.');
+            showNotification('تم حفظ الإعدادات بنجاح! 💾');
             // Update dropdown immediately
             populateCategoryDropdown(storeCategories);
         })

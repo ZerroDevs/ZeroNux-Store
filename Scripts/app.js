@@ -140,9 +140,152 @@ function loadSettings() {
                 if (settings.theme.bgSecondary) root.style.setProperty('--bg-secondary', settings.theme.bgSecondary);
                 if (settings.theme.textPrimary) root.style.setProperty('--text-primary', settings.theme.textPrimary);
                 if (settings.theme.textSecondary) root.style.setProperty('--text-secondary', settings.theme.textSecondary);
+
+                // 10. Check Seasonal Effects
+                if (settings.theme.effect) {
+                    initParticleEffect(settings.theme.effect);
+                } else {
+                    initParticleEffect('none');
+                }
             }
         }
     });
+}
+// ============================================
+// PARTICLE ENGINE (Seasonal Effects)
+// ============================================
+let particleCanvas, particleCtx, particleRequest;
+let particles = [];
+
+function initParticleEffect(type) {
+    // 1. Clean up existing
+    if (particleRequest) cancelAnimationFrame(particleRequest);
+    particles = [];
+
+    // 2. Remove canvas if type is none
+    const existingCanvas = document.getElementById('particle-canvas');
+    if (type === 'none' || !type) {
+        if (existingCanvas) existingCanvas.remove();
+        return;
+    }
+
+    // 3. Create Canvas if needed
+    if (!existingCanvas) {
+        particleCanvas = document.createElement('canvas');
+        particleCanvas.id = 'particle-canvas';
+        Object.assign(particleCanvas.style, {
+            position: 'fixed', top: '0', left: '0',
+            width: '100%', height: '100%',
+            pointerEvents: 'none', zIndex: '9998' // Behind cart/modals but above content
+        });
+        document.body.appendChild(particleCanvas);
+        particleCtx = particleCanvas.getContext('2d');
+
+        // Resize handler
+        window.addEventListener('resize', resizeParticleCanvas);
+        resizeParticleCanvas();
+    } else {
+        particleCanvas = existingCanvas;
+        particleCtx = particleCanvas.getContext('2d');
+    }
+
+    // 4. Initialize Particles based on type
+    const count = window.innerWidth < 768 ? 30 : 80; // Performance opt for mobile
+
+    for (let i = 0; i < count; i++) {
+        particles.push(createParticle(type));
+    }
+
+    // 5. Start Loop
+    loopParticles(type);
+}
+
+function resizeParticleCanvas() {
+    if (particleCanvas) {
+        particleCanvas.width = window.innerWidth;
+        particleCanvas.height = window.innerHeight;
+    }
+}
+
+function createParticle(type) {
+    const x = Math.random() * window.innerWidth;
+    const y = Math.random() * window.innerHeight;
+
+    if (type === 'snow') {
+        return {
+            x: x, y: y,
+            vx: (Math.random() - 0.5) * 1, // Slight drift
+            vy: Math.random() * 2 + 1,     // Fall speed
+            size: Math.random() * 3 + 1,
+            color: 'rgba(255, 255, 255, 0.8)'
+        };
+    } else if (type === 'rain') {
+        return {
+            x: x, y: y,
+            vx: (Math.random() - 0.5) * 0.5,
+            vy: Math.random() * 15 + 10,   // Fast fall
+            size: Math.random() * 2 + 20,  // Length of drop
+            width: 1,
+            color: 'rgba(174, 194, 224, 0.6)'
+        };
+    } else if (type === 'confetti') {
+        const colors = ['#f5576c', '#f093fb', '#4facfe', '#43e97b', '#fa709a'];
+        return {
+            x: x, y: y,
+            vx: (Math.random() - 0.5) * 4,
+            vy: Math.random() * 4 + 2,
+            size: Math.random() * 6 + 4,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            rotation: Math.random() * 360,
+            rotationSpeed: (Math.random() - 0.5) * 10
+        };
+    }
+}
+
+function loopParticles(type) {
+    particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+
+    particles.forEach(p => {
+        // Update
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // Draw
+        particleCtx.fillStyle = p.color;
+
+        if (type === 'snow') {
+            particleCtx.beginPath();
+            particleCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            particleCtx.fill();
+
+            // Snow wander
+            p.x += Math.sin(p.y * 0.01) * 0.5;
+
+        } else if (type === 'rain') {
+            particleCtx.fillStyle = p.color;
+            particleCtx.fillRect(p.x, p.y, p.width, p.size);
+
+        } else if (type === 'confetti') {
+            particleCtx.save();
+            particleCtx.translate(p.x, p.y);
+            particleCtx.rotate(p.rotation * Math.PI / 180);
+            particleCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+            particleCtx.restore();
+            p.rotation += p.rotationSpeed;
+        }
+
+        // Reset if out of bounds
+        if (p.y > window.innerHeight) {
+            p.y = -20;
+            p.x = Math.random() * window.innerWidth;
+        }
+        if (p.x > window.innerWidth || p.x < 0) {
+            if (p.x > window.innerWidth) p.x = 0;
+            if (p.x < 0) p.x = window.innerWidth;
+        }
+    });
+
+    particleRequest = requestAnimationFrame(() => loopParticles(type));
 }
 
 // Currency formatting
