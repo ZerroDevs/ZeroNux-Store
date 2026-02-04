@@ -217,7 +217,8 @@ function createParticle(type) {
             vx: (Math.random() - 0.5) * 1, // Slight drift
             vy: Math.random() * 2 + 1,     // Fall speed
             size: Math.random() * 3 + 1,
-            color: 'rgba(255, 255, 255, 0.8)'
+            color: 'rgba(255, 255, 255, 0.8)',
+            type: 'circle'
         };
     } else if (type === 'rain') {
         return {
@@ -226,7 +227,8 @@ function createParticle(type) {
             vy: Math.random() * 15 + 10,   // Fast fall
             size: Math.random() * 2 + 20,  // Length of drop
             width: 1,
-            color: 'rgba(174, 194, 224, 0.6)'
+            color: 'rgba(174, 194, 224, 0.6)',
+            type: 'rect'
         };
     } else if (type === 'confetti') {
         const colors = ['#f5576c', '#f093fb', '#4facfe', '#43e97b', '#fa709a'];
@@ -237,7 +239,59 @@ function createParticle(type) {
             size: Math.random() * 6 + 4,
             color: colors[Math.floor(Math.random() * colors.length)],
             rotation: Math.random() * 360,
-            rotationSpeed: (Math.random() - 0.5) * 10
+            rotationSpeed: (Math.random() - 0.5) * 10,
+            type: 'confetti'
+        };
+    } else if (type === 'ramadan') {
+        const icons = ['🌙', '⭐️', '🏮', '✨'];
+        return {
+            x: x, y: y,
+            vx: (Math.random() - 0.5) * 0.5,
+            vy: Math.random() * 1 + 0.5, // Slow float
+            size: Math.random() * 20 + 15, // Font size
+            text: icons[Math.floor(Math.random() * icons.length)],
+            type: 'text'
+        };
+    } else if (type === 'christmas') {
+        const icons = ['❄️', '🎅', '🎄', '🎁', '🦌'];
+        return {
+            x: x, y: y,
+            vx: (Math.random() - 0.5) * 2, // Windy snow
+            vy: Math.random() * 2 + 1,
+            size: Math.random() * 20 + 15,
+            text: icons[Math.floor(Math.random() * icons.length)],
+            type: 'text'
+        };
+    } else if (type === 'eid-fitr') {
+        // Eid Al-Fitr: Sweets, Coffee, Money
+        const icons = ['🍬', '☕', '🧁', '🎈', '✨', '🎁'];
+        return {
+            x: x, y: window.innerHeight + 20,
+            vx: (Math.random() - 0.5) * 1.5,
+            vy: (Math.random() * 2 + 2) * -1, // Float UP
+            size: Math.random() * 25 + 20,
+            text: icons[Math.floor(Math.random() * icons.length)],
+            type: 'text'
+        };
+    } else if (type === 'eid-adha') {
+        // Eid Al-Adha: Sheep, Kaaba, Meat
+        const icons = ['🐑', '🕌', '🍖', '🐏', '🎈'];
+        return {
+            x: x, y: window.innerHeight + 20,
+            vx: (Math.random() - 0.5) * 1.5,
+            vy: (Math.random() * 2 + 1) * -1, // Float UP
+            size: Math.random() * 25 + 20,
+            text: icons[Math.floor(Math.random() * icons.length)],
+            type: 'text'
+        };
+    } else if (type === 'desert') {
+        return {
+            x: x, y: y,
+            vx: Math.random() * 5 + 3, // Fast horizontal wind
+            vy: (Math.random() - 0.5) * 2,
+            size: Math.random() * 2 + 1,
+            color: 'rgba(210, 180, 140, 0.6)', // Tan color
+            type: 'circle'
         };
     }
 }
@@ -246,42 +300,55 @@ function loopParticles(type) {
     particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
 
     particles.forEach(p => {
-        // Update
+        // Update positions
         p.x += p.vx;
         p.y += p.vy;
 
-        // Draw
-        particleCtx.fillStyle = p.color;
-
-        if (type === 'snow') {
+        // Draw based on type
+        if (p.type === 'circle') {
+            particleCtx.fillStyle = p.color;
             particleCtx.beginPath();
             particleCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
             particleCtx.fill();
-
-            // Snow wander
-            p.x += Math.sin(p.y * 0.01) * 0.5;
-
-        } else if (type === 'rain') {
+            if (type === 'snow') p.x += Math.sin(p.y * 0.01) * 0.5;
+        } else if (p.type === 'rect') {
             particleCtx.fillStyle = p.color;
             particleCtx.fillRect(p.x, p.y, p.width, p.size);
-
-        } else if (type === 'confetti') {
+        } else if (p.type === 'confetti') {
+            particleCtx.fillStyle = p.color;
             particleCtx.save();
             particleCtx.translate(p.x, p.y);
             particleCtx.rotate(p.rotation * Math.PI / 180);
             particleCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
             particleCtx.restore();
             p.rotation += p.rotationSpeed;
+        } else if (p.type === 'text') {
+            particleCtx.font = `${p.size}px serif`;
+            particleCtx.fillText(p.text, p.x, p.y);
         }
 
-        // Reset if out of bounds
-        if (p.y > window.innerHeight) {
-            p.y = -20;
-            p.x = Math.random() * window.innerWidth;
-        }
-        if (p.x > window.innerWidth || p.x < 0) {
-            if (p.x > window.innerWidth) p.x = 0;
-            if (p.x < 0) p.x = window.innerWidth;
+        // Reset logic (Standard Falling)
+        if (type !== 'eid-fitr' && type !== 'eid-adha') {
+            if (p.y > window.innerHeight + 50) {
+                p.y = -50;
+                p.x = Math.random() * window.innerWidth;
+            }
+            if (p.x > window.innerWidth + 50) {
+                if (type === 'desert') {
+                    p.x = -50; // Reset to left for wind
+                    p.y = Math.random() * window.innerHeight;
+                } else {
+                    p.x = 0;
+                }
+            } else if (p.x < -50) {
+                if (type === 'desert') p.x = window.innerWidth + 50; else p.x = window.innerWidth;
+            }
+        } else {
+            // Rising Types (Eids)
+            if (p.y < -50) {
+                p.y = window.innerHeight + 50;
+                p.x = Math.random() * window.innerWidth;
+            }
         }
     });
 
