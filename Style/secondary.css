@@ -48,6 +48,7 @@ body {
     margin-bottom: 0.5rem;
     background: var(--accent-gradient);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: 0 10px 30px rgba(79, 172, 254, 0.3);
 }
