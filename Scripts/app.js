@@ -490,7 +490,10 @@ function showCartModal() {
             </div>
 
             <div class="phone-input-section" style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
-                <input type="tel" id="customer-phone" placeholder="📞 رقم الهاتف (اختياري)" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; margin-bottom: 5px;">
+                <input type="tel" id="customer-phone" placeholder="📞 رقم الهاتف (اختياري)" 
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '')" 
+                       inputmode="numeric"
+                       style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; margin-bottom: 5px;">
                 <small style="color: rgba(255,255,255,0.5); font-size: 0.8rem;">أضف رقمك لتسهيل التواصل بخصوص الطلب</small>
             </div>
             <div class="cart-actions">
