@@ -444,6 +444,7 @@ function loadSettings() {
                 if (settings.theme.textPrimary) document.getElementById('theme-text-primary').value = settings.theme.textPrimary;
                 if (settings.theme.textSecondary) document.getElementById('theme-text-secondary').value = settings.theme.textSecondary;
                 if (settings.theme.preset) document.getElementById('theme-preset-name').value = settings.theme.preset;
+                if (settings.theme.effect) document.getElementById('theme-effect').value = settings.theme.effect;
             }
         } else {
             // Default exchange rate
