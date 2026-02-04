@@ -762,14 +762,77 @@ window.completeOrder = function () {
 
     // Open WhatsApp
     // Clear cart and redirect to success page
+
+    // Send to Discord Webhook
+    sendToDiscord(orderData);
+
     activeDiscount = null;
     cart = [];
     updateCartCount();
     document.querySelector('.cart-modal-overlay').remove();
 
     // Redirect to success page
-    window.location.href = `success.html?orderId=${orderId}`;
+    setTimeout(() => {
+        window.location.href = `success.html?orderId=${orderId}`;
+    }, 1000); // Small delay to allow webhook to fire (though it's async)
 };
+
+// Send Order to Discord Webhook
+function sendToDiscord(order) {
+    const webhookURL = 'https://discord.com/api/webhooks/1468393122735067360/1vk_PLkUv4pdD4ofsxS6xGASp7Zp2DFw_ZkeSMYzoETu4duI-Hl63-iw5rFPRCYF4cDY';
+
+    // Format Items in a nice list
+    const itemsDescription = order.items.map(item => {
+        // We need manually format price because formatCurrency function might rely on global state but here we have data
+        const price = order.currency === 'LYD' ? `${item.price.toFixed(2)} د.ل` : `$${item.price.toFixed(2)}`;
+        return `• **${item.name}** - ${price}`;
+    }).join('\n');
+
+    // Format Totals
+    const totalDisplay = order.currency === 'LYD' ? `${order.total.toFixed(2)} د.ل` : `$${order.total.toFixed(2)}`;
+    const finalTotalDisplay = order.currency === 'LYD' ? `${order.finalTotal.toFixed(2)} د.ل` : `$${order.finalTotal.toFixed(2)}`;
+
+    // Discount Field (if any)
+    const fields = [
+        { name: '💰 المبلغ الإجمالي', value: finalTotalDisplay, inline: true },
+        { name: '📦 عدد المنتجات', value: order.items.length.toString(), inline: true },
+        { name: '🕒 الحالة', value: 'قيد الانتظار (Pending)', inline: true }
+    ];
+
+    if (order.discount) {
+        fields.push({ name: '🎟️ كود الخصم', value: `${order.discount.code} (-${order.discount.value}%)`, inline: true });
+    }
+
+    if (order.customerPhone) {
+        fields.push({ name: '📞 رقم الهاتف', value: order.customerPhone, inline: true });
+    }
+
+    // Embed Payload
+    const payload = {
+        embeds: [{
+            title: `🛒 طلب جديد: ${order.orderId}`,
+            color: 6719210, // Purple color #667eea
+            description: itemsDescription,
+            fields: fields,
+            footer: {
+                text: `ZeroNux Store • ${new Date(order.timestamp).toLocaleString('ar-EG')}`
+            },
+            timestamp: new Date().toISOString()
+        }]
+    };
+
+    // Send Request
+    fetch(webhookURL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    }).then(response => {
+        if (response.ok) console.log('Discord webhook sent successfully');
+        else console.error('Discord webhook failed', response.statusText);
+    }).catch(error => {
+        console.error('Discord webhook error:', error);
+    });
+}
 
 function closeModal(overlay) {
     overlay.style.animation = 'fadeOut 0.3s ease-out';
