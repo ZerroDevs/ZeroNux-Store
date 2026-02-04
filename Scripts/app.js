@@ -368,7 +368,9 @@ function initAddToCartButtons() {
             const productId = btn.dataset.productId;
             const productName = btn.dataset.productName;
             const productPrice = parseFloat(btn.dataset.productPrice);
-            const price = currentCurrency === 'USD' ? productPrice : (productPrice * EXCHANGE_RATE);
+            // ALWAYS store the base USD price in the cart. 
+            // We will convert it to the active currency at display/checkout time.
+            const price = productPrice;
             const image = btn.dataset.productImage;
             const description = btn.dataset.productDesc;
 
@@ -445,6 +447,10 @@ function showCartModal() {
     } else {
         let cartHTML = '';
         cart.forEach((item, index) => {
+            // Convert price for display based on current settings
+            const itemPriceUSD = item.price;
+            const itemPriceDisplay = currentCurrency === 'USD' ? itemPriceUSD : (itemPriceUSD * EXCHANGE_RATE);
+
             cartHTML += `
                 <div class="cart-item">
                     <div class="cart-item-image">
@@ -453,16 +459,21 @@ function showCartModal() {
                     <div class="cart-item-details">
                         <div class="cart-item-name">${item.name}</div>
                         <div class="cart-item-desc">${item.description}</div>
-                        <div class="cart-item-price">${formatCurrency(item.price, currentCurrency)}</div>
+                        <div class="cart-item-price">${formatCurrency(itemPriceDisplay, currentCurrency)}</div>
                     </div>
                     <button class="remove-item-btn" data-index="${index}">&times;</button>
                 </div>
             `;
         });
 
-        const total = cart.reduce((sum, item) => sum + item.price, 0);
-        const displayTotal = activeDiscount ? (total * (1 - activeDiscount.value / 100)) : total;
-        const totalFormatted = formatCurrency(total, currentCurrency);
+        // Calculate total in BASE USD first
+        const totalUSD = cart.reduce((sum, item) => sum + item.price, 0);
+
+        // Then convert to current currency for display
+        const totalCurrent = currentCurrency === 'USD' ? totalUSD : (totalUSD * EXCHANGE_RATE);
+
+        const displayTotal = activeDiscount ? (totalCurrent * (1 - activeDiscount.value / 100)) : totalCurrent;
+        const totalFormatted = formatCurrency(totalCurrent, currentCurrency);
         const displayTotalFormatted = formatCurrency(displayTotal, currentCurrency);
 
         let priceHtml = `<div class="cart-total-value">${displayTotalFormatted}</div>`;
@@ -743,8 +754,12 @@ window.applyPromoCode = function () {
 window.completeOrder = function () {
     if (cart.length === 0) return;
 
-    // Calculate total
-    const total = cart.reduce((sum, item) => sum + item.price, 0);
+    // Calculate total in BASE USD first
+    const totalUSD = cart.reduce((sum, item) => sum + item.price, 0);
+
+    // Then convert to current currency for final order processing
+    const total = currentCurrency === 'USD' ? totalUSD : (totalUSD * EXCHANGE_RATE);
+
     const finalTotal = activeDiscount ? (total * (1 - activeDiscount.value / 100)) : total;
 
     const totalFormatted = formatCurrency(finalTotal, currentCurrency);
@@ -762,11 +777,15 @@ window.completeOrder = function () {
     // Prepare order data for Firebase
     const orderData = {
         orderId: orderId,
-        items: cart.map(item => ({
-            name: item.name,
-            price: item.price,
-            image: item.image || ''
-        })),
+        items: cart.map(item => {
+            // Save item price in the CURRENCY USED for the order
+            const itemPrice = currentCurrency === 'USD' ? item.price : (item.price * EXCHANGE_RATE);
+            return {
+                name: item.name,
+                price: itemPrice,
+                image: item.image || ''
+            };
+        }),
         total: total,
         finalTotal: finalTotal,
         discount: activeDiscount ? {
@@ -798,7 +817,8 @@ window.completeOrder = function () {
     }
 
     cart.forEach(item => {
-        message += `📦 *${item.name}*\nالسعر: ${formatCurrency(item.price, currentCurrency)}\n\n`;
+        const itemPrice = currentCurrency === 'USD' ? item.price : (item.price * EXCHANGE_RATE);
+        message += `📦 *${item.name}*\nالسعر: ${formatCurrency(itemPrice, currentCurrency)}\n\n`;
     });
 
     if (activeDiscount) {
