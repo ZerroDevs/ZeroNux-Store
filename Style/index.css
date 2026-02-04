@@ -1162,32 +1162,60 @@ body:has(#announcement-bar[style*="display: block"]) {
 
 /* Out of stock card styling */
 .out-of-stock-card {
-    opacity: 0.6;
+    opacity: 0.7;
+    filter: grayscale(0.5);
     position: relative;
+    pointer-events: auto;
+    /* Enable hover/viewing details */
 }
 
-.out-of-stock-card::after {
-    content: '';
+/* Sold Out Badge (Main Overlay) */
+.sold-out-badge {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: var(--radius-lg);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    background: rgba(220, 53, 69, 0.95);
+    color: white;
+    padding: 10px 20px;
+    font-size: 1.5rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    border: 3px solid white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    z-index: 10;
     pointer-events: none;
+    white-space: nowrap;
 }
 
-/* Disabled button styling */
+/* Modal Sold Out Badge */
+.sold-out-badge-modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-10deg);
+    background: rgba(255, 59, 48, 0.9);
+    color: white;
+    padding: 10px 30px;
+    font-size: 1.8rem;
+    font-weight: bold;
+    border-radius: 8px;
+    border: 3px solid white;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.6);
+    z-index: 5;
+}
+
+/* Disabled button styling override */
+.add-to-cart-btn.disabled,
 .add-to-cart-btn:disabled {
-    background: linear-gradient(135deg, #666 0%, #444 100%);
+    background: linear-gradient(135deg, #555 0%, #333 100%) !important;
     cursor: not-allowed;
-    opacity: 0.6;
-}
-
-.add-to-cart-btn:disabled:hover {
-    transform: none;
-    box-shadow: none;
+    opacity: 0.8;
+    transform: none !important;
+    box-shadow: none !important;
 }
 
 /* ============================================

@@ -1302,7 +1302,7 @@ function showProductDetails(productId) {
         
         /* Gallery Styles */
         .product-gallery { padding: 0 2rem; display: flex; flex-direction: column; gap: 1rem; }
-        .gallery-main-image { width: 100%; height: 300px; border-radius: 12px; overflow: hidden; background: rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; }
+        .gallery-main-image { width: 100%; height: 300px; border-radius: 12px; overflow: hidden; background: rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; position: relative; }
         .gallery-main-image img { max-width: 100%; max-height: 100%; object-fit: contain; animation: fadeIn 0.3s ease; }
         .gallery-thumbnails { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: thin; }
         .gallery-thumbnail { min-width: 60px; height: 60px; border-radius: 8px; overflow: hidden; cursor: pointer; border: 2px solid transparent; opacity: 0.6; transition: all 0.2s ease; }
@@ -1323,6 +1323,7 @@ function showProductDetails(productId) {
         .modal-price-label { color: rgba(255, 255, 255, 0.7); font-size: 0.875rem; }
         .modal-price { font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
         .add-to-cart-modal { padding: 1rem 2rem; white-space: nowrap; }
+        .add-to-cart-modal:disabled { background: #555; cursor: not-allowed; transform: none !important; box-shadow: none !important; opacity: 0.7; }
     `;
         document.head.appendChild(modalStyles);
 
@@ -1331,10 +1332,33 @@ function showProductDetails(productId) {
         overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(overlay); });
 
         const addToCartBtn = modal.querySelector('.add-to-cart-modal');
+        // Check stock for modal button
+        if (product.stock !== undefined && product.stock <= 0) {
+            addToCartBtn.disabled = true;
+            addToCartBtn.innerHTML = 'نفذت الكمية ❌';
+            addToCartBtn.style.background = '#444';
+
+            // Add sold out badge to main gallery image if needed
+            const mainImgContainer = modal.querySelector('.gallery-main-image');
+            const soldOutBadge = document.createElement('div');
+            soldOutBadge.className = 'sold-out-badge-modal';
+            soldOutBadge.innerHTML = 'نفذت الكمية';
+            Object.assign(soldOutBadge.style, {
+                position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-10deg)',
+                background: 'rgba(255, 59, 48, 0.9)', color: 'white', padding: '10px 30px',
+                fontSize: '1.5rem', fontWeight: 'bold', borderRadius: '8px', border: '2px solid white',
+                letterSpacing: '1px', textTransform: 'uppercase', boxShadow: '0 5px 20px rgba(0,0,0,0.5)',
+                zIndex: '5'
+            });
+            mainImgContainer.appendChild(soldOutBadge);
+        }
+
         addToCartBtn.addEventListener('click', () => {
+            if (addToCartBtn.disabled) return;
             const productName = addToCartBtn.dataset.productName;
             const productPrice = parseFloat(addToCartBtn.dataset.productPrice);
-            const price = currentCurrency === 'USD' ? productPrice : (productPrice * EXCHANGE_RATE);
+            // ALWAYS store the base USD price in the cart.
+            const price = productPrice;
             addToCart(productName, price, product.image, product.shortDesc || product.description.substring(0, 100));
             closeModal(overlay);
         });
