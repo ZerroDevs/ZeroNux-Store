@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="Images/Logo.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الدعم الفني - متجر زيرونكس</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Cairo:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="Style/index.css">
+    <link rel="stylesheet" href="Style/secondary.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo" onclick="window.location.href='index.html'">
+                    <img src="Images/Logo.png" alt="ZeroNux Store Logo">
+                </div>
+
+                <button class="mobile-menu-btn" aria-label="Toggle Menu">☰</button>
+
+                <div class="nav-links">
+                    <a href="index.html" class="nav-link">الرئيسية</a>
+                    <a href="index.html#products" class="nav-link">المنتجات</a>
+                    <a href="faq.html" class="nav-link">الأسئلة الشائعة</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <script>
+        // Mobile Menu Logic (Inline for simplicity or load app.js if needed)
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const navLinks = document.querySelector('.nav-links');
+        if (mobileMenuBtn && navLinks) {
+            mobileMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                navLinks.classList.toggle('active');
+            });
+            document.addEventListener('click', (e) => {
+                if (navLinks.classList.contains('active') && !navLinks.contains(e.target) && e.target !== mobileMenuBtn) {
+                    navLinks.classList.remove('active');
+                }
+            });
+        }
+    </script>
+
+    <header class="page-header">
+        <div class="container">
+            <h1 class="page-title">🛠️ مركز الدعم الفني</h1>
+            <p class="page-subtitle">نحن هنا لمساعدتك. كيف يمكننا خدمتك اليوم؟</p>
+        </div>
+    </header>
+
+    <main class="secondary-container">
+        <!-- Support Grid -->
+        <div class="support-grid">
+            <a href="https://wa.me/218916808225" target="_blank" class="support-card">
+                <span class="support-icon">💬</span>
+                <h3>محادثة مباشرة</h3>
+                <p>تواصل معنا عبر واتساب لرد فوري وسريع</p>
+            </a>
+
+            <a href="mailto:support@zeronux.store" class="support-card">
+                <span class="support-icon">📧</span>
+                <h3>البريد الإلكتروني</h3>
+                <p>ارسل استفسارك وسنرد عليك خلال 24 ساعة</p>
+            </a>
+
+            <a href="faq.html" class="support-card">
+                <span class="support-icon">❓</span>
+                <h3>الأسئلة الشائعة</h3>
+                <p>تصفح إجابات لأكثر الأسئلة تكراراً</p>
+            </a>
+        </div>
+
+        <!-- Contact Form -->
+        <div class="glass-card contact-form-container">
+            <h2 style="margin-bottom: 2rem; color: #fff; text-align: center;">📝 أرسل لنا رسالة</h2>
+            <form id="contact-form" onsubmit="event.preventDefault(); alert('شكراً لتواصلك! سنرد عليك قريباً.');">
+                <div class="form-input-group">
+                    <label>الاسم بالكامل</label>
+                    <input type="text" class="form-input" placeholder="اسمك الكريم" required>
+                </div>
+                <div class="form-input-group">
+                    <label>البريد الإلكتروني أو رقم الهاتف</label>
+                    <input type="text" class="form-input" placeholder="وسيلة التواصل معك" required>
+                </div>
+                <div class="form-input-group">
+                    <label>موضوع الرسالة</label>
+                    <select class="form-input">
+                        <option>استفسار عام</option>
+                        <option>مشكلة في الطلب</option>
+                        <option>اقتراح</option>
+                        <option>أخرى</option>
+                    </select>
+                </div>
+                <div class="form-input-group">
+                    <label>تفاصيل الرسالة</label>
+                    <textarea class="form-input" placeholder="اشرح لنا كيف يمكننا مساعدتك..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">إرسال
+                    الرسالة 🚀</button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 متجر زيرونكس. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>
