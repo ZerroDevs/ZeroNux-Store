@@ -410,16 +410,21 @@ function showCartModal() {
     });
 
     Object.assign(modal.style, {
-        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
-        borderRadius: '16px',
+        background: 'linear-gradient(145deg, rgba(26, 26, 46, 0.95), rgba(22, 33, 62, 0.98))',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        borderRadius: '24px',
         padding: '2rem',
-        maxWidth: '500px',
-        width: '90%',
-        maxHeight: '80vh',
-        overflow: 'auto',
-        animation: 'slideInUp 0.3s ease-out',
-        direction: 'rtl'
+        maxWidth: '480px',
+        width: '95%',
+        maxHeight: '85vh',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        boxShadow: '0 25px 60px rgba(0,0,0,0.6), 0 0 30px rgba(102, 126, 234, 0.15)',
+        backdropFilter: 'blur(12px)',
+        webkitBackdropFilter: 'blur(12px)',
+        animation: 'modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+        direction: 'rtl',
+        color: '#fff'
     });
 
     /* REWRITING CONTENT GENERATION */
@@ -427,12 +432,14 @@ function showCartModal() {
 
     if (cart.length === 0) {
         contentHTML = `
-            <span class="close-modal-btn" style="position:absolute; top:10px; right:20px; font-size:28px; cursor:pointer;">&times;</span>
-            <div class="empty-cart">
-                <div style="font-size: 3rem; margin-bottom: 1rem">🛒</div>
-                <h3>سلة المشتريات فارغة</h3>
-                <p>تصفح المنتجات وأضف ما يعجبك!</p>
-                <button class="btn btn-primary" onclick="document.querySelector('.cart-modal-overlay').remove()">تصفح المنتجات</button>
+            <span class="close-modal-btn">&times;</span>
+            <div class="empty-cart" style="text-align: center; padding: 4rem 1rem;">
+                <div style="font-size: 5rem; margin-bottom: 1.5rem; animation: float 3s ease-in-out infinite; filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));">🛒</div>
+                <h3 style="font-size: 1.6rem; margin-bottom: 0.5rem; background: linear-gradient(to right, #fff, #a5a5a5); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">السلة فارغة حالياً</h3>
+                <p style="color: rgba(255,255,255,0.6); margin-bottom: 2.5rem; font-size: 0.95rem; line-height: 1.6;">لم تقم بإضافة أي منتجات بعد.<br>تصفح المتجر واكتشف عروضنا المميزة!</p>
+                <button class="btn btn-primary" onclick="document.querySelector('.cart-modal-overlay').remove()" style="padding: 14px 35px; border-radius: 50px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); font-weight: 600; letter-spacing: 0.5px; transition: transform 0.2s;">
+                    تصفح المنتجات 🛍️
+                </button>
             </div>
         `;
     } else {
@@ -554,15 +561,77 @@ function showCartModal() {
     // Add extra styles for modal content
     const style = document.createElement('style');
     style.textContent = `
-        .cart-item { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 12px; margin-bottom: 1rem; position: relative; }
-        .cart-item-image { width: 60px; height: 60px; flex-shrink: 0; border-radius: 8px; overflow: hidden; background: white; }
+        @keyframes modalSlideUp {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .cart-modal-overlay { transition: opacity 0.3s ease; }
+        .cart-item { 
+            display: flex; align-items: center; gap: 1rem; padding: 1rem; 
+            background: rgba(255, 255, 255, 0.03); 
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px; margin-bottom: 1rem; position: relative; 
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .cart-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+        .cart-item-image { 
+            width: 70px; height: 70px; flex-shrink: 0; border-radius: 12px; 
+            overflow: hidden; background: rgba(255,255,255,0.05); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
         .cart-item-image img { width: 100%; height: 100%; object-fit: contain; }
-        .cart-item-details { flex: 1; display: flex; flex-direction: column; gap: 0.25rem; }
-        .cart-item-name { font-weight: 700; font-size: 1rem; }
-        .cart-item-desc { font-size: 0.85rem; color: rgba(255, 255, 255, 0.6); margin: 0; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
-        .cart-item-price { color: #f093fb; font-weight: 600; font-size: 0.95rem; }
-        .remove-item-btn { width: 24px; height: 24px; border-radius: 50%; background: rgba(255, 59, 48, 0.2); color: #ff3b30; border: none; display: flex; align-items: center; justifyContent: center; cursor: pointer; position: absolute; top: 10px; left: 10px; font-size: 1.2rem; line-height: 1; }
-        .remove-item-btn:hover { background: rgba(255, 59, 48, 0.4); }
+        .cart-item-details { flex: 1; display: flex; flex-direction: column; gap: 0.3rem; }
+        .cart-item-name { font-weight: 700; font-size: 1.05rem; color: #fff; }
+        .cart-item-desc { font-size: 0.85rem; color: rgba(255, 255, 255, 0.5); }
+        .cart-item-price { 
+            color: #f093fb; font-weight: 700; font-size: 1rem; 
+            background: rgba(240, 147, 251, 0.1); padding: 2px 8px; 
+            border-radius: 6px; width: fit-content; margin-top: 2px;
+        }
+        .remove-item-btn { 
+            width: 32px; height: 32px; border-radius: 50%; 
+            background: rgba(255, 59, 48, 0.1); color: #ff3b30; border: none; 
+            display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; position: absolute; top: -10px; left: -10px; 
+            font-size: 1rem; transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            opacity: 0; transform: scale(0.8);
+        }
+        .cart-item:hover .remove-item-btn { opacity: 1; transform: scale(1); top: -8px; left: -8px; }
+        .remove-item-btn:hover { background: #ff3b30; color: white; transform: scale(1.1) !important; box-shadow: 0 4px 12px rgba(255, 59, 48, 0.4); }
+        
+        .close-modal-btn {
+            position: absolute; top: 15px; right: 20px; 
+            font-size: 24px; color: rgba(255,255,255,0.5); 
+            cursor: pointer; transition: 0.2s;
+            width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; background: rgba(255,255,255,0.05);
+        }
+        .close-modal-btn:hover { background: rgba(255,255,255,0.1); color: white; transform: rotate(90deg); }
+        
+        .cart-total {
+            background: rgba(0,0,0,0.2); border-radius: 12px; padding: 1.2rem;
+            margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .cart-total span:first-child { font-size: 1.1rem; color: rgba(255,255,255,0.8); }
+        .cart-total-value { font-size: 1.5rem; font-weight: 800; color: #fff; text-shadow: 0 0 20px rgba(102, 126, 234, 0.3); }
+
+        /* Scrollbar */
+        .cart-modal::-webkit-scrollbar { width: 6px; }
+        .cart-modal::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+        .cart-modal::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .cart-modal::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
     `;
     modal.appendChild(style);
 
@@ -571,7 +640,7 @@ function showCartModal() {
 
     // Close modal handlers
     const closeBtn = modal.querySelector('.close-modal-btn');
-    closeBtn.addEventListener('click', () => closeModal(overlay));
+    if (closeBtn) closeBtn.addEventListener('click', () => closeModal(overlay));
 
     overlay.addEventListener('click', (e) => {
         if (e.target === overlay) {
