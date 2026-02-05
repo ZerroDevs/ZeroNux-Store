@@ -51,7 +51,7 @@ body {
     flex-direction: column;
 }
 
-/* Tab Navigation */
+/* Tab Navigation s*/
 .admin-tabs {
     display: flex;
     gap: 0.5rem;
