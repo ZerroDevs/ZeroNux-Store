@@ -115,7 +115,7 @@
                 <!-- Search & Filter -->
                 <div class="search-container">
                     <div class="search-box">
-                        <input type="text" id="product-search" placeholder="ابحث عن منتج..." autocomplete="off">
+                        <input type="text" id="product-search" placeholder="ابحث عن منتج..." autocomplete="off" aria-label="Search products">
                         <span class="search-icon">🔍</span>
                     </div>
 
@@ -161,7 +161,7 @@
                 <h2 data-i18n="newsletter-title">ابق على اطلاع</h2>
                 <p data-i18n="newsletter-desc">اشترك للحصول على عروض خاصة وهدايا مجانية وصفقات حصرية.</p>
                 <form class="newsletter-form">
-                    <input type="email" data-i18n="newsletter-placeholder" placeholder="أدخل بريدك الإلكتروني" required>
+                    <input type="email" data-i18n="newsletter-placeholder" placeholder="أدخل بريدك الإلكتروني" required aria-label="Email for newsletter">
                     <button type="submit" class="btn btn-primary" data-i18n="newsletter-submit">اشترك</button>
                 </form>
             </div>
@@ -237,6 +237,9 @@
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <!-- Back to Top Button -->
+    <button id="back-to-top" aria-label="Back to Top">↑</button>
 
     <!-- Mobile Bottom Navigation Bar -->
     <div class="mobile-bottom-nav">

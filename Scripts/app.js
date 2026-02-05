@@ -1081,6 +1081,9 @@ window.completeOrder = function () {
 
 // Send Order to Discord Webhook
 function sendToDiscord(order) {
+    // SECURITY WARNING: This Webhook URL is exposed to the client.
+    // In a production environment, this should be moved to a backend service (e.g., Firebase Cloud Functions)
+    // to prevent potential abuse (spamming).
     const webhookURL = 'https://discord.com/api/webhooks/1468393122735067360/1vk_PLkUv4pdD4ofsxS6xGASp7Zp2DFw_ZkeSMYzoETu4duI-Hl63-iw5rFPRCYF4cDY';
 
     // Format Items in a nice list
@@ -1478,9 +1481,14 @@ function showProductDetails(productId) {
                     <span class="modal-price-label">السعر:</span>
                     <span class="modal-price">${displayPrice}</span>
                 </div>
-                <button class="btn btn-primary add-to-cart-modal" data-product-name="${product.name}" data-product-price="${product.price}">
-                    إضافة للسلة
-                </button>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button class="btn btn-secondary share-btn" onclick="shareProduct('${productId}')" aria-label="Share Product" style="padding: 0 1.2rem; height: 100%; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;">
+                        🔗
+                    </button>
+                    <button class="btn btn-primary add-to-cart-modal" data-product-name="${product.name}" data-product-price="${product.price}">
+                        إضافة للسلة
+                    </button>
+                </div>
             </div>
         `;
 
@@ -1574,6 +1582,17 @@ function showProductDetails(productId) {
         });
     });
 }
+
+// Share Product Function
+window.shareProduct = function(productId) {
+    const url = `${window.location.origin}${window.location.pathname}?product=${productId}`;
+    navigator.clipboard.writeText(url).then(() => {
+        showNotification('تم نسخ رابط المنتج! 📋');
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+        showNotification('حدث خطأ أثناء النسخ');
+    });
+};
 
 // Change main image in product details gallery
 window.changeMainImage = function (thumbnail, src) {
@@ -2335,9 +2354,56 @@ document.addEventListener('DOMContentLoaded', () => {
     initWhatsAppButton();
     initMobileMenu();
     initBottomNav();
+    initBackToTop();
+    initCookieConsent();
 
     console.log('ZeroNux Store initialized successfully!');
 });
+
+// Cookie Consent
+function initCookieConsent() {
+    if (localStorage.getItem('cookieConsent') === 'true') return;
+
+    const banner = document.createElement('div');
+    banner.className = 'cookie-consent-banner';
+    banner.innerHTML = `
+        <div class="cookie-content">
+            🍪 نستخدم ملفات تعريف الارتباط لتحسين تجربتك في التسوق. بمواصلة استخدام الموقع، فإنك توافق على سياساتنا.
+        </div>
+        <button class="cookie-btn">موافق</button>
+    `;
+
+    document.body.appendChild(banner);
+
+    banner.querySelector('.cookie-btn').addEventListener('click', () => {
+        localStorage.setItem('cookieConsent', 'true');
+        banner.style.animation = 'fadeOut 0.3s ease-out forwards';
+        setTimeout(() => banner.remove(), 300);
+    });
+}
+
+// Back to Top Button
+function initBackToTop() {
+    const backToTopBtn = document.getElementById('back-to-top');
+    if (!backToTopBtn) return;
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            backToTopBtn.style.display = 'flex';
+            // Small animation
+            backToTopBtn.style.animation = 'fadeIn 0.3s ease-out';
+        } else {
+            backToTopBtn.style.display = 'none';
+        }
+    });
+
+    backToTopBtn.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+}
 
 // Mobile Bottom Navigation
 function initBottomNav() {
