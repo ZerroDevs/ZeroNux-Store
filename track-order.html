@@ -63,10 +63,25 @@
 
     <header class="page-header">
         <div class="container">
+            <div style="font-size: 4rem; margin-bottom: 1rem; animation: float 3s ease-in-out infinite;">📦</div>
             <h1 class="page-title">تتبع طلبك</h1>
-            <p style="color: rgba(255,255,255,0.7);">أدخل رقم الطلب لمعرفة حالته الحالية</p>
+            <p>أدخل رقم الطلب لمعرفة حالته الحالية</p>
         </div>
     </header>
+
+    <style>
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+    </style>
 
     <main class="container track-section">
         <div class="search-box">
