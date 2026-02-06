@@ -1742,6 +1742,47 @@ body:has(#announcement-bar[style*="display: block"]) {
     .whatsapp-float {
         display: none !important;
     }
+
+    /* Mobile Nav Toggle */
+    .mobile-nav-toggle {
+        position: absolute;
+        top: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(18, 18, 30, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: none;
+        border-radius: 12px 12px 0 0;
+        width: 50px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        cursor: pointer;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.2);
+        z-index: 10001;
+        /* Ensure it's clickable */
+    }
+
+    .toggle-icon {
+        font-size: 12px;
+        transition: transform 0.3s ease;
+    }
+
+    .mobile-bottom-nav {
+        transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+
+    .mobile-bottom-nav.nav-hidden {
+        transform: translateY(100%);
+    }
+
+    .mobile-bottom-nav.nav-hidden .toggle-icon {
+        transform: rotate(180deg);
+    }
 }
 
 /* Mobile Navigation Optimization (Hamburger Menu) */
