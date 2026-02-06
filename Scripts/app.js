@@ -670,6 +670,188 @@ function initCartButton() {
 }
 
 // ============================================
+// RECENTLY VIEWED PRODUCTS
+// ============================================
+const MAX_RECENTLY_VIEWED = 6;
+let recentlyViewed = [];
+
+// Load recently viewed from localStorage
+function loadRecentlyViewed() {
+    const saved = localStorage.getItem('recentlyViewed');
+    if (saved) {
+        try {
+            recentlyViewed = JSON.parse(saved);
+        } catch (e) {
+            console.error('Error loading recently viewed:', e);
+            recentlyViewed = [];
+        }
+    }
+}
+
+// Save recently viewed to localStorage
+function saveRecentlyViewed() {
+    localStorage.setItem('recentlyViewed', JSON.stringify(recentlyViewed));
+}
+
+// Add product to recently viewed
+function addToRecentlyViewed(productId, productData) {
+    // Remove if already exists
+    recentlyViewed = recentlyViewed.filter(item => item.id !== productId);
+
+    // Add to front of array
+    recentlyViewed.unshift({
+        id: productId,
+        name: productData.name,
+        price: productData.price,
+        image: productData.image,
+        shortDesc: productData.shortDesc || productData.description?.substring(0, 60) + '...'
+    });
+
+    // Keep only last MAX items
+    if (recentlyViewed.length > MAX_RECENTLY_VIEWED) {
+        recentlyViewed = recentlyViewed.slice(0, MAX_RECENTLY_VIEWED);
+    }
+
+    saveRecentlyViewed();
+    updateRecentlyViewedCount();
+}
+
+// Render recently viewed section
+function renderRecentlyViewed() {
+    const container = document.getElementById('recently-viewed-container');
+    const section = document.getElementById('recently-viewed-section');
+
+    if (!container || !section) return;
+
+    if (recentlyViewed.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+
+    section.style.display = 'block';
+
+    let html = '';
+    recentlyViewed.forEach(item => {
+        const priceDisplay = currentCurrency === 'USD'
+            ? formatCurrency(item.price, 'USD')
+            : formatCurrency(item.price * EXCHANGE_RATE, 'LYD');
+
+        html += `
+            <div class="recently-viewed-item" onclick="showProductDetails('${item.id}')" style="cursor: pointer;">
+                <div class="recently-viewed-image">
+                    <img src="${item.image}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
+                </div>
+                <div class="recently-viewed-info">
+                    <h4>${item.name}</h4>
+                    <span class="recently-viewed-price">${priceDisplay}</span>
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+// Update recently viewed count badge
+function updateRecentlyViewedCount() {
+    const badge = document.querySelector('.recently-viewed-count');
+    if (badge) {
+        badge.textContent = recentlyViewed.length;
+        badge.style.display = recentlyViewed.length > 0 ? 'flex' : 'none';
+    }
+}
+
+// Show recently viewed drawer
+function showRecentlyViewedDrawer() {
+    // Remove existing drawer if any
+    const existing = document.querySelector('.recently-viewed-drawer');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'recently-viewed-drawer';
+
+    let itemsHTML = '';
+    if (recentlyViewed.length === 0) {
+        itemsHTML = `
+            <div class="empty-recently-viewed" style="text-align: center; padding: 3rem 1rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🕐</div>
+                <h3 style="color: white; margin-bottom: 0.5rem;">لا توجد منتجات</h3>
+                <p style="color: rgba(255,255,255,0.6);">لم تشاهد أي منتجات بعد</p>
+            </div>
+        `;
+    } else {
+        recentlyViewed.forEach(item => {
+            const priceDisplay = currentCurrency === 'USD'
+                ? formatCurrency(item.price, 'USD')
+                : formatCurrency(item.price * EXCHANGE_RATE, 'LYD');
+
+            itemsHTML += `
+                <div class="recently-viewed-drawer-item" onclick="document.querySelector('.recently-viewed-drawer').remove(); showProductDetails('${item.id}');">
+                    <img src="${item.image}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/60?text=No+Image'">
+                    <div class="item-info">
+                        <h4>${item.name}</h4>
+                        <span class="price">${priceDisplay}</span>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    overlay.innerHTML = `
+        <div class="drawer-content">
+            <div class="drawer-header">
+                <h3>🕐 شاهدت مؤخراً</h3>
+                <button class="close-drawer">&times;</button>
+            </div>
+            <div class="drawer-items">
+                ${itemsHTML}
+            </div>
+            ${recentlyViewed.length > 0 ? `
+                <button class="clear-recently-viewed" onclick="clearRecentlyViewed()">مسح السجل</button>
+            ` : ''}
+        </div>
+    `;
+
+    // Styles
+    Object.assign(overlay.style, {
+        position: 'fixed', top: '0', left: '0', right: '0', bottom: '0',
+        background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)',
+        zIndex: '99999', display: 'flex', justifyContent: 'flex-end',
+        animation: 'fadeIn 0.3s ease'
+    });
+
+    document.body.appendChild(overlay);
+
+    // Close handlers
+    overlay.querySelector('.close-drawer').addEventListener('click', () => overlay.remove());
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.remove();
+    });
+}
+
+// Clear recently viewed
+function clearRecentlyViewed() {
+    recentlyViewed = [];
+    saveRecentlyViewed();
+    updateRecentlyViewedCount();
+    const drawer = document.querySelector('.recently-viewed-drawer');
+    if (drawer) drawer.remove();
+    showNotification('تم مسح السجل');
+}
+
+// Initialize recently viewed button
+function initRecentlyViewedButton() {
+    const btn = document.querySelector('.recently-viewed-btn');
+    if (btn) {
+        btn.addEventListener('click', showRecentlyViewedDrawer);
+    }
+    updateRecentlyViewedCount();
+}
+
+// Initialize recently viewed on page load
+loadRecentlyViewed();
+
+// ============================================
 // WISHLIST FUNCTIONALITY
 // ============================================
 let wishlist = [];
@@ -1804,6 +1986,9 @@ function showProductDetails(productId) {
             return;
         }
 
+        // Track as recently viewed
+        addToRecentlyViewed(productId, product);
+
         const overlay = document.createElement('div');
         overlay.className = 'product-modal-overlay';
 
@@ -2551,6 +2736,7 @@ function loadProductsFromFirebase() {
         initProductCardClick();
         initWishlistHearts();
         initWishlistButton();
+        initRecentlyViewedButton();
 
         // Check for product ID in URL (Deep Linking)
         const urlParams = new URLSearchParams(window.location.search);

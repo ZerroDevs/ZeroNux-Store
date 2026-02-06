@@ -77,6 +77,18 @@
                     <a href="#products" class="nav-link" data-i18n="nav-products">المنتجات</a>
                     <a href="#about" class="nav-link" data-i18n="nav-about">من نحن</a>
                     <a href="#contact" class="nav-link" data-i18n="nav-contact">اتصل بنا</a>
+
+                    <!-- Mobile Only Links -->
+                    <a href="#" class="nav-link mobile-only-link" onclick="showWishlistDrawer(); return false;">
+                        <span style="display:flex; align-items:center; gap:8px;">
+                            ❤️ المفضلة
+                        </span>
+                    </a>
+                    <a href="#" class="nav-link mobile-only-link" onclick="showRecentlyViewedDrawer(); return false;">
+                        <span style="display:flex; align-items:center; gap:8px;">
+                            🕐 شاهدت مؤخراً
+                        </span>
+                    </a>
                 </div>
 
                 <div class="nav-actions">
@@ -90,6 +102,14 @@
                             <span class="currency-code">LYD</span>
                         </button>
                     </div>
+                    <button class="recently-viewed-btn" aria-label="Recently Viewed">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                        <span class="recently-viewed-count">0</span>
+                    </button>
                     <button class="wishlist-btn" aria-label="Wishlist">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
