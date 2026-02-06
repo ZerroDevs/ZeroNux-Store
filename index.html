@@ -33,6 +33,26 @@
 </head>
 
 <body>
+    <script>
+        // التحقق مما إذا كان المستخدم على رابط Dev أو Preview
+        const isDevOrPreview = window.location.hostname.includes('dev.') ||
+            window.location.hostname.includes('preview.');
+
+        if (isDevOrPreview) {
+            // 1. تغيير عنوان الصفحة (Title)
+            document.title = "[TEST SITE] " + document.title;
+
+            // 2. تغيير نص الـ Footer
+            const footerElement = document.querySelector('[data-i18n="footer-copyright"]');
+            if (footerElement) {
+                footerElement.innerHTML = "هذه نسخة تجريبية لمتجر زيرونكس - 2026 ©";
+                footerElement.style.color = "#ff4444"; // تلوينه بالأحمر لتمييزه
+            }
+
+            // يمكنك إضافة تنبيه بسيط في أعلى الصفحة لتعرف أنك في بيئة الاختبار
+            console.log("نتواصل الآن من بيئة الاختبار: " + window.location.hostname);
+        }
+    </script>
     <!-- Announcement Bar -->
     <div id="announcement-bar" class="announcement-bar" style="display: none;">
         <div class="announcement-content">
@@ -216,7 +236,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p data-i18n="footer-copyright">&copy; PREVIEW 2026 متجر زيرونكس. جميع الحقوق محفوظة. PREVIEW</p>
+                <p data-i18n="footer-copyright">&copy; 2026 متجر زيرونكس. جميع الحقوق محفوظة. </p>
             </div>
         </div>
     </footer>
