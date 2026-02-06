@@ -533,21 +533,95 @@ function showNotification(message) {
 }
 
 // Add to cart function
-// Add to cart function
 function addToCart(productName, price, image, description, productId) {
-    cart.push({
-        id: productId || null,
-        name: productName,
-        price: price,
-        image: image || 'https://via.placeholder.com/100',
-        description: description || ''
-    });
+    // Check if item already exists in cart
+    const existingItem = cart.find(item => item.id === productId);
+
+    if (existingItem) {
+        // Increase quantity if already in cart
+        existingItem.quantity = (existingItem.quantity || 1) + 1;
+        showNotification(`تم زيادة الكمية: ${productName} (${existingItem.quantity}) 🛒`);
+    } else {
+        // Add new item with quantity 1
+        cart.push({
+            id: productId || null,
+            name: productName,
+            price: price,
+            image: image || 'https://via.placeholder.com/100',
+            description: description || '',
+            quantity: 1
+        });
+        showNotification(`تمت إضافة ${productName} إلى السلة! 🛒`);
+    }
+
     saveCart();
     updateCartCount();
+}
 
-    // Show notification
-    const message = `تمت إضافة ${productName} إلى السلة! 🛒`;
-    showNotification(message);
+// Update item quantity in cart
+function updateCartQuantity(productId, newQuantity) {
+    const item = cart.find(item => item.id === productId);
+    if (item) {
+        if (newQuantity <= 0) {
+            // Remove item if quantity is 0 or less
+            removeFromCart(productId);
+        } else {
+            item.quantity = newQuantity;
+            saveCart();
+            updateCartCount();
+        }
+    }
+}
+
+// Increase quantity
+function increaseQuantity(productId) {
+    const item = cart.find(item => item.id === productId);
+    if (item) {
+        item.quantity = (item.quantity || 1) + 1;
+        saveCart();
+        updateCartCount();
+        // Refresh cart modal
+        refreshCartModal();
+    }
+}
+
+// Decrease quantity
+function decreaseQuantity(productId) {
+    const item = cart.find(item => item.id === productId);
+    if (item) {
+        if (item.quantity <= 1) {
+            removeFromCart(productId);
+        } else {
+            item.quantity--;
+            saveCart();
+            updateCartCount();
+            refreshCartModal();
+        }
+    }
+}
+
+// Remove item from cart
+function removeFromCart(productId) {
+    const index = cart.findIndex(item => item.id === productId);
+    if (index > -1) {
+        const itemName = cart[index].name;
+        cart.splice(index, 1);
+        saveCart();
+        updateCartCount();
+        showNotification(`تمت إزالة ${itemName} من السلة`);
+        refreshCartModal();
+    }
+}
+
+// Refresh cart modal (if open)
+function refreshCartModal() {
+    const existingModal = document.querySelector('.cart-modal-overlay');
+    if (existingModal) {
+        existingModal.remove();
+        if (cart.length > 0) {
+            showCartModal();
+        }
+    }
 }
 
 // Update cart count badge
@@ -577,8 +651,11 @@ function updateCartCount() {
         cartBtn.style.position = 'relative';
         cartBtn.appendChild(badge);
     }
-    badge.textContent = cart.length;
-    badge.style.display = cart.length > 0 ? 'flex' : 'none';
+
+    // Sum all quantities
+    const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    badge.textContent = totalItems;
+    badge.style.display = totalItems > 0 ? 'flex' : 'none';
 }
 
 // Initialize cart button
@@ -968,6 +1045,8 @@ function showCartModal() {
             // Convert price for display based on current settings
             const itemPriceUSD = item.price;
             const itemPriceDisplay = currentCurrency === 'USD' ? itemPriceUSD : (itemPriceUSD * EXCHANGE_RATE);
+            const itemQuantity = item.quantity || 1;
+            const itemSubtotal = itemPriceDisplay * itemQuantity;
 
             cartHTML += `
                 <div class="cart-item">
@@ -978,14 +1057,22 @@ function showCartModal() {
                         <div class="cart-item-name">${item.name}</div>
                         <div class="cart-item-desc">${item.description}</div>
                         <div class="cart-item-price">${formatCurrency(itemPriceDisplay, currentCurrency)}</div>
+                        <div class="quantity-controls">
+                            <button class="qty-btn qty-decrease" data-product-id="${item.id}">−</button>
+                            <span class="qty-value">${itemQuantity}</span>
+                            <button class="qty-btn qty-increase" data-product-id="${item.id}">+</button>
+                        </div>
+                        <div class="cart-item-subtotal" style="font-size: 0.85rem; color: rgba(255,255,255,0.7); margin-top: 0.25rem;">
+                            المجموع: ${formatCurrency(itemSubtotal, currentCurrency)}
+                        </div>
                     </div>
-                    <button class="remove-item-btn" data-index="${index}">&times;</button>
+                    <button class="remove-item-btn" data-product-id="${item.id}">&times;</button>
                 </div>
             `;
         });
 
-        // Calculate total in BASE USD first
-        const totalUSD = cart.reduce((sum, item) => sum + item.price, 0);
+        // Calculate total in BASE USD first (with quantities)
+        const totalUSD = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
 
         // Then convert to current currency for display
         const totalCurrent = currentCurrency === 'USD' ? totalUSD : (totalUSD * EXCHANGE_RATE);
@@ -1063,12 +1150,25 @@ function showCartModal() {
         const removeButtons = modal.querySelectorAll('.remove-item-btn');
         removeButtons.forEach(btn => {
             btn.addEventListener('click', () => {
-                const index = parseInt(btn.dataset.index);
-                cart.splice(index, 1);
-                saveCart();
-                updateCartCount();
-                document.querySelector('.cart-modal-overlay').remove();
-                if (cart.length > 0) showCartModal(); else showNotification('تم إفراغ السلة');
+                const productId = btn.dataset.productId;
+                removeFromCart(productId);
+            });
+        });
+
+        // Quantity Controls
+        const increaseButtons = modal.querySelectorAll('.qty-increase');
+        increaseButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const productId = btn.dataset.productId;
+                increaseQuantity(productId);
+            });
+        });
+
+        const decreaseButtons = modal.querySelectorAll('.qty-decrease');
+        decreaseButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const productId = btn.dataset.productId;
+                decreaseQuantity(productId);
             });
         });
 
@@ -1274,8 +1374,8 @@ window.applyPromoCode = function () {
 window.completeOrder = function () {
     if (cart.length === 0) return;
 
-    // Calculate total in BASE USD first
-    const totalUSD = cart.reduce((sum, item) => sum + item.price, 0);
+    // Calculate total in BASE USD first (with quantities)
+    const totalUSD = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
 
     // Then convert to current currency for final order processing
     const total = currentCurrency === 'USD' ? totalUSD : (totalUSD * EXCHANGE_RATE);
@@ -1303,6 +1403,7 @@ window.completeOrder = function () {
             return {
                 name: item.name,
                 price: itemPrice,
+                quantity: item.quantity || 1,
                 image: item.image || ''
             };
         }),
@@ -1338,7 +1439,9 @@ window.completeOrder = function () {
 
     cart.forEach(item => {
         const itemPrice = currentCurrency === 'USD' ? item.price : (item.price * EXCHANGE_RATE);
-        message += `📦 *${item.name}*\nالسعر: ${formatCurrency(itemPrice, currentCurrency)}\n\n`;
+        const itemQty = item.quantity || 1;
+        const itemSubtotal = itemPrice * itemQty;
+        message += `📦 *${item.name}* x${itemQty}\nالسعر: ${formatCurrency(itemSubtotal, currentCurrency)}\n\n`;
     });
 
     if (activeDiscount) {
@@ -1357,15 +1460,16 @@ window.completeOrder = function () {
         promoRef.child('usedCount').transaction(current => (current || 0) + 1);
     }
 
-    // Reduce stock for products with tracking enabled
+    // Reduce stock for products with tracking enabled (by quantity)
     cart.forEach(item => {
         if (item.id) {
             const productRef = firebase.database().ref('products').child(item.id);
             productRef.once('value', (snapshot) => {
                 const product = snapshot.val();
                 if (product && product.trackStock && product.stock > 0) {
+                    const qtyToReduce = item.quantity || 1;
                     productRef.update({
-                        stock: product.stock - 1
+                        stock: Math.max(0, product.stock - qtyToReduce)
                     });
                 }
             });
@@ -1380,6 +1484,7 @@ window.completeOrder = function () {
 
     activeDiscount = null;
     cart = [];
+    saveCart();
     updateCartCount();
     document.querySelector('.cart-modal-overlay').remove();
 
