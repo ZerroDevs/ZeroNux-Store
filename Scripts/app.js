@@ -413,6 +413,28 @@ function initCurrencySwitcher() {
 // Shopping cart functionality
 let cart = [];
 
+// Load cart from localStorage
+function loadCart() {
+    const savedCart = localStorage.getItem('shoppingCart');
+    if (savedCart) {
+        try {
+            cart = JSON.parse(savedCart);
+            updateCartCount();
+        } catch (e) {
+            console.error('Error loading cart:', e);
+            cart = [];
+        }
+    }
+}
+
+// Save cart to localStorage
+function saveCart() {
+    localStorage.setItem('shoppingCart', JSON.stringify(cart));
+}
+
+// Initialize cart on load
+loadCart();
+
 function updateCartCount() {
     const cartCount = document.querySelector('.cart-count');
     cartCount.textContent = cart.length;
@@ -520,6 +542,7 @@ function addToCart(productName, price, image, description, productId) {
         image: image || 'https://via.placeholder.com/100',
         description: description || ''
     });
+    saveCart();
     updateCartCount();
 
     // Show notification
@@ -757,6 +780,7 @@ function showCartModal() {
             btn.addEventListener('click', () => {
                 const index = parseInt(btn.dataset.index);
                 cart.splice(index, 1);
+                saveCart();
                 updateCartCount();
                 document.querySelector('.cart-modal-overlay').remove();
                 if (cart.length > 0) showCartModal(); else showNotification('تم إفراغ السلة');
@@ -768,6 +792,7 @@ function showCartModal() {
         if (clrBtn) {
             clrBtn.addEventListener('click', () => {
                 cart = [];
+                saveCart();
                 updateCartCount();
                 activeDiscount = null; // Reset discount on clear
                 document.querySelector('.cart-modal-overlay').remove();
