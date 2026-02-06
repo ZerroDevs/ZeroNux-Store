@@ -592,6 +592,291 @@ function initCartButton() {
     }
 }
 
+// ============================================
+// WISHLIST FUNCTIONALITY
+// ============================================
+let wishlist = [];
+
+// Load wishlist from localStorage
+function loadWishlist() {
+    const savedWishlist = localStorage.getItem('wishlist');
+    if (savedWishlist) {
+        try {
+            wishlist = JSON.parse(savedWishlist);
+            updateWishlistCount();
+        } catch (e) {
+            console.error('Error loading wishlist:', e);
+            wishlist = [];
+        }
+    }
+}
+
+// Save wishlist to localStorage
+function saveWishlist() {
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+}
+
+// Check if product is in wishlist
+function isInWishlist(productId) {
+    return wishlist.some(item => item.id === productId);
+}
+
+// Toggle wishlist (add/remove)
+function toggleWishlist(productId, productData) {
+    const index = wishlist.findIndex(item => item.id === productId);
+
+    if (index > -1) {
+        // Remove from wishlist
+        wishlist.splice(index, 1);
+        saveWishlist();
+        updateWishlistCount();
+        updateWishlistHearts();
+        showNotification('تمت الإزالة من القائمة 📑');
+    } else {
+        // Add to wishlist
+        wishlist.push({
+            id: productId,
+            name: productData.name,
+            price: productData.price,
+            image: productData.image,
+            description: productData.description
+        });
+        saveWishlist();
+        updateWishlistCount();
+        updateWishlistHearts();
+        showNotification('تمت الإضافة إلى القائمة 🔖');
+    }
+}
+
+// Update wishlist count badge
+function updateWishlistCount() {
+    const wishlistBtn = document.querySelector('.wishlist-btn');
+    if (!wishlistBtn) return;
+
+    let badge = wishlistBtn.querySelector('.wishlist-count');
+    if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'wishlist-count';
+        Object.assign(badge.style, {
+            position: 'absolute',
+            top: '-5px',
+            right: '-5px',
+            background: 'linear-gradient(135deg, #f5576c 0%, #ff6b6b 100%)',
+            color: 'white',
+            borderRadius: '50%',
+            width: '20px',
+            height: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.75rem',
+            fontWeight: '700'
+        });
+        wishlistBtn.style.position = 'relative';
+        wishlistBtn.appendChild(badge);
+    }
+    badge.textContent = wishlist.length;
+    badge.style.display = wishlist.length > 0 ? 'flex' : 'none';
+}
+
+// Update all wishlist heart icons on page
+function updateWishlistHearts() {
+    const hearts = document.querySelectorAll('.wishlist-heart');
+    hearts.forEach(heart => {
+        const productId = heart.dataset.productId;
+        if (isInWishlist(productId)) {
+            heart.classList.add('active');
+            heart.innerHTML = '🔖';
+        } else {
+            heart.classList.remove('active');
+            heart.innerHTML = '📑';
+        }
+    });
+}
+
+// Initialize wishlist button in navbar
+function initWishlistButton() {
+    const wishlistBtn = document.querySelector('.wishlist-btn');
+    if (wishlistBtn) {
+        wishlistBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            showWishlistDrawer();
+        });
+    }
+}
+
+// Initialize wishlist heart buttons on product cards
+function initWishlistHearts() {
+    const hearts = document.querySelectorAll('.wishlist-heart');
+    hearts.forEach(heart => {
+        heart.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const productId = heart.dataset.productId;
+            const productData = {
+                name: heart.dataset.productName,
+                price: parseFloat(heart.dataset.productPrice),
+                image: heart.dataset.productImage,
+                description: heart.dataset.productDesc
+            };
+            toggleWishlist(productId, productData);
+        });
+    });
+}
+
+// Move item from wishlist to cart
+function moveToCart(productId) {
+    const item = wishlist.find(i => i.id === productId);
+    if (item) {
+        addToCart(item.name, item.price, item.image, item.description, item.id);
+        // Remove from wishlist
+        const index = wishlist.findIndex(i => i.id === productId);
+        if (index > -1) {
+            wishlist.splice(index, 1);
+            saveWishlist();
+            updateWishlistCount();
+            updateWishlistHearts();
+        }
+        // Refresh drawer
+        const drawer = document.querySelector('.wishlist-drawer-overlay');
+        if (drawer) {
+            drawer.remove();
+            showWishlistDrawer();
+        }
+    }
+}
+
+// Show wishlist drawer/modal
+function showWishlistDrawer() {
+    const overlay = document.createElement('div');
+    overlay.className = 'wishlist-drawer-overlay';
+
+    const drawer = document.createElement('div');
+    drawer.className = 'wishlist-drawer';
+
+    Object.assign(overlay.style, {
+        position: 'fixed',
+        top: '0',
+        left: '0',
+        right: '0',
+        bottom: '0',
+        background: 'rgba(0, 0, 0, 0.8)',
+        backdropFilter: 'blur(10px)',
+        zIndex: '9999',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        animation: 'fadeIn 0.3s ease-out'
+    });
+
+    Object.assign(drawer.style, {
+        background: 'linear-gradient(145deg, rgba(26, 26, 46, 0.95), rgba(22, 33, 62, 0.98))',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        borderRadius: '24px',
+        padding: '2rem',
+        maxWidth: '480px',
+        width: '95%',
+        maxHeight: '85vh',
+        overflowY: 'auto',
+        boxShadow: '0 25px 60px rgba(0,0,0,0.6), 0 0 30px rgba(245, 87, 108, 0.15)',
+        animation: 'modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+        direction: 'rtl',
+        color: '#fff'
+    });
+
+    let contentHTML = '';
+
+    if (wishlist.length === 0) {
+        contentHTML = `
+            <span class="close-wishlist-btn" style="position:absolute; top:15px; right:20px; font-size:28px; cursor:pointer;">&times;</span>
+            <div class="empty-wishlist" style="text-align: center; padding: 4rem 1rem;">
+                <div style="font-size: 5rem; margin-bottom: 1.5rem; animation: float 3s ease-in-out infinite;">📑</div>
+                <h3 style="font-size: 1.6rem; margin-bottom: 0.5rem; background: linear-gradient(to right, #fff, #a5a5a5); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Wishlist فارغة</h3>
+                <p style="color: rgba(255,255,255,0.6); margin-bottom: 2.5rem; font-size: 0.95rem;">لم تقم بإضافة أي منتجات للقائمة بعد.<br>اضغط على 🔖 لإضافة منتجات!</p>
+                <button class="btn btn-primary" onclick="document.querySelector('.wishlist-drawer-overlay').remove()" style="padding: 14px 35px; border-radius: 50px;">
+                    تصفح المنتجات 🛍️
+                </button>
+            </div>
+        `;
+    } else {
+        let itemsHTML = '';
+        wishlist.forEach(item => {
+            const itemPriceDisplay = currentCurrency === 'USD' ? item.price : (item.price * EXCHANGE_RATE);
+            itemsHTML += `
+                <div class="wishlist-item" style="display: flex; gap: 1rem; padding: 1rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; margin-bottom: 1rem; align-items: center;">
+                    <div style="width: 70px; height: 70px; border-radius: 12px; overflow: hidden; flex-shrink: 0; background: rgba(255,255,255,0.05);">
+                        <img src="${item.image}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: contain;">
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; color: white; margin-bottom: 0.25rem;">${item.name}</div>
+                        <div style="color: #667eea; font-weight: 700;">${formatCurrency(itemPriceDisplay, currentCurrency)}</div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <button onclick="moveToCart('${item.id}')" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+                            🛒 أضف للسلة
+                        </button>
+                        <button onclick="removeFromWishlist('${item.id}')" style="background: rgba(245, 87, 108, 0.2); border: 1px solid #f5576c; color: #f5576c; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem;">
+                            إزالة
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+
+        contentHTML = `
+            <span class="close-wishlist-btn" style="position:absolute; top:15px; right:20px; font-size:28px; cursor:pointer;">&times;</span>
+            <h2 style="margin-top: 0; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span>🔖</span> Wishlist
+                <span style="font-size: 0.9rem; color: rgba(255,255,255,0.5);">(${wishlist.length})</span>
+            </h2>
+            <div class="wishlist-items">
+                ${itemsHTML}
+            </div>
+        `;
+    }
+
+    drawer.innerHTML = contentHTML;
+    drawer.style.position = 'relative';
+
+    // Close button listener
+    setTimeout(() => {
+        const closeBtn = drawer.querySelector('.close-wishlist-btn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => overlay.remove());
+        }
+    }, 0);
+
+    // Close on overlay click
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.remove();
+    });
+
+    overlay.appendChild(drawer);
+    document.body.appendChild(overlay);
+}
+
+// Remove from wishlist (called from drawer)
+function removeFromWishlist(productId) {
+    const index = wishlist.findIndex(item => item.id === productId);
+    if (index > -1) {
+        wishlist.splice(index, 1);
+        saveWishlist();
+        updateWishlistCount();
+        updateWishlistHearts();
+        showNotification('تمت الإزالة من القائمة 📑');
+        // Refresh drawer
+        const drawer = document.querySelector('.wishlist-drawer-overlay');
+        if (drawer) {
+            drawer.remove();
+            if (wishlist.length > 0) {
+                showWishlistDrawer();
+            }
+        }
+    }
+}
+
+// Initialize wishlist on page load
+loadWishlist();
+
 // Initialize add to cart buttons
 function initAddToCartButtons() {
     const addToCartBtns = document.querySelectorAll('.add-to-cart-btn');
@@ -2159,6 +2444,8 @@ function loadProductsFromFirebase() {
         // Re-initialize buttons and events
         initAddToCartButtons();
         initProductCardClick();
+        initWishlistHearts();
+        initWishlistButton();
 
         // Check for product ID in URL (Deep Linking)
         const urlParams = new URLSearchParams(window.location.search);
@@ -2297,10 +2584,24 @@ function createProductCardHTML(id, product) {
         }
     }
 
+    // Wishlist heart icon
+    const isWishlisted = isInWishlist(id);
+    const heartIcon = isWishlisted ? '🔖' : '📑';
+    const heartActiveClass = isWishlisted ? 'active' : '';
+
     return `
         <div class="product-card ${isOutOfStock ? 'out-of-stock-card' : ''}" data-product-id="${id}" data-category="${categoryClass}">
             ${badgeHTML}
             ${stockBadge}
+            <button class="wishlist-heart ${heartActiveClass}" 
+                data-product-id="${id}" 
+                data-product-name="${product.name}" 
+                data-product-price="${product.price}" 
+                data-product-image="${product.image}" 
+                data-product-desc="${product.shortDesc || product.description.substring(0, 60) + '...'}"
+                aria-label="إضافة لـ Wishlist">
+                ${heartIcon}
+            </button>
             <div class="product-image">
                 <img src="${product.image}" alt="${product.name}" class="product-img" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
             </div>
