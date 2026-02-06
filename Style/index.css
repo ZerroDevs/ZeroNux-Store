@@ -160,7 +160,7 @@ body:has(#announcement-bar[style*="display: block"]) {
     background: rgba(15, 15, 30, 0.8);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border-color);
-    z-index: 1000;
+    z-index: 10000;
     transition: var(--transition-normal);
 }
 
@@ -216,7 +216,7 @@ body:has(#announcement-bar[style*="display: block"]) {
         /* Changed from block to flex for centering */
         position: relative;
         /* CRITICAL for z-index */
-        z-index: 1002;
+        z-index: 10002;
         /* Ensure above menu */
         font-size: 1.5rem;
         width: 40px;
@@ -249,7 +249,7 @@ body:has(#announcement-bar[style*="display: block"]) {
         align-items: flex-start;
         padding: 6rem 1.5rem 2rem;
         transition: right 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-        z-index: 1000;
+        z-index: 10001;
         box-shadow: -10px 0 50px rgba(0, 0, 0, 0.7);
         border-left: 1px solid rgba(255, 255, 255, 0.1);
         overflow-y: auto;
