@@ -2593,15 +2593,6 @@ function createProductCardHTML(id, product) {
         <div class="product-card ${isOutOfStock ? 'out-of-stock-card' : ''}" data-product-id="${id}" data-category="${categoryClass}">
             ${badgeHTML}
             ${stockBadge}
-            <button class="wishlist-heart ${heartActiveClass}" 
-                data-product-id="${id}" 
-                data-product-name="${product.name}" 
-                data-product-price="${product.price}" 
-                data-product-image="${product.image}" 
-                data-product-desc="${product.shortDesc || product.description.substring(0, 60) + '...'}"
-                aria-label="إضافة لـ Wishlist">
-                ${heartIcon}
-            </button>
             <div class="product-image">
                 <img src="${product.image}" alt="${product.name}" class="product-img" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
             </div>
@@ -2610,12 +2601,23 @@ function createProductCardHTML(id, product) {
                 <p class="product-description">${product.shortDesc || product.description.substring(0, 60) + '...'}</p>
                 <div class="product-footer">
                     <span class="product-price" data-usd="${product.price}">${price}</span>
-                    <button class="add-to-cart-btn" ${addToCartDisabled} data-product-id="${id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-image="${product.image}" data-product-desc="${product.shortDesc || product.description.substring(0, 60) + '...'}">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M9 2L6 6M18 6L15 2M6 6h12l1 14H5L6 6z" />
-                        </svg>
-                        ${buttonText}
-                    </button>
+                    <div class="product-actions">
+                        <button class="wishlist-heart ${heartActiveClass}" 
+                            data-product-id="${id}" 
+                            data-product-name="${product.name}" 
+                            data-product-price="${product.price}" 
+                            data-product-image="${product.image}" 
+                            data-product-desc="${product.shortDesc || product.description.substring(0, 60) + '...'}"
+                            aria-label="إضافة لـ Wishlist">
+                            ${heartIcon}
+                        </button>
+                        <button class="add-to-cart-btn" ${addToCartDisabled} data-product-id="${id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-image="${product.image}" data-product-desc="${product.shortDesc || product.description.substring(0, 60) + '...'}">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 2L6 6M18 6L15 2M6 6h12l1 14H5L6 6z" />
+                            </svg>
+                            ${buttonText}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
