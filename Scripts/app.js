@@ -1767,10 +1767,11 @@ function initSmoothScrolling() {
 
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
-            e.preventDefault();
-
             const targetId = link.getAttribute('href');
-            if (targetId.startsWith('#')) {
+
+            // Only intercept internal links for smooth scrolling
+            if (targetId && targetId.startsWith('#')) {
+                e.preventDefault();
                 const targetSection = document.querySelector(targetId);
                 if (targetSection) {
                     const offsetTop = targetSection.offsetTop - 80; // Account for fixed navbar
