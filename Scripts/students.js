@@ -19,19 +19,21 @@ const studentBooksRef = database.ref('studentBooks');
 const bookRequestsRef = database.ref('bookRequests');
 const settingsRef = database.ref('settings');
 
-// Global contact number (loaded from settings)
+// Global State
 let CONTACT_NUMBER = '218916808225';
+let EXCHANGE_RATE = 1;
+let currentCurrency = 'USD';
+let allBooks = {};
 
 // ============================================
-// LOAD SETTINGS (theme, contact info)
+// LOAD SETTINGS (theme, contact info, exchange rate)
 // ============================================
 function loadSettings() {
     settingsRef.on('value', (snapshot) => {
         const settings = snapshot.val();
         if (settings) {
-            if (settings.phoneNumber) {
-                CONTACT_NUMBER = settings.phoneNumber;
-            }
+            if (settings.phoneNumber) CONTACT_NUMBER = settings.phoneNumber;
+            if (settings.exchangeRate) EXCHANGE_RATE = parseFloat(settings.exchangeRate) || 1;
 
             // Apply theme
             if (settings.theme) {
@@ -40,19 +42,41 @@ function loadSettings() {
                     root.style.setProperty('--primary', settings.theme.primary);
                     root.style.setProperty('--primary-gradient', `linear-gradient(135deg, ${settings.theme.primary} 0%, ${settings.theme.secondary || '#764ba2'} 100%)`);
                 }
-                if (settings.theme.secondary) {
-                    root.style.setProperty('--secondary', settings.theme.secondary);
-                }
-                if (settings.theme.accent) {
-                    root.style.setProperty('--accent', settings.theme.accent);
-                }
+                if (settings.theme.secondary) root.style.setProperty('--secondary', settings.theme.secondary);
+                if (settings.theme.accent) root.style.setProperty('--accent', settings.theme.accent);
                 if (settings.theme.bgPrimary) root.style.setProperty('--bg-primary', settings.theme.bgPrimary);
                 if (settings.theme.bgSecondary) root.style.setProperty('--bg-secondary', settings.theme.bgSecondary);
                 if (settings.theme.textPrimary) root.style.setProperty('--text-primary', settings.theme.textPrimary);
                 if (settings.theme.textSecondary) root.style.setProperty('--text-secondary', settings.theme.textSecondary);
             }
         }
+        // Re-render to update exchange rate if needed
+        renderBooks();
     });
+}
+
+// ============================================
+// CURRENCY TOGGLE
+// ============================================
+function toggleCurrency() {
+    currentCurrency = currentCurrency === 'USD' ? 'LYD' : 'USD';
+
+    // Update button
+    const symbol = document.querySelector('.currency-symbol');
+    const code = document.querySelector('.currency-code');
+    if (symbol) symbol.textContent = currentCurrency === 'USD' ? '$' : 'د.ل';
+    if (code) code.textContent = currentCurrency;
+
+    renderBooks();
+}
+
+// Helper to format price
+function formatPrice(price) {
+    if (currentCurrency === 'USD') {
+        return `$${parseFloat(price).toFixed(2)}`;
+    } else {
+        return `${(parseFloat(price) * EXCHANGE_RATE).toFixed(2)} د.ل`;
+    }
 }
 
 // ============================================
@@ -68,38 +92,45 @@ function loadBooks() {
     `;
 
     studentBooksRef.on('value', (snapshot) => {
-        const books = snapshot.val();
-        grid.innerHTML = '';
+        allBooks = snapshot.val() || {};
+        renderBooks();
+    });
+}
 
-        if (!books || Object.keys(books).length === 0) {
-            grid.innerHTML = `
-                <div class="books-empty">
-                    <span class="books-empty-icon">📚</span>
-                    <h3>لا توجد كتب حالياً</h3>
-                    <p>سيتم إضافة الكتب قريباً. يمكنك طلب كتاب من خلال النموذج أدناه</p>
-                </div>
-            `;
-            return;
-        }
+function renderBooks() {
+    const grid = document.getElementById('books-grid');
+    if (!grid) return;
 
-        // Only show visible books
-        const bookEntries = Object.entries(books).filter(([id, book]) => book.visible !== false);
+    grid.innerHTML = '';
 
-        if (bookEntries.length === 0) {
-            grid.innerHTML = `
-                <div class="books-empty">
-                    <span class="books-empty-icon">📚</span>
-                    <h3>لا توجد كتب حالياً</h3>
-                    <p>سيتم إضافة الكتب قريباً. يمكنك طلب كتاب من خلال النموذج أدناه</p>
-                </div>
-            `;
-            return;
-        }
+    if (!allBooks || Object.keys(allBooks).length === 0) {
+        grid.innerHTML = `
+            <div class="books-empty">
+                <span class="books-empty-icon">📚</span>
+                <h3>لا توجد كتب حالياً</h3>
+                <p>سيتم إضافة الكتب قريباً. يمكنك طلب كتاب من خلال النموذج أدناه</p>
+            </div>
+        `;
+        return;
+    }
 
-        bookEntries.forEach(([id, book]) => {
-            const card = createBookCard(id, book);
-            grid.appendChild(card);
-        });
+    // Only show visible books
+    const bookEntries = Object.entries(allBooks).filter(([id, book]) => book.visible !== false);
+
+    if (bookEntries.length === 0) {
+        grid.innerHTML = `
+            <div class="books-empty">
+                <span class="books-empty-icon">📚</span>
+                <h3>لا توجد كتب حالياً</h3>
+                <p>سيتم إضافة الكتب قريباً. يمكنك طلب كتاب من خلال النموذج أدناه</p>
+            </div>
+        `;
+        return;
+    }
+
+    bookEntries.forEach(([id, book]) => {
+        const card = createBookCard(id, book);
+        grid.appendChild(card);
     });
 }
 
@@ -108,13 +139,20 @@ function createBookCard(id, book) {
     card.className = 'book-card';
 
     const isContactPrice = book.priceType === 'contact';
-    const priceHTML = isContactPrice
-        ? '<span class="book-card-price contact-price">📞 تواصل للسعر</span>'
-        : `<span class="book-card-price">$${parseFloat(book.price).toFixed(2)}</span>`;
 
-    const whatsappMsg = isContactPrice
-        ? encodeURIComponent(`مرحباً، أريد الاستفسار عن سعر كتاب: ${book.name}`)
-        : encodeURIComponent(`مرحباً، أريد طلب كتاب: ${book.name} - السعر: $${parseFloat(book.price).toFixed(2)}`);
+    let priceHTML = '';
+    let priceText = '';
+
+    if (isContactPrice) {
+        priceHTML = '<span class="book-card-price contact-price">📞 تواصل للسعر</span>';
+        priceText = 'تواصل للسعر';
+    } else {
+        const p = formatPrice(book.price);
+        priceHTML = `<span class="book-card-price">${p}</span>`;
+        priceText = p;
+    }
+
+    const whatsappMsg = encodeURIComponent(`مرحباً، أريد طلب كتاب: ${book.name} - السعر: ${priceText}`);
 
     card.innerHTML = `
         <div class="book-card-image">
