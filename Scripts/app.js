@@ -369,6 +369,16 @@ function updatePrices(currency) {
     const priceElements = document.querySelectorAll('.product-price');
 
     priceElements.forEach(priceEl => {
+        const priceType = priceEl.dataset.priceType || 'fixed';
+
+        // Skip non-numeric price types
+        if (priceType === 'negotiable' || priceType === 'contact') return;
+
+        if (priceType === 'range') {
+            // Range prices are re-rendered on full reload, skip here
+            return;
+        }
+
         const usdPrice = parseFloat(priceEl.dataset.usd);
 
         let displayPrice;
@@ -2013,9 +2023,39 @@ function showProductDetails(productId) {
             featuresHTML = `<p>${product.description}</p>`;
         }
 
-        const priceUSD = product.price;
-        const priceLYD = priceUSD * EXCHANGE_RATE;
-        const displayPrice = currentCurrency === 'USD' ? formatCurrency(priceUSD, 'USD') : formatCurrency(priceLYD, 'LYD');
+        // Flexible Pricing in Modal
+        const modalPriceType = product.priceType || 'fixed';
+        let displayPrice = '';
+        let modalIsContactPrice = false;
+
+        if (modalPriceType === 'fixed') {
+            const priceUSD = product.price;
+            const priceLYD = priceUSD * EXCHANGE_RATE;
+            displayPrice = currentCurrency === 'USD' ? formatCurrency(priceUSD, 'USD') : formatCurrency(priceLYD, 'LYD');
+        } else if (modalPriceType === 'range') {
+            const min = product.priceMin || 0;
+            const max = product.priceMax || 0;
+            if (currentCurrency === 'USD') {
+                displayPrice = `$${min.toFixed(2)} - $${max.toFixed(2)}`;
+            } else {
+                displayPrice = `${(min * EXCHANGE_RATE).toFixed(2)} - ${(max * EXCHANGE_RATE).toFixed(2)} د.ل`;
+            }
+            modalIsContactPrice = true;
+        } else if (modalPriceType === 'negotiable') {
+            displayPrice = '🤝 قابل للتفاوض';
+            modalIsContactPrice = true;
+        } else if (modalPriceType === 'contact') {
+            displayPrice = '📞 تواصل للسعر';
+            modalIsContactPrice = true;
+        }
+
+        const modalActionButton = modalIsContactPrice
+            ? `<a class="btn btn-primary" href="https://wa.me/${CONTACT_NUMBER}?text=${encodeURIComponent('مرحباً، أريد الاستفسار عن سعر: ' + product.name)}" target="_blank" style="text-decoration:none;color:white;">
+                   💬 تواصل عبر واتساب
+               </a>`
+            : `<button class="btn btn-primary add-to-cart-modal" data-product-name="${product.name}" data-product-price="${product.price}">
+                    إضافة للسلة
+                </button>`;
 
         // Gallery Logic
         let imageSectionHTML = '';
@@ -2078,9 +2118,7 @@ function showProductDetails(productId) {
                     <span class="modal-price-label">السعر:</span>
                     <span class="modal-price">${displayPrice}</span>
                 </div>
-                <button class="btn btn-primary add-to-cart-modal" data-product-name="${product.name}" data-product-price="${product.price}">
-                    إضافة للسلة
-                </button>
+                ${modalActionButton}
             </div>
         `;
 
@@ -2851,9 +2889,31 @@ function createProductCardHTML(id, product) {
 
     const categoryClass = product.category || 'general';
 
-    const price = currentCurrency === 'USD'
-        ? `$${product.price.toFixed(2)}`
-        : `${(product.price * EXCHANGE_RATE).toFixed(2)} د.ل`;
+    // Flexible Pricing
+    const priceType = product.priceType || 'fixed';
+    let price = '';
+    let isContactPrice = false;
+
+    if (priceType === 'fixed') {
+        price = currentCurrency === 'USD'
+            ? `$${product.price.toFixed(2)}`
+            : `${(product.price * EXCHANGE_RATE).toFixed(2)} د.ل`;
+    } else if (priceType === 'range') {
+        const min = product.priceMin || 0;
+        const max = product.priceMax || 0;
+        if (currentCurrency === 'USD') {
+            price = `$${min.toFixed(2)} - $${max.toFixed(2)}`;
+        } else {
+            price = `${(min * EXCHANGE_RATE).toFixed(2)} - ${(max * EXCHANGE_RATE).toFixed(2)} د.ل`;
+        }
+        isContactPrice = true;
+    } else if (priceType === 'negotiable') {
+        price = '🤝 قابل للتفاوض';
+        isContactPrice = true;
+    } else if (priceType === 'contact') {
+        price = '📞 تواصل للسعر';
+        isContactPrice = true;
+    }
 
     // Stock Management
     let stockBadge = '';
@@ -2891,7 +2951,7 @@ function createProductCardHTML(id, product) {
                 <h3 class="product-name">${product.name}</h3>
                 <p class="product-description">${product.shortDesc || product.description.substring(0, 60) + '...'}</p>
                 <div class="product-footer">
-                    <span class="product-price" data-usd="${product.price}">${price}</span>
+                    <span class="product-price" data-usd="${product.price || 0}" data-price-type="${priceType}">${price}</span>
                     <div class="product-actions">
                         <button class="wishlist-heart ${heartActiveClass}" 
                             data-product-id="${id}" 
@@ -2902,12 +2962,19 @@ function createProductCardHTML(id, product) {
                             aria-label="إضافة لـ Wishlist">
                             ${heartIcon}
                         </button>
+                        ${isContactPrice ? `
+                        <a class="contact-price-btn" href="https://wa.me/${CONTACT_NUMBER}?text=${encodeURIComponent('مرحباً، أريد الاستفسار عن سعر: ' + product.name)}" target="_blank" style="text-decoration:none;color:inherit;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                            </svg>
+                            تواصل معنا
+                        </a>` : `
                         <button class="add-to-cart-btn" ${addToCartDisabled} data-product-id="${id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-image="${product.image}" data-product-desc="${product.shortDesc || product.description.substring(0, 60) + '...'}">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M9 2L6 6M18 6L15 2M6 6h12l1 14H5L6 6z" />
                             </svg>
                             ${buttonText}
-                        </button>
+                        </button>`}
                     </div>
                 </div>
             </div>

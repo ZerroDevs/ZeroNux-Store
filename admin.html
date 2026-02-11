@@ -177,9 +177,35 @@
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label>السعر ($)</label>
-                                <input type="number" id="product-price" step="0.01" required>
+                                <label>نوع السعر</label>
+                                <select id="price-type" onchange="togglePriceFields()">
+                                    <option value="fixed">💰 سعر ثابت</option>
+                                    <option value="range">📊 نطاق سعري (من - إلى)</option>
+                                    <option value="negotiable">🤝 قابل للتفاوض</option>
+                                    <option value="contact">📞 تواصل للسعر</option>
+                                </select>
                             </div>
+                        </div>
+
+                        <div class="form-row" id="fixed-price-fields">
+                            <div class="form-group">
+                                <label>السعر ($)</label>
+                                <input type="number" id="product-price" step="0.01">
+                            </div>
+                        </div>
+
+                        <div class="form-row" id="range-price-fields" style="display: none;">
+                            <div class="form-group">
+                                <label>من ($)</label>
+                                <input type="number" id="price-min" step="0.01" placeholder="10">
+                            </div>
+                            <div class="form-group">
+                                <label>إلى ($)</label>
+                                <input type="number" id="price-max" step="0.01" placeholder="50">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
                             <div class="form-group">
                                 <label>التصنيف</label>
                                 <select id="product-category" required>
@@ -196,6 +222,16 @@
                                 </select>
                             </div>
                         </div>
+
+                        <script>
+                            function togglePriceFields() {
+                                const type = document.getElementById('price-type').value;
+                                document.getElementById('fixed-price-fields').style.display = type === 'fixed' ? 'flex' : 'none';
+                                document.getElementById('range-price-fields').style.display = type === 'range' ? 'flex' : 'none';
+                                // Make price required only when fixed
+                                document.getElementById('product-price').required = (type === 'fixed');
+                            }
+                        </script>
 
                         <hr style="border-color: rgba(255,255,255,0.1); margin: 1.5rem 0;">
                         <h3 style="margin-bottom: 1rem; color: #667eea;">📊 إدارة المخزون</h3>

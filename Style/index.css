@@ -1037,6 +1037,14 @@ body:has(#announcement-bar[style*="display: block"]) {
     gap: var(--spacing-sm);
 }
 
+.product-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    min-width: 0;
+}
+
 .product-price {
     font-size: 1.75rem;
     font-weight: 700;
@@ -1152,6 +1160,33 @@ body:has(#announcement-bar[style*="display: block"]) {
 }
 
 .add-to-cart-btn:active {
+    transform: translateY(0);
+}
+
+.contact-price-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    white-space: nowrap;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.contact-price-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.3);
+}
+
+.contact-price-btn:active {
     transform: translateY(0);
 }
 
@@ -1668,11 +1703,37 @@ body:has(#announcement-bar[style*="display: block"]) {
         font-size: 1.1rem !important;
     }
 
+    .product-actions {
+        width: 100%;
+        justify-content: stretch;
+    }
+
     .add-to-cart-btn {
-        padding: 0.5rem !important;
-        font-size: 0.85rem !important;
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.75rem !important;
         width: 100%;
         justify-content: center;
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .add-to-cart-btn svg {
+        flex-shrink: 0;
+        width: 16px;
+        height: 16px;
+    }
+
+    .wishlist-heart {
+        flex-shrink: 0;
+    }
+
+    .contact-price-btn {
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.75rem !important;
+        width: 100%;
+        justify-content: center;
+        min-width: 0;
+        overflow: hidden;
     }
 
     /* Sticky Bottom Nav Styles */

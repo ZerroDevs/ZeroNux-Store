@@ -746,7 +746,7 @@ function createProductCard(id, product) {
         ${badgeHtml}
         <h3>${product.name}</h3>
         <p class="price">
-            $${product.price}
+            ${product.priceType === 'range' ? `$${product.priceMin} - $${product.priceMax}` : product.priceType === 'negotiable' ? '🤝 قابل للتفاوض' : product.priceType === 'contact' ? '📞 تواصل للسعر' : `$${product.price}`}
             ${product.category && product.category !== 'general' ? `<span style="font-size: 0.8em; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; margin-right: 5px;">${product.category}</span>` : ''}
         </p>
         ${stockHtml}
@@ -948,9 +948,13 @@ document.getElementById('product-form').addEventListener('submit', (e) => {
 
     const trackStock = document.getElementById('track-stock').checked;
 
+    const priceType = document.getElementById('price-type').value;
     const productData = {
         name: document.getElementById('product-name').value,
-        price: parseFloat(document.getElementById('product-price').value),
+        priceType: priceType,
+        price: priceType === 'fixed' ? parseFloat(document.getElementById('product-price').value) || 0 : 0,
+        priceMin: priceType === 'range' ? parseFloat(document.getElementById('price-min').value) || 0 : null,
+        priceMax: priceType === 'range' ? parseFloat(document.getElementById('price-max').value) || 0 : null,
         shortDesc: document.getElementById('product-short-desc').value,
         description: document.getElementById('product-description').value,
         badge: document.getElementById('product-badge').value,
@@ -1035,7 +1039,13 @@ window.editProduct = function (id) {
 
         document.getElementById('product-id').value = id;
         document.getElementById('product-name').value = product.name;
-        document.getElementById('product-price').value = product.price;
+        // Load price type
+        const pt = product.priceType || 'fixed';
+        document.getElementById('price-type').value = pt;
+        document.getElementById('product-price').value = product.price || '';
+        document.getElementById('price-min').value = product.priceMin || '';
+        document.getElementById('price-max').value = product.priceMax || '';
+        togglePriceFields();
         document.getElementById('product-short-desc').value = product.shortDesc || '';
         document.getElementById('product-description').value = product.description;
         document.getElementById('product-badge').value = product.badge;
