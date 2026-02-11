@@ -58,6 +58,9 @@
                 <button class="tab-btn" onclick="switchTab('coupons')">
                     <span>🎫</span> الكوبونات
                 </button>
+                <button class="tab-btn" onclick="switchTab('books')">
+                    <span>📚</span> الكتب الدراسية
+                </button>
                 <button class="tab-btn" onclick="switchTab('settings')">
                     <span>⚙️</span> الإعدادات
                 </button>
@@ -351,6 +354,81 @@
                             style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));">
                             <!-- Promo Cards will appear here -->
                         </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Books Tab -->
+            <div id="tab-books" class="tab-content">
+                <section class="form-section">
+                    <h2 id="book-form-title">📚 إضافة كتاب جديد</h2>
+                    <form id="book-form">
+                        <input type="hidden" id="book-id">
+
+                        <div class="form-group">
+                            <label>اسم الكتاب</label>
+                            <input type="text" id="book-name" required placeholder="أدخل اسم الكتاب">
+                        </div>
+
+                        <div class="form-group">
+                            <label>رابط الصورة</label>
+                            <input type="url" id="book-image" placeholder="https://example.com/book.png">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>نوع السعر</label>
+                                <select id="book-price-type" onchange="toggleBookPriceField()">
+                                    <option value="fixed">💰 سعر ثابت</option>
+                                    <option value="contact">📞 تواصل للسعر</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="book-price-field">
+                                <label>السعر ($)</label>
+                                <input type="number" id="book-price" step="0.01" placeholder="0.00">
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" id="book-submit-btn">إضافة الكتاب</button>
+                            <button type="button" class="btn btn-secondary" id="book-cancel-btn"
+                                style="display: none;">إلغاء</button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Current Books -->
+                <section class="form-section" style="margin-top: 2rem;">
+                    <h2>📖 الكتب الحالية</h2>
+                    <div id="admin-books-list" class="products-grid">
+                        <div class="loading">جاري التحميل...</div>
+                    </div>
+                </section>
+
+                <!-- Book Requests -->
+                <section class="form-section" style="margin-top: 2rem;">
+                    <h2>📝 طلبات الكتب من المستخدمين</h2>
+                    <div class="orders-table-container">
+                        <table class="orders-table">
+                            <thead>
+                                <tr>
+                                    <th>الاسم</th>
+                                    <th>رقم الهاتف</th>
+                                    <th>اسم الكتاب</th>
+                                    <th>الوصف</th>
+                                    <th>التاريخ</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="book-requests-list">
+                                <tr>
+                                    <td colspan="6"
+                                        style="text-align: center; padding: 2rem; color: rgba(255,255,255,0.5);">
+                                        جاري التحميل...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </section>
             </div>

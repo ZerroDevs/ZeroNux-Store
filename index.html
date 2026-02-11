@@ -74,21 +74,36 @@
 
                 <div class="nav-links">
                     <a href="#home" class="nav-link active" data-i18n="nav-home">الرئيسية</a>
+                    <a href="students.html" class="nav-link">📚 الكتب الدراسية</a>
                     <a href="#products" class="nav-link" data-i18n="nav-products">المنتجات</a>
-                    <a href="#about" class="nav-link" data-i18n="nav-about">من نحن</a>
-                    <a href="#contact" class="nav-link" data-i18n="nav-contact">اتصل بنا</a>
+                    <!-- About & Contact moved to quick actions -->
 
-                    <!-- Mobile Only Links -->
-                    <a href="#" class="nav-link mobile-only-link" onclick="showWishlistDrawer(); return false;">
-                        <span style="display:flex; align-items:center; gap:8px;">
-                            ❤️ المفضلة
-                        </span>
-                    </a>
-                    <a href="#" class="nav-link mobile-only-link" onclick="showRecentlyViewedDrawer(); return false;">
-                        <span style="display:flex; align-items:center; gap:8px;">
-                            🕐 شاهدت مؤخراً
-                        </span>
-                    </a>
+                    <!-- Mobile Quick Actions (icon row) -->
+                    <div class="mobile-quick-actions">
+                        <button class="mobile-quick-btn" onclick="showWishlistDrawer()" title="المفضلة">
+                            <span class="quick-icon">❤️</span>
+                            <span class="quick-label">المفضلة</span>
+                        </button>
+                        <button class="mobile-quick-btn" onclick="showRecentlyViewedDrawer()" title="شاهدت مؤخراً">
+                            <span class="quick-icon">🕐</span>
+                            <span class="quick-label">الأخيرة</span>
+                        </button>
+                        <button class="mobile-quick-btn" onclick="document.querySelector('.cart-btn').click()"
+                            title="السلة">
+                            <span class="quick-icon">🛒</span>
+                            <span class="quick-label">السلة</span>
+                        </button>
+                        <a href="#about" class="mobile-quick-btn" title="من نحن"
+                            style="text-decoration: none; color: inherit;">
+                            <span class="quick-icon">ℹ️</span>
+                            <span class="quick-label">من نحن</span>
+                        </a>
+                        <a href="#contact" class="mobile-quick-btn" title="اتصل بنا"
+                            style="text-decoration: none; color: inherit;">
+                            <span class="quick-icon">📞</span>
+                            <span class="quick-label">اتصل بنا</span>
+                        </a>
+                    </div>
                 </div>
 
                 <div class="nav-actions">
@@ -294,6 +309,10 @@
         <a href="#home" class="mobile-nav-item active" id="mobile-nav-home">
             <span class="nav-icon">🏠</span>
             <span class="nav-label">الرئيسية</span>
+        </a>
+        <a href="students.html" class="mobile-nav-item">
+            <span class="nav-icon">📚</span>
+            <span class="nav-label">الكتب</span>
         </a>
         <div class="mobile-nav-item" id="mobile-nav-search">
             <span class="nav-icon">🔍</span>

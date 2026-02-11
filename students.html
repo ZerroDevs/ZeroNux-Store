@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="https://assets.zeronux.store/Logo.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الكتب الدراسية - متجر زيرونكس</title>
+    <meta name="description"
+        content="تصفح الكتب الدراسية المتوفرة في متجر زيرونكس. اطلب كتابك المفضل أو اطلب كتاب غير متوفر وسنوفره لك.">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://zeronux.store/students.html">
+    <meta property="og:title" content="الكتب الدراسية - متجر زيرونكس">
+    <meta property="og:description" content="تصفح الكتب الدراسية المتوفرة واطلب كتابك الآن.">
+    <meta property="og:image" content="https://assets.zeronux.store/Logo.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700&family=Cairo:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="Style/index.css">
+    <link rel="stylesheet" href="Style/secondary.css">
+    <link rel="stylesheet" href="Style/students.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo" onclick="window.location.href='index.html'" style="cursor:pointer;">
+                    <img src="https://assets.zeronux.store/Logo.png" alt="ZeroNux Store Logo">
+                </div>
+
+                <button class="mobile-menu-btn" aria-label="Toggle Menu">☰</button>
+
+                <div class="nav-links">
+                    <a href="index.html" class="nav-link">الرئيسية</a>
+                    <a href="index.html#products" class="nav-link">المنتجات</a>
+                    <a href="#" class="nav-link active">الكتب الدراسية</a>
+                    <!-- Mobile Quick Actions (icon row - simplified for students page) -->
+                    <div class="mobile-quick-actions">
+                        <a href="index.html#about" class="mobile-quick-btn" title="من نحن"
+                            style="text-decoration: none; color: inherit;">
+                            <span class="quick-icon">ℹ️</span>
+                            <span class="quick-label">من نحن</span>
+                        </a>
+                        <a href="index.html#contact" class="mobile-quick-btn" title="اتصل بنا"
+                            style="text-decoration: none; color: inherit;">
+                            <span class="quick-icon">📞</span>
+                            <span class="quick-label">اتصل بنا</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <header class="page-header">
+        <div class="container">
+            <h1 class="page-title">📚 الكتب الدراسية</h1>
+            <p class="page-subtitle">تصفح الكتب المتوفرة واطلب كتابك بسهولة. لم تجد كتابك؟ أرسل لنا طلبك وسنوفره لك!</p>
+        </div>
+    </header>
+
+    <!-- Books Section -->
+    <main class="secondary-container" style="max-width: 1100px;">
+        <div class="books-grid" id="books-grid">
+            <div class="books-loading">
+                <div class="spinner"></div>
+                <p>جاري تحميل الكتب...</p>
+            </div>
+        </div>
+
+        <!-- Book Request Section -->
+        <section class="request-section">
+            <div class="request-section-header">
+                <h2>📝 اطلب كتاب غير متوفر</h2>
+                <div class="section-divider"></div>
+                <p>لم تجد الكتاب الذي تبحث عنه؟ أرسل لنا التفاصيل وسنعمل على توفيره لك</p>
+            </div>
+
+            <div class="request-form-card">
+                <div id="request-form-wrapper">
+                    <form class="request-form" id="book-request-form">
+                        <div class="form-group">
+                            <label><span class="required">*</span> الاسم الكامل</label>
+                            <input type="text" class="form-input" id="req-name" placeholder="أدخل اسمك الكامل" required>
+                        </div>
+                        <div class="form-group">
+                            <label><span class="required">*</span> رقم الهاتف</label>
+                            <input type="tel" class="form-input" id="req-phone" placeholder="09XXXXXXXX" required>
+                        </div>
+                        <div class="form-group">
+                            <label><span class="required">*</span> اسم الكتاب</label>
+                            <input type="text" class="form-input" id="req-book-name" placeholder="اسم الكتاب الذي تريده"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label>وصف إضافي (اختياري)</label>
+                            <textarea class="form-input" id="req-description"
+                                placeholder="أي تفاصيل إضافية مثل الطبعة أو المؤلف..."></textarea>
+                        </div>
+                        <button type="submit" class="request-submit-btn">إرسال الطلب</button>
+                    </form>
+                </div>
+
+                <div class="request-success" id="request-success">
+                    <span class="success-icon">✅</span>
+                    <h3>تم إرسال طلبك بنجاح!</h3>
+                    <p>سنتواصل معك قريباً عبر رقم الهاتف الذي أدخلته</p>
+                    <button class="btn-new-request" id="btn-new-request">إرسال طلب آخر</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 متجر زيرونكس. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <!-- Students Page Script -->
+    <script src="Scripts/students.js?v=1.0"></script>
+</body>
+
+</html>

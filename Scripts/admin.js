@@ -20,6 +20,8 @@ const productsRef = database.ref('products');
 const settingsRef = database.ref('settings');
 const promosRef = database.ref('promos');
 const ordersRef = database.ref('orders');
+const studentBooksRef = database.ref('studentBooks');
+const bookRequestsRef = database.ref('bookRequests');
 
 // ============================================
 // TAB SWITCHING
@@ -30,8 +32,15 @@ function switchTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
     // Add active class to selected tab and content
-    event.target.classList.add('active');
-    document.getElementById(`tab-${tabName}`).classList.add('active');
+    if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+    }
+    const tabContent = document.getElementById(`tab-${tabName}`);
+    if (tabContent) {
+        tabContent.classList.add('active');
+    } else {
+        console.error(`Tab content not found: tab-${tabName}`);
+    }
 }
 
 // ============================================
@@ -558,6 +567,8 @@ function checkAuthState() {
             loadSettings();
             loadPromos(); // Load Promos
             loadOrders(); // Load orders when admin logs in
+            loadStudentBooks(); // Load student books
+            loadBookRequests(); // Load book requests
         } else {
             // User is signed out
             currentUser = null;
@@ -1167,6 +1178,189 @@ window.copyProductLink = function (id) {
     }).catch(err => {
         showNotification('فشل نسخ الرابط', 'error');
     });
+};
+
+// ============================================
+// STUDENT BOOKS MANAGEMENT
+// ============================================
+let editingBookId = null;
+
+// Toggle book price field
+window.toggleBookPriceField = function () {
+    const type = document.getElementById('book-price-type').value;
+    document.getElementById('book-price-field').style.display = type === 'fixed' ? 'block' : 'none';
+};
+
+// Load student books in admin
+function loadStudentBooks() {
+    const booksList = document.getElementById('admin-books-list');
+    if (!booksList) return;
+    booksList.innerHTML = '<div class="loading">جاري تحميل الكتب...</div>';
+
+    studentBooksRef.on('value', (snapshot) => {
+        const books = snapshot.val();
+        booksList.innerHTML = '';
+
+        if (!books || Object.keys(books).length === 0) {
+            booksList.innerHTML = '<div class="empty-state"><p>لا توجد كتب بعد</p><p>ابدأ بإضافة كتابك الأول!</p></div>';
+            return;
+        }
+
+        Object.keys(books).forEach(id => {
+            const book = books[id];
+            const card = document.createElement('div');
+            card.className = 'product-card' + (book.visible === false ? ' product-hidden' : '');
+
+            const priceText = book.priceType === 'contact' ? '📞 تواصل للسعر' : `$${parseFloat(book.price || 0).toFixed(2)}`;
+
+            card.innerHTML = `
+                <img src="${book.image || 'https://via.placeholder.com/300x200?text=📖'}" alt="${book.name}" class="product-image" onerror="this.src='https://via.placeholder.com/300x200?text=📖'">
+                <h3>${book.name}</h3>
+                <p class="price">${priceText}</p>
+                <div class="product-actions">
+                    <button class="btn btn-visibility ${book.visible === false ? 'btn-hidden' : ''}" onclick="toggleBookVisibility('${id}', ${book.visible !== false})">
+                        ${book.visible === false ? '👁️‍🗨️ مخفي' : '👁️ مرئي'}
+                    </button>
+                    <button class="btn btn-edit" onclick="editBook('${id}')">تعديل</button>
+                    <button class="btn btn-delete" onclick="deleteBook('${id}')">حذف</button>
+                </div>
+            `;
+            booksList.appendChild(card);
+        });
+    });
+}
+
+// Book form submit handler
+document.getElementById('book-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const priceType = document.getElementById('book-price-type').value;
+    const bookData = {
+        name: document.getElementById('book-name').value,
+        image: document.getElementById('book-image').value,
+        priceType: priceType,
+        price: priceType === 'fixed' ? parseFloat(document.getElementById('book-price').value) || 0 : 0,
+        visible: true,
+        timestamp: Date.now()
+    };
+
+    if (editingBookId) {
+        delete bookData.visible; // preserve visibility on edit
+        studentBooksRef.child(editingBookId).update(bookData)
+            .then(() => {
+                showNotification('تم تحديث الكتاب بنجاح! ✅');
+                resetBookForm();
+            })
+            .catch(err => showNotification('خطأ: ' + err.message, 'error'));
+    } else {
+        studentBooksRef.push(bookData)
+            .then(() => {
+                showNotification('تم إضافة الكتاب بنجاح! 📚');
+                resetBookForm();
+            })
+            .catch(err => showNotification('خطأ: ' + err.message, 'error'));
+    }
+});
+
+// Edit book
+window.editBook = function (id) {
+    studentBooksRef.child(id).once('value', (snapshot) => {
+        const book = snapshot.val();
+        document.getElementById('book-id').value = id;
+        document.getElementById('book-name').value = book.name;
+        document.getElementById('book-image').value = book.image || '';
+        document.getElementById('book-price-type').value = book.priceType || 'fixed';
+        document.getElementById('book-price').value = book.price || '';
+        toggleBookPriceField();
+
+        editingBookId = id;
+        document.getElementById('book-form-title').textContent = 'تعديل الكتاب';
+        document.getElementById('book-submit-btn').textContent = 'تحديث الكتاب';
+        document.getElementById('book-cancel-btn').style.display = 'inline-block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+};
+
+// Toggle book visibility
+window.toggleBookVisibility = function (id, currentStatus) {
+    studentBooksRef.child(id).update({ visible: !currentStatus })
+        .then(() => showNotification(!currentStatus ? 'الكتاب الآن مرئي 👁️' : 'تم إخفاء الكتاب 👁️‍🗨️'))
+        .catch(err => showNotification('خطأ: ' + err.message, 'error'));
+};
+
+// Delete book
+window.deleteBook = function (id) {
+    if (confirm('هل أنت متأكد من حذف هذا الكتاب؟')) {
+        studentBooksRef.child(id).remove()
+            .then(() => showNotification('تم حذف الكتاب 🗑️'))
+            .catch(err => showNotification('خطأ: ' + err.message, 'error'));
+    }
+};
+
+// Reset book form
+function resetBookForm() {
+    document.getElementById('book-form').reset();
+    document.getElementById('book-id').value = '';
+    editingBookId = null;
+    document.getElementById('book-form-title').textContent = '📚 إضافة كتاب جديد';
+    document.getElementById('book-submit-btn').textContent = 'إضافة الكتاب';
+    document.getElementById('book-cancel-btn').style.display = 'none';
+    document.getElementById('book-price-field').style.display = 'block';
+}
+
+// Cancel book edit
+document.getElementById('book-cancel-btn').addEventListener('click', resetBookForm);
+
+// ============================================
+// BOOK REQUESTS MANAGEMENT
+// ============================================
+function loadBookRequests() {
+    const requestsList = document.getElementById('book-requests-list');
+    if (!requestsList) return;
+    requestsList.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: rgba(255,255,255,0.5);">جاري التحميل...</td></tr>';
+
+    bookRequestsRef.on('value', (snapshot) => {
+        const requests = snapshot.val();
+        requestsList.innerHTML = '';
+
+        if (!requests) {
+            requestsList.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: rgba(255,255,255,0.5);">لا توجد طلبات كتب بعد</td></tr>';
+            return;
+        }
+
+        const requestsArray = Object.entries(requests).map(([id, data]) => ({ id, ...data }));
+        requestsArray.sort((a, b) => b.timestamp - a.timestamp);
+
+        requestsArray.forEach(req => {
+            const row = document.createElement('tr');
+            const date = new Date(req.timestamp);
+            const formattedDate = date.toLocaleDateString('ar-EG', {
+                year: 'numeric', month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+
+            row.innerHTML = `
+                <td><strong>${req.name}</strong></td>
+                <td dir="ltr">${req.phone}</td>
+                <td>${req.bookName}</td>
+                <td>${req.description || '—'}</td>
+                <td>${formattedDate}</td>
+                <td>
+                    <button class="btn btn-danger" onclick="deleteBookRequest('${req.id}')" title="حذف">🗑️</button>
+                </td>
+            `;
+            requestsList.appendChild(row);
+        });
+    });
+}
+
+// Delete book request
+window.deleteBookRequest = function (id) {
+    if (confirm('هل أنت متأكد من حذف هذا الطلب؟')) {
+        bookRequestsRef.child(id).remove()
+            .then(() => showNotification('تم حذف الطلب'))
+            .catch(err => showNotification('خطأ: ' + err.message, 'error'));
+    }
 };
 
 // ============================================
