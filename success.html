@@ -67,27 +67,49 @@
     <script src="Scripts/cart.js"></script>
     <script src="Scripts/app.js"></script>
     <script>
-        // Use the same contact number as in app.js
-        // CONTACT_NUMBER is already defined in app.js
-
         document.addEventListener('DOMContentLoaded', () => {
             // Get order ID from URL
             const urlParams = new URLSearchParams(window.location.search);
             const orderId = urlParams.get('orderId');
-
             const orderIdEl = document.getElementById('order-id');
             const whatsappBtn = document.getElementById('whatsapp-btn');
+
+            // Function to update the WhatsApp link
+            function updateWhatsAppLink() {
+                if (!orderId) return;
+
+                // Use global CONTACT_NUMBER from app.js (which might be updated by settings)
+                const phone = (window.CONTACT_NUMBER && window.CONTACT_NUMBER !== '218916808225')
+                    ? window.CONTACT_NUMBER
+                    : '218916808225'; // Fallback to default if not yet loaded or set
+
+
+                const message = `مرحباً، قمت للتو بطلب جديد من المتجر.\nرقم الطلب: ${orderId}\nأرغب في إتمام عملية الدفع والتوصيل.`;
+                const encodedMessage = encodeURIComponent(message);
+
+                if (whatsappBtn) {
+                    whatsappBtn.href = `https://wa.me/${phone}?text=${encodedMessage}`;
+                }
+            }
 
             if (orderId) {
                 orderIdEl.textContent = orderId;
 
-                // Prepare WhatsApp Message
-                const message = `مرحباً، قمت للتو بطلب جديد من المتجر.\nرقم الطلب: ${orderId}\nأرغب في إتمام عملية الدفع والتوصيل.`;
-                const encodedMessage = encodeURIComponent(message);
-                whatsappBtn.href = `https://wa.me/${CONTACT_NUMBER}?text=${encodedMessage}`;
+                // Initial update (might use default number)
+                updateWhatsAppLink();
+
+                // Listen for updates from app.js when settings are loaded
+                document.addEventListener('contact-info-updated', (e) => {
+                    // Force update global if needed, though app.js should have set it
+                    if (e.detail && e.detail.phoneNumber) {
+                        window.CONTACT_NUMBER = e.detail.phoneNumber;
+                    }
+                    updateWhatsAppLink();
+                });
+
             } else {
                 orderIdEl.textContent = "غير متوفر";
-                whatsappBtn.style.display = 'none';
+                if (whatsappBtn) whatsappBtn.style.display = 'none';
             }
         });
     </script>

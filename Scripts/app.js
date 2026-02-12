@@ -39,6 +39,11 @@ function loadSettings() {
             if (settings.phoneNumber) {
                 CONTACT_NUMBER = settings.phoneNumber;
 
+                // Dispatch event so other pages (like success.html) know
+                document.dispatchEvent(new CustomEvent('contact-info-updated', {
+                    detail: { phoneNumber: CONTACT_NUMBER }
+                }));
+
                 // Update Footer Text
                 const footerPhonetext = document.getElementById('footer-phone-text');
                 if (footerPhonetext) footerPhonetext.textContent = CONTACT_NUMBER;
