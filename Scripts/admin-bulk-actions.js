@@ -131,7 +131,7 @@ function renderBulkToolbar() {
     style.innerHTML = `
         .bulk-toolbar {
             position: fixed;
-            bottom: -100px;
+            bottom: -300px;
             left: 50%;
             transform: translateX(-50%);
             background: #1a1a2e;
@@ -140,13 +140,17 @@ function renderBulkToolbar() {
             padding: 1rem 2rem;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             z-index: 1000;
-            transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s, visibility 0.3s;
             width: 90%;
             max-width: 800px;
             direction: rtl;
+            opacity: 0;
+            visibility: hidden;
         }
         .bulk-toolbar.visible {
             bottom: 20px;
+            opacity: 1;
+            visibility: visible;
         }
         .toolbar-content {
             display: flex;
