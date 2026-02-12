@@ -170,7 +170,7 @@
 
         card.innerHTML = `
             <div class="book-card-image">
-                <img src="${book.image || 'https://via.placeholder.com/300x220?text=📖'}" alt="${book.name}" onerror="this.src='https://via.placeholder.com/300x220?text=📖'">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E" data-src="${book.image || 'https://via.placeholder.com/300x220?text=📖'}" alt="${book.name}" onerror="this.src='https://via.placeholder.com/300x220?text=📖'">
             </div>
             <div class="book-card-info">
                 <h3 class="book-card-name">${book.name}</h3>

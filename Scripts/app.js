@@ -2198,7 +2198,7 @@ function createProductCardHTML(id, product) {
             ${badgeHTML}
             ${stockBadge}
             <div class="product-image">
-                <img src="${product.image}" alt="${product.name}" class="product-img" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E" data-src="${product.image}" alt="${product.name}" class="product-img" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
             </div>
             <div class="product-info">
                 <h3 class="product-name">${product.name}</h3>
