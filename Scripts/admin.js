@@ -86,11 +86,16 @@ function loadOrders() {
                 'cancelled': 'ملغاة'
             };
 
+            // Calculate approximate USD value for the switcher
+            const isLyd = order.currency === 'LYD';
+            const totalUSD = isLyd ? (order.finalTotal / (window.exchangeRate || 9)) : order.finalTotal;
+            const displayPrice = isLyd ? `${order.finalTotal.toFixed(2)} د.ل` : `$${parseFloat(order.finalTotal).toFixed(2)}`;
+
             row.innerHTML = `
-                <td><strong>${order.orderId}</strong></td>
+                <td><strong>${order.orderId || order.id.slice(-6)}</strong></td>
                 <td>${formattedDate}</td>
-                <td>${order.items.length} منتج</td>
-                <td>${order.currency === 'LYD' ? `${order.finalTotal.toFixed(2)} د.ل` : `$${order.finalTotal.toFixed(2)}`}</td>
+                <td>${order.items ? order.items.length : 0} منتج</td>
+                <td><span class="price-display" data-usd="${parseFloat(totalUSD).toFixed(2)}">${displayPrice}</span></td>
                 <td><span class="order-status-badge status-${order.status}">${statusText[order.status] || order.status}</span></td>
                 <td>
                     <div class="order-actions">
@@ -399,7 +404,11 @@ function loadSettings() {
     settingsRef.once('value', (snapshot) => {
         const settings = snapshot.val();
         if (settings) {
-            if (settings.exchangeRate) document.getElementById('exchange-rate').value = settings.exchangeRate;
+            if (settings.exchangeRate) {
+                document.getElementById('exchange-rate').value = settings.exchangeRate;
+                window.exchangeRate = parseFloat(settings.exchangeRate);
+                document.dispatchEvent(new CustomEvent('settings-loaded'));
+            }
             if (settings.phoneNumber) document.getElementById('contact-phone').value = settings.phoneNumber;
             if (settings.facebookUrl) document.getElementById('facebook-url').value = settings.facebookUrl;
             if (settings.contactEmail) document.getElementById('contact-email').value = settings.contactEmail;
@@ -458,6 +467,7 @@ function loadSettings() {
         } else {
             // Default exchange rate
             document.getElementById('exchange-rate').value = 9;
+            window.exchangeRate = 9;
             populateCategoryDropdown('برامج, ألعاب, اشتراكات');
         }
     });
@@ -697,7 +707,7 @@ function updateStats(total, visible, hidden, value) {
     document.getElementById('stat-total').textContent = total;
     document.getElementById('stat-visible').textContent = visible;
     document.getElementById('stat-hidden').textContent = hidden;
-    document.getElementById('stat-value').textContent = `$${value.toFixed(2)}`;
+    document.getElementById('stat-value').innerHTML = `<span class="price-display" data-usd="${value.toFixed(2)}">$${value.toFixed(2)}</span>`;
 }
 
 // Create product card element
@@ -758,7 +768,14 @@ function createProductCard(id, product) {
         ${badgeHtml}
         <h3>${product.name}</h3>
         <p class="price">
-            ${product.priceType === 'range' ? `$${product.priceMin} - $${product.priceMax}` : product.priceType === 'negotiable' ? '🤝 قابل للتفاوض' : product.priceType === 'contact' ? '📞 تواصل للسعر' : `$${product.price}`}
+            ${product.priceType === 'range'
+            ? `<span class="price-display" data-usd="${product.priceMin}">$${product.priceMin}</span> - <span class="price-display" data-usd="${product.priceMax}">$${product.priceMax}</span>`
+            : product.priceType === 'negotiable'
+                ? '🤝 قابل للتفاوض'
+                : product.priceType === 'contact'
+                    ? '📞 تواصل للسعر'
+                    : `<span class="price-display" data-usd="${product.price}">$${product.price}</span>`
+        }
             ${product.category && product.category !== 'general' ? `<span style="font-size: 0.8em; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; margin-right: 5px;">${product.category}</span>` : ''}
         </p>
         ${stockHtml}
@@ -1216,7 +1233,9 @@ function loadStudentBooks() {
             const card = document.createElement('div');
             card.className = 'product-card' + (book.visible === false ? ' product-hidden' : '');
 
-            const priceText = book.priceType === 'contact' ? '📞 تواصل للسعر' : `$${parseFloat(book.price || 0).toFixed(2)}`;
+            const priceText = book.priceType === 'contact'
+                ? '📞 تواصل للسعر'
+                : `<span class="price-display" data-usd="${parseFloat(book.price || 0).toFixed(2)}">$${parseFloat(book.price || 0).toFixed(2)}</span>`;
 
             card.innerHTML = `
                 <img src="${book.image || 'https://via.placeholder.com/300x200?text=📖'}" alt="${book.name}" class="product-image" onerror="this.src='https://via.placeholder.com/300x200?text=📖'">
