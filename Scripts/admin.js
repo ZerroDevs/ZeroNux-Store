@@ -43,14 +43,14 @@ function switchTab(tabName) {
 // ============================================
 function loadOrders() {
     const ordersList = document.getElementById('orders-list');
-    ordersList.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: rgba(255,255,255,0.5);">جاري التحميل...</td></tr>';
+    ordersList.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: rgba(255,255,255,0.5);">جاري التحميل...</td></tr>';
 
     ordersRef.on('value', (snapshot) => {
         const orders = snapshot.val();
         ordersList.innerHTML = '';
 
         if (!orders) {
-            ordersList.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: rgba(255,255,255,0.5);">لا توجد طلبات بعد</td></tr>';
+            ordersList.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: rgba(255,255,255,0.5);">لا توجد طلبات بعد</td></tr>';
             updateOrderStats(0, 0, 0);
             return;
         }
@@ -92,6 +92,7 @@ function loadOrders() {
             const displayPrice = isLyd ? `${order.finalTotal.toFixed(2)} د.ل` : `$${parseFloat(order.finalTotal).toFixed(2)}`;
 
             row.innerHTML = `
+                <td><input type="checkbox" class="bulk-check" value="${order.id}" data-type="orders"></td>
                 <td><strong>${order.orderId || order.id.slice(-6)}</strong></td>
                 <td>${formattedDate}</td>
                 <td>${order.items ? order.items.length : 0} منتج</td>
@@ -725,6 +726,13 @@ function createProductCard(id, product) {
         badgeHtml = `<span class="product-badge badge-${product.badge}">${badgeMap[product.badge]}</span>`;
     }
 
+    // Add Checkbox for Bulk Actions
+    const checkboxHtml = `
+        <div class="product-select-overlay" style="position: absolute; top: 10px; right: 10px; z-index: 10;">
+            <input type="checkbox" class="bulk-check" value="${id}" data-type="products" style="width: 20px; height: 20px; cursor: pointer;">
+        </div>
+    `;
+
     const visibilityBtn = `
         <button class="btn btn-visibility ${product.visible === false ? 'btn-hidden' : ''}" onclick="toggleVisibility('${id}', ${product.visible !== false})">
             ${product.visible === false ? '👁️‍🗨️ مخفي' : '👁️ مرئي'}
@@ -764,6 +772,7 @@ function createProductCard(id, product) {
     }
 
     card.innerHTML = `
+        ${checkboxHtml}
         <img src="${product.image}" alt="${product.name}" class="product-image" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
         ${badgeHtml}
         <h3>${product.name}</h3>

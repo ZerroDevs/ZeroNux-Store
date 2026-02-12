@@ -103,7 +103,14 @@
 
                 <!-- Products List -->
                 <section class="products-section">
-                    <h2>المنتجات الحالية</h2>
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h2>المنتجات الحالية</h2>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #b3b3b3;">
+                            <input type="checkbox" id="select-all-products">
+                            تحديد الكل
+                        </label>
+                    </div>
                     <div id="products-list" class="products-grid">
                         <div class="loading">جاري التحميل...</div>
                     </div>
@@ -147,6 +154,7 @@
                         <table class="orders-table">
                             <thead>
                                 <tr>
+                                    <th style="width: 40px;"><input type="checkbox" id="select-all-orders"></th>
                                     <th>رقم الطلب</th>
                                     <th>التاريخ</th>
                                     <th>عدد المنتجات</th>
@@ -655,6 +663,7 @@
     <script src="Scripts/admin-currency.js"></script>
     <script src="Scripts/admin-search-filter.js"></script>
     <script src="Scripts/admin-activity-log.js"></script>
+    <script src="Scripts/admin-bulk-actions.js"></script>
     <script src="Scripts/admin-image-manager.js"></script>
     <script src="Scripts/instant-page.js" type="module"></script>
     <script src="Scripts/smart-search.js"></script>
