@@ -141,16 +141,20 @@ function updateOrderStatus(orderId, newStatus) {
 }
 
 function deleteOrder(orderId) {
-    if (!confirm('هل أنت متأكد من حذف هذا الطلب؟ لا يمكن التراجع عن هذا الإجراء.')) return;
-
-    ordersRef.child(orderId).remove()
-        .then(() => {
-            showNotification('تم حذف الطلب بنجاح');
-            if (window.adminLog) window.adminLog.orderDeleted(orderId);
-        })
-        .catch(error => {
-            showNotification('حدث خطأ: ' + error.message, 'error');
-        });
+    showConfirmModal(
+        'حذف الطلب',
+        'هل أنت متأكد من حذف هذا الطلب؟ لا يمكن التراجع عن هذا الإجراء.',
+        () => {
+            ordersRef.child(orderId).remove()
+                .then(() => {
+                    showNotification('تم حذف الطلب بنجاح');
+                    if (window.adminLog) window.adminLog.orderDeleted(orderId);
+                })
+                .catch(error => {
+                    showNotification('حدث خطأ: ' + error.message, 'error');
+                });
+        }
+    );
 }
 
 function viewOrderDetails(orderId) {
@@ -321,11 +325,15 @@ document.getElementById('promo-form').addEventListener('submit', (e) => {
 
 // Delete Promo
 window.deletePromo = function (id) {
-    if (confirm('هل أنت متأكد من حذف هذا الكوبون؟')) {
-        promosRef.child(id).remove().then(() => {
-            if (window.adminLog) window.adminLog.promoDeleted(id.slice(-6));
-        });
-    }
+    showConfirmModal(
+        'حذف الكوبون',
+        'هل أنت متأكد من حذف هذا الكوبون؟',
+        () => {
+            promosRef.child(id).remove().then(() => {
+                if (window.adminLog) window.adminLog.promoDeleted(id.slice(-6));
+            });
+        }
+    );
 };
 
 // ============================================
@@ -1138,16 +1146,20 @@ window.toggleVisibility = function (id, currentStatus) {
 
 // Delete product
 window.deleteProduct = function (id) {
-    if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
-        productsRef.child(id).remove()
-            .then(() => {
-                showNotification('تم حذف المنتج بنجاح! 🗑️');
-                if (window.adminLog) window.adminLog.productDeleted(id.slice(-6));
-            })
-            .catch((error) => {
-                showNotification('حدث خطأ: ' + error.message, 'error');
-            });
-    }
+    showConfirmModal(
+        'حذف المنتج',
+        'هل أنت متأكد من حذف هذا المنتج؟ لا يمكن استعادته.',
+        () => {
+            productsRef.child(id).remove()
+                .then(() => {
+                    showNotification('تم حذف المنتج بنجاح! 🗑️');
+                    if (window.adminLog) window.adminLog.productDeleted(id.slice(-6));
+                })
+                .catch((error) => {
+                    showNotification('حدث خطأ: ' + error.message, 'error');
+                });
+        }
+    );
 };
 
 // Reset form
@@ -1325,14 +1337,18 @@ window.toggleBookVisibility = function (id, currentStatus) {
 
 // Delete book
 window.deleteBook = function (id) {
-    if (confirm('هل أنت متأكد من حذف هذا الكتاب؟')) {
-        studentBooksRef.child(id).remove()
-            .then(() => {
-                showNotification('تم حذف الكتاب 🗑️');
-                if (window.adminLog) window.adminLog.bookDeleted(id.slice(-6));
-            })
-            .catch(err => showNotification('خطأ: ' + err.message, 'error'));
-    }
+    showConfirmModal(
+        'حذف الكتاب',
+        'هل أنت متأكد من حذف هذا الكتاب؟',
+        () => {
+            studentBooksRef.child(id).remove()
+                .then(() => {
+                    showNotification('تم حذف الكتاب 🗑️');
+                    if (window.adminLog) window.adminLog.bookDeleted(id.slice(-6));
+                })
+                .catch(err => showNotification('خطأ: ' + err.message, 'error'));
+        }
+    );
 };
 
 // Reset book form
@@ -1394,11 +1410,15 @@ function loadBookRequests() {
 
 // Delete book request
 window.deleteBookRequest = function (id) {
-    if (confirm('هل أنت متأكد من حذف هذا الطلب؟')) {
-        bookRequestsRef.child(id).remove()
-            .then(() => showNotification('تم حذف الطلب'))
-            .catch(err => showNotification('خطأ: ' + err.message, 'error'));
-    }
+    showConfirmModal(
+        'حذف الطلب',
+        'هل أنت متأكد من حذف هذا الطلب؟',
+        () => {
+            bookRequestsRef.child(id).remove()
+                .then(() => showNotification('تم حذف الطلب'))
+                .catch(err => showNotification('خطأ: ' + err.message, 'error'));
+        }
+    );
 };
 
 // ============================================

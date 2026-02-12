@@ -215,31 +215,32 @@ window.clearSelection = function () {
 // =======================
 
 window.bulkDelete = function (type) {
-    if (!confirm(`هل أنت متأكد من حذف ${selectedItems.size} عنصر؟ هذه العملية لا رجعة فيها.`)) return;
+    showConfirmModal(
+        'حذف جماعي',
+        `هل أنت متأكد من حذف ${selectedItems.size} عنصر؟ هذه العملية لا رجعة فيها.`,
+        () => {
+            const updates = {};
+            selectedItems.forEach(id => {
+                updates[id] = null; // Removing
+            });
 
-    const updates = {};
-    selectedItems.forEach(id => {
-        updates[id] = null; // Removing
-    });
+            const ref = type === 'products' ? productsRef : ordersRef; // references from admin.js
 
-    const ref = type === 'products' ? productsRef : ordersRef; // references from admin.js
+            // Construct multi-path update
+            const multiPathUpdate = {};
+            selectedItems.forEach(id => {
+                multiPathUpdate[`/${id}`] = null;
+            });
 
-    // Firebase update doesn't support list delete easily on root ref with nulls in one go 
-    // effectively if keys are direct children. 
-    // But update({...}) on parent works for multi-path updates.
-
-    // Construct multi-path update
-    const multiPathUpdate = {};
-    selectedItems.forEach(id => {
-        multiPathUpdate[`/${id}`] = null;
-    });
-
-    ref.update(multiPathUpdate)
-        .then(() => {
-            showNotification(`تم حذف ${selectedItems.size} عنصر بنجاح`);
-            clearSelection();
-        })
-        .catch(err => showNotification('خطأ: ' + err.message, 'error'));
+            ref.update(multiPathUpdate)
+                .then(() => {
+                    showNotification(`تم حذف ${selectedItems.size} عنصر بنجاح`);
+                    clearSelection();
+                })
+                .catch(err => showNotification('خطأ: ' + err.message, 'error'));
+        },
+        'نعم، حذف الكل'
+    );
 }
 
 window.bulkToggleVisibility = function (visible) {
@@ -332,55 +333,61 @@ window.applyBulkPrice = function () {
         return;
     }
 
-    if (!confirm('هل أنت متأكد؟ سيتم تغيير الأسعار لجميع المنتجات المحددة.')) return;
+    showConfirmModal(
+        'تحديث الأسعار',
+        'هل أنت متأكد؟ سيتم تغيير الأسعار لجميع المنتجات المحددة.',
+        () => {
+            // For relative updates, we need to fetch current prices first (transaction or read-update)
+            // Since we have the data somewhat loaded in UI but not purely reliable for math, 
+            // it's safer to fetch once.
+            // However, to keep it simple and efficient, we will just read all selected products once.
 
-    // For relative updates, we need to fetch current prices first (transaction or read-update)
-    // Since we have the data somewhat loaded in UI but not purely reliable for math, 
-    // it's safer to fetch once.
-    // However, to keep it simple and efficient, we will just read all selected products once.
+            // We can use the existing 'products' data if globally available or fetch fresh.
+            // 'productsRef' is available.
 
-    // We can use the existing 'products' data if globally available or fetch fresh.
-    // 'productsRef' is available.
+            let processed = 0;
+            const total = selectedItems.size;
 
-    let processed = 0;
-    const total = selectedItems.size;
+            selectedItems.forEach(id => {
+                productsRef.child(id).transaction((product) => {
+                    if (product) {
+                        let currentPrice = parseFloat(product.price) || 0;
 
-    selectedItems.forEach(id => {
-        productsRef.child(id).transaction((product) => {
-            if (product) {
-                let currentPrice = parseFloat(product.price) || 0;
+                        switch (type) {
+                            case 'fixed':
+                                currentPrice = value;
+                                break;
+                            case 'increase_percent':
+                                currentPrice = currentPrice + (currentPrice * (value / 100));
+                                break;
+                            case 'decrease_percent':
+                                currentPrice = currentPrice - (currentPrice * (value / 100));
+                                break;
+                            case 'increase_amount':
+                                currentPrice = currentPrice + value;
+                                break;
+                            case 'decrease_amount':
+                                currentPrice = currentPrice - value;
+                                break;
+                        }
 
-                switch (type) {
-                    case 'fixed':
-                        currentPrice = value;
-                        break;
-                    case 'increase_percent':
-                        currentPrice = currentPrice + (currentPrice * (value / 100));
-                        break;
-                    case 'decrease_percent':
-                        currentPrice = currentPrice - (currentPrice * (value / 100));
-                        break;
-                    case 'increase_amount':
-                        currentPrice = currentPrice + value;
-                        break;
-                    case 'decrease_amount':
-                        currentPrice = currentPrice - value;
-                        break;
-                }
+                        // Ensure no negative price
+                        if (currentPrice < 0) currentPrice = 0;
 
-                // Ensure no negative price
-                if (currentPrice < 0) currentPrice = 0;
-
-                product.price = parseFloat(currentPrice.toFixed(2));
-                return product;
-            }
-        }, (error, committed, snapshot) => {
-            processed++;
-            if (processed === total) {
-                document.getElementById('bulk-price-modal').remove();
-                showNotification('تم تحديث الأسعار بنجاح! ✅');
-                clearSelection();
-            }
-        });
-    });
+                        product.price = parseFloat(currentPrice.toFixed(2));
+                        return product;
+                    }
+                }, (error, committed, snapshot) => {
+                    processed++;
+                    if (processed === total) {
+                        document.getElementById('bulk-price-modal').remove();
+                        showNotification('تم تحديث الأسعار بنجاح! ✅');
+                        clearSelection();
+                    }
+                });
+            });
+        },
+        'نعم، تحديث الأسعار',
+        'primary'
+    );
 }
