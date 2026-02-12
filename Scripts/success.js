@@ -103,3 +103,36 @@ function showCopyFeedback(button) {
         button.classList.remove('copied');
     }, 2000);
 }
+// ============================================
+// 4. BACKGROUND ANIMATION
+// ============================================
+function createBackgroundAnimation() {
+    const container = document.getElementById('success-bg-animation');
+    if (!container) return;
+
+    const logoUrl = 'https://assets.zeronux.store/Logo.png';
+    const count = 15; // Number of floating logos
+
+    for (let i = 0; i < count; i++) {
+        const logo = document.createElement('img');
+        logo.src = logoUrl;
+        logo.classList.add('floating-logo');
+
+        // Randomize properties
+        const left = Math.random() * 100; // 0-100%
+        const delay = Math.random() * 10; // 0-10s delay
+        const duration = 10 + Math.random() * 10; // 10-20s duration
+        const size = 30 + Math.random() * 50; // 30-80px size
+
+        logo.style.left = `${left}%`;
+        logo.style.animationDelay = `-${delay}s`; // Negative delay to start mid-animation
+        logo.style.animationDuration = `${duration}s`;
+        logo.style.width = `${size}px`;
+        logo.style.height = `${size}px`;
+
+        container.appendChild(logo);
+    }
+}
+
+// Initialize Animation
+createBackgroundAnimation();
