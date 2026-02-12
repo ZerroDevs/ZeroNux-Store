@@ -347,11 +347,157 @@
                     padding: 1rem;
                 }
             }
+            /* ---- Header Enhancement ---- */
+            .admin-header {
+                background: rgba(16, 14, 36, 0.8) !important;
+                backdrop-filter: blur(12px);
+                border-bottom: 1px solid rgba(255,255,255,0.08);
+                padding: 1rem 2rem;
+                position: sticky;
+                top: 0;
+                z-index: 90;
+            }
+            .header-content {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                max-width: none;
+                margin: 0;
+            }
+            .header-title-area {
+                display: flex;
+                flex-direction: column;
+            }
+            .header-breadcrumbs {
+                font-size: 0.75rem;
+                color: rgba(255,255,255,0.5);
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                margin-bottom: 4px;
+            }
+            .header-breadcrumbs span.separator {
+                opacity: 0.4;
+            }
+            .header-page-title {
+                font-size: 1.25rem;
+                font-weight: 700;
+                color: white;
+                margin: 0;
+            }
+            .header-actions {
+                gap: 12px;
+            }
+            .btn-header-action {
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.1);
+                color: white;
+                padding: 8px 16px;
+                border-radius: 10px;
+                font-size: 0.85rem;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                transition: all 0.2s;
+                text-decoration: none;
+                cursor: pointer;
+            }
+            .btn-header-action:hover {
+                background: rgba(255,255,255,0.1);
+                border-color: rgba(255,255,255,0.2);
+                transform: translateY(-1px);
+            }
+            .btn-header-logout {
+                background: rgba(255,59,48,0.1);
+                border-color: rgba(255,59,48,0.2);
+                color: #ff6b6b;
+            }
+            .btn-header-logout:hover {
+                background: rgba(255,59,48,0.2);
+            }
         `;
         document.head.appendChild(style);
     }
 
+    function enhanceHeader() {
+        const header = document.querySelector('.admin-header');
+        if (!header) return;
+
+        // Replace content with new structure
+        header.innerHTML = `
+            <div class="header-content">
+                <div class="header-title-area">
+                    <div class="header-breadcrumbs">
+                        <span>الرئيسية</span>
+                        <span class="separator">/</span>
+                        <span id="header-active-tab">لوحة التحكم</span>
+                    </div>
+                    <h1 class="header-page-title" id="header-page-title">نظرة عامة</h1>
+                </div>
+                <div class="header-actions">
+                    <a href="index.html" class="btn-header-action" target="_blank">
+                        <span>🌐</span> عرض المتجر
+                    </a>
+                    <button id="logout-btn-enhanced" class="btn-header-action btn-header-logout">
+                        <span>🚪</span> تسجيل خروج
+                    </button>
+                </div>
+            </div>
+        `;
+
+        // Re-attach logout listener
+        const logoutBtn = document.getElementById('logout-btn-enhanced');
+        if (logoutBtn && window.logout) {
+            logoutBtn.addEventListener('click', window.logout);
+        } else if (logoutBtn) {
+            // Fallback if window.logout isn't exposed yet (admin.js needs to expose it)
+            logoutBtn.addEventListener('click', () => {
+                const oldBtn = document.createElement('button');
+                oldBtn.id = 'logout-btn'; // Try to find original handler via ID delegation if any
+                // Or just:
+                firebase.auth().signOut().then(() => {
+                    window.location.reload();
+                });
+            });
+        }
+        // Dispatch event for currency switcher
+        document.dispatchEvent(new CustomEvent('admin-header-ready'));
+    }
+
+    function updateHeaderTitle(tabName) {
+        const activeItem = document.querySelector(`.sidebar-nav-item[data-sidebar-tab="${tabName}"]`);
+        if (activeItem) {
+            const label = activeItem.querySelector('.nav-label').textContent;
+
+            // Find parent category label
+            let categoryLabel = 'الرئيسية';
+            const categoryEl = activeItem.closest('.sidebar-category');
+            if (categoryEl) {
+                const labelEl = categoryEl.querySelector('.sidebar-category-label');
+                if (labelEl) {
+                    // Clone to get text without icon
+                    const clone = labelEl.cloneNode(true);
+                    const icon = clone.querySelector('.cat-icon');
+                    if (icon) icon.remove();
+                    categoryLabel = clone.textContent.trim();
+                }
+            }
+
+            // Update Breadcrumb Root (Category)
+            const breadcrumbRoot = document.querySelector('.header-breadcrumbs span:first-child');
+            if (breadcrumbRoot) breadcrumbRoot.textContent = categoryLabel;
+
+            // Update Breadcrumb Leaf (Tab) & Page Title
+            const breadcrumb = document.getElementById('header-active-tab');
+            const title = document.getElementById('header-page-title');
+
+            if (breadcrumb) breadcrumb.textContent = label;
+            if (title) title.textContent = label;
+        }
+    }
+
     function buildSidebar() {
+        enhanceHeader();
         const adminMain = document.querySelector('.admin-main');
         if (!adminMain) return;
 
@@ -489,6 +635,8 @@
                 sidebar.querySelectorAll('.sidebar-nav-item').forEach(n => {
                     n.classList.toggle('active', n.getAttribute('data-sidebar-tab') === tabName);
                 });
+                // Update header
+                updateHeaderTitle(tabName);
             };
         }
     }

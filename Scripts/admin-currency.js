@@ -149,6 +149,9 @@
     // Init
     function init() {
         injectSwitcher();
+        // Also listen for header rebuild
+        document.addEventListener('admin-header-ready', injectSwitcher);
+
         // Give admin.js a moment to load settings, then update initial prices
         setTimeout(updateAllPrices, 500);
         setTimeout(updateAllPrices, 2000);
