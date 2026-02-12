@@ -251,18 +251,27 @@
         injectAdminReviewStyles();
         injectReviewsTab();
 
-        // Load reviews when tab is clicked
+        // Load reviews when old tab button is clicked
         const tabBtn = document.getElementById('tab-btn-reviews');
         if (tabBtn) {
             tabBtn.addEventListener('click', () => {
-                if (!reviewsLoaded) {
-                    loadAdminReviews();
-                    reviewsLoaded = true;
-                } else {
-                    loadAdminReviews(); // Refresh each time
-                }
+                loadAdminReviews();
             });
         }
+
+        // Also detect tab activation via sidebar / switchTab()
+        const checkTab = setInterval(() => {
+            const tabPanel = document.getElementById('tab-reviews');
+            if (tabPanel) {
+                clearInterval(checkTab);
+                const observer = new MutationObserver(() => {
+                    if (tabPanel.classList.contains('active')) {
+                        loadAdminReviews();
+                    }
+                });
+                observer.observe(tabPanel, { attributes: true, attributeFilter: ['class'] });
+            }
+        }, 500);
 
         // Filter change
         setTimeout(() => {
