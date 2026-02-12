@@ -79,11 +79,11 @@
                 overflow-x: hidden;
                 padding: 1rem 0;
                 position: sticky;
-                top: 0;
-                height: 100vh;
+                top: 88px; /* Offset for header */
+                height: calc(100vh - 88px);
                 scrollbar-width: thin;
                 scrollbar-color: rgba(255,255,255,0.1) transparent;
-                z-index: 100;
+                z-index: 99; /* Below header */
                 transition: width 0.3s cubic-bezier(0.4,0,0.2,1),
                             min-width 0.3s cubic-bezier(0.4,0,0.2,1),
                             transform 0.3s cubic-bezier(0.4,0,0.2,1);
@@ -355,7 +355,7 @@
                 padding: 1rem 2rem;
                 position: sticky;
                 top: 0;
-                z-index: 90;
+                z-index: 999;
             }
             .header-content {
                 display: flex;
