@@ -13,7 +13,9 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 const database = firebase.database();
 const productsRef = database.ref('products');//products
 const settingsRef = database.ref('settings');
@@ -400,23 +402,28 @@ function updatePrices(currency) {
 }
 
 // Currency switcher functionality
+// Currency switcher functionality
 function initCurrencySwitcher() {
-    const currencyButtons = document.querySelectorAll('.currency-btn');
+    // Use event delegation for dynamically added header
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.currency-btn');
+        if (!btn) return;
 
-    currencyButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Remove active class from all buttons
-            currencyButtons.forEach(b => b.classList.remove('active'));
+        // Remove active class from all buttons
+        document.querySelectorAll('.currency-btn').forEach(b => b.classList.remove('active'));
 
-            // Add active class to clicked button
-            btn.classList.add('active');
+        // Add active class to clicked button
+        btn.classList.add('active');
 
-            // Update current currency
-            currentCurrency = btn.dataset.currency;
+        // Update current currency
+        currentCurrency = btn.dataset.currency;
 
-            // Update all prices
-            updatePrices(currentCurrency);
-        });
+        // Update all prices
+        updatePrices(currentCurrency);
+
+        // Dispatch event for other scripts (like students.js)
+        const event = new CustomEvent('currency-change', { detail: { currency: currentCurrency } });
+        document.dispatchEvent(event);
     });
 }
 
@@ -493,13 +500,15 @@ function initAddToCartButtons() {
 function initCartButton() {
     const cartBtn = document.querySelector('.cart-btn');
 
-    cartBtn.addEventListener('click', () => {
-        if (cart.length === 0) {
-            showNotification('السلة فارغة! 🛒');
-        } else {
-            showCartModal();
-        }
-    });
+    if (cartBtn) {
+        cartBtn.addEventListener('click', () => {
+            if (cart.length === 0) {
+                showNotification('السلة فارغة! 🛒');
+            } else {
+                showCartModal();
+            }
+        });
+    }
 }
 
 // Notification system
@@ -851,15 +860,19 @@ function clearRecentlyViewed() {
 
 // Initialize recently viewed button
 function initRecentlyViewedButton() {
-    const btn = document.querySelector('.recently-viewed-btn');
-    if (btn) {
-        btn.addEventListener('click', showRecentlyViewedDrawer);
-    }
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.recently-viewed-btn');
+        if (btn) {
+            e.preventDefault();
+            showRecentlyViewedDrawer();
+        }
+    });
     updateRecentlyViewedCount();
 }
 
 // Initialize recently viewed on page load
-loadRecentlyViewed();
+// Initialize recently viewed on header load
+// loadRecentlyViewed(); // Moved to initHeaderDependentFunctions
 
 // ============================================
 // WISHLIST FUNCTIONALITY
@@ -965,13 +978,13 @@ function updateWishlistHearts() {
 
 // Initialize wishlist button in navbar
 function initWishlistButton() {
-    const wishlistBtn = document.querySelector('.wishlist-btn');
-    if (wishlistBtn) {
-        wishlistBtn.addEventListener('click', (e) => {
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.wishlist-btn');
+        if (btn) {
             e.preventDefault();
             showWishlistDrawer();
-        });
-    }
+        }
+    });
 }
 
 // Initialize wishlist heart buttons on product cards
@@ -1258,7 +1271,7 @@ function showCartModal() {
                             المجموع: ${formatCurrency(itemSubtotal, currentCurrency)}
                         </div>
                     </div>
-                    <button class="remove-item-btn" data-product-id="${item.id}">&times;</button>
+
                 </div>
             `;
         });
@@ -1338,14 +1351,7 @@ function showCartModal() {
         const clsBtn = modal.querySelector('.close-modal-btn');
         if (clsBtn) clsBtn.addEventListener('click', () => document.querySelector('.cart-modal-overlay').remove());
 
-        // Remove Item
-        const removeButtons = modal.querySelectorAll('.remove-item-btn');
-        removeButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const productId = btn.dataset.productId;
-                removeFromCart(productId);
-            });
-        });
+
 
         // Quantity Controls
         const increaseButtons = modal.querySelectorAll('.qty-increase');
@@ -1754,11 +1760,13 @@ function closeModal(overlay) {
 function initNewsletterForm() {
     const form = document.querySelector('.newsletter-form');
 
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        showNotification('شكراً لاشتراكك في النشرة البريدية! 🎉');
-        form.reset();
-    });
+    if (form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            showNotification('شكراً لاشتراكك في النشرة البريدية! 🎉');
+            form.reset();
+        });
+    }
 }
 
 // Smooth scrolling for navigation links
@@ -2341,13 +2349,13 @@ function showAboutModal() {
 }
 
 function initAboutLink() {
-    const aboutLink = document.querySelector('[href="#about"]');
-    if (aboutLink) {
-        aboutLink.addEventListener('click', (e) => {
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('a');
+        if (link && link.getAttribute('href').endsWith('#about')) {
             e.preventDefault();
             showAboutModal();
-        });
-    }
+        }
+    });
 }
 
 // Contact modal
@@ -2513,13 +2521,13 @@ document.head.appendChild(styleSheet);
 
 
 function initContactLink() {
-    const contactLink = document.querySelector('[href="#contact"]');
-    if (contactLink) {
-        contactLink.addEventListener('click', (e) => {
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('a');
+        if (link && link.getAttribute('href').endsWith('#contact')) {
             e.preventDefault();
             showContactModal();
-        });
-    }
+        }
+    });
 }
 
 // Refund Policy Modal
@@ -2640,37 +2648,35 @@ function showRefundModal() {
 }
 
 function initRefundLink() {
-    const refundLink = document.querySelector('[href="#refund"]');
-    if (refundLink) {
-        refundLink.addEventListener('click', (e) => {
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('a');
+        if (link && link.getAttribute('href').endsWith('#refund')) {
             e.preventDefault();
             showRefundModal();
-        });
-    }
+        }
+    });
 }
 
 // Footer links handler
 function initFooterLinks() {
-    // About and Contact links in footer
-    const footerAboutLink = document.querySelector('.footer-section a[href="#about"]');
-    const footerContactLink = document.querySelector('.footer-section a[href="#contact"]');
-    const footerRefundLink = document.querySelector('.footer-section a[href="#refund"]');
+    // About and Contact links in footer handled by initAboutLink and initContactLink now universally
+    // But we might want specific scroll behavior? 
+    // The previous implementation added showModal AND scrollToTop. 
+    // The new initAboutLink shows modal.
+    // Redundant listeners are okay, but cleaner to just have one set. 
+    // Let's update this to just specific footer things if needed, or rely on universal.
+    // However, to keep same behavior (scroll top), let's just make sure we don't double bind in a bad way.
+    // Actually, let's just update the selectors to match what we have in footer.js (index.html#about)
 
-    if (footerAboutLink) {
-        footerAboutLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            showAboutModal();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-    }
+    // Refund link
+    const footerRefundLink = document.querySelector('.footer-section a[href$="#refund"]');
 
-    if (footerContactLink) {
-        footerContactLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            showContactModal();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-    }
+    // About/Contact are handled by initAboutLink/initContactLink above for the modal part. 
+    // If we want to scroll to top as well:
+    const footerModalLinks = document.querySelectorAll('.footer-section a[href$="#about"], .footer-section a[href$="#contact"]');
+    footerModalLinks.forEach(link => {
+        link.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    });
 
     if (footerRefundLink) {
         footerRefundLink.addEventListener('click', (e) => {
@@ -2732,6 +2738,7 @@ function initHeroShopNow() {
 // ============================================
 function loadProductsFromFirebase() {
     const productsContainer = document.getElementById('products-container');
+    if (!productsContainer) return; // Exit if not on products page
 
     // Show loading state
     productsContainer.innerHTML = '<div class="loading-products">جاري تحميل المنتجات...</div>';
@@ -3016,90 +3023,39 @@ document.addEventListener('DOMContentLoaded', () => {
     initProductCardClick();
     initAboutLink();
     initContactLink();
+    initRefundLink();
     initFooterLinks();
+    initWishlistButton();
+    initRecentlyViewedButton();
     initLogoClick();
     initHeroShopNow();
     initWhatsAppButton();
-    initMobileMenu();
-    initBottomNav();
+
+    // Sync with Header (Cart/Wishlist Counts)
+    // Sync with Header (Cart/Wishlist Counts)
+    function initHeaderSync() {
+        // Also load recently viewed if not loaded
+        if (typeof loadRecentlyViewed === 'function') loadRecentlyViewed();
+
+        updateCartCount();
+        if (typeof updateWishlistCount === 'function') updateWishlistCount();
+        // Update runs after load
+        if (typeof updateRecentlyViewedCount === 'function') updateRecentlyViewedCount();
+    }
+
+    // Listen for header ready event
+    document.addEventListener('header-loaded', initHeaderSync);
+
+    // Check if ready (if header script ran first)
+    if (document.getElementById('main-header') && document.getElementById('main-header').innerHTML.trim() !== '') {
+        initHeaderSync();
+    }
 
     console.log('ZeroNux Store initialized successfully!');
 });
 
 // Mobile Bottom Navigation
-function initBottomNav() {
-    const searchBtn = document.getElementById('mobile-nav-search');
-    const cartBtn = document.getElementById('mobile-nav-cart');
-    const homeBtn = document.getElementById('mobile-nav-home');
-
-    if (searchBtn) {
-        searchBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const searchInput = document.getElementById('product-search');
-            const productsSection = document.getElementById('products');
-
-            if (productsSection) {
-                const offsetTop = productsSection.offsetTop - 80;
-                window.scrollTo({ top: offsetTop, behavior: 'smooth' });
-            }
-
-            if (searchInput) {
-                setTimeout(() => {
-                    searchInput.focus();
-                    searchInput.parentElement.style.boxShadow = '0 0 0 4px rgba(102, 126, 234, 0.3)';
-                    setTimeout(() => searchInput.parentElement.style.boxShadow = '', 2000);
-                }, 500);
-            }
-        });
-    }
-
-    if (cartBtn) {
-        cartBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            showCartModal();
-        });
-
-        // Sync badge
-        setInterval(() => {
-            const badge = cartBtn.querySelector('.cart-count-badge');
-            if (badge) {
-                badge.textContent = cart.length;
-                badge.style.display = cart.length > 0 ? 'flex' : 'none';
-            }
-        }, 1000);
-    }
-}
-
-// Mobile Menu Functionality
-function initMobileMenu() {
-    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-    const navLinks = document.querySelector('.nav-links');
-
-    if (mobileMenuBtn && navLinks) {
-        // Toggle menu
-        mobileMenuBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            navLinks.classList.toggle('active');
-            // Removed: mobileMenuBtn.textContent = navLinks.classList.contains('active') ? '✕' : '☰';
-        });
-
-        // Close when clicking outside
-        document.addEventListener('click', (e) => {
-            if (navLinks.classList.contains('active') && !navLinks.contains(e.target) && e.target !== mobileMenuBtn) {
-                navLinks.classList.remove('active');
-                // Removed: mobileMenuBtn.textContent = '☰';
-            }
-        });
-
-        // Close when clicking a link
-        navLinks.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                navLinks.classList.remove('active');
-                // Removed: mobileMenuBtn.textContent = '☰';
-            });
-        });
-    }
-}
+// Mobile Bottom Navigation and Menu Logic handled by header.js
 
 // Search functionality
 function initSearch() {

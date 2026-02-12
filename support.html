@@ -16,40 +16,16 @@
 </head>
 
 <body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="container">
-            <div class="nav-content">
-                <div class="logo" onclick="window.location.href='index.html'">
-                    <img src="https://assets.zeronux.store/Logo.png" alt="ZeroNux Store Logo">
-                </div>
+    <!-- Header -->
+    <div id="main-header"></div>
+    <script src="Scripts/header.js"></script>
 
-                <button class="mobile-menu-btn" aria-label="Toggle Menu">☰</button>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
-                <div class="nav-links">
-                    <a href="index.html" class="nav-link">الرئيسية</a>
-                    <a href="index.html#products" class="nav-link">المنتجات</a>
-                    <a href="faq.html" class="nav-link">الأسئلة الشائعة</a>
-                </div>
-            </div>
-        </div>
-    </nav>
-    <script>
-        // Mobile Menu Logic (Inline for simplicity or load app.js if needed)
-        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-        const navLinks = document.querySelector('.nav-links');
-        if (mobileMenuBtn && navLinks) {
-            mobileMenuBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                navLinks.classList.toggle('active');
-            });
-            document.addEventListener('click', (e) => {
-                if (navLinks.classList.contains('active') && !navLinks.contains(e.target) && e.target !== mobileMenuBtn) {
-                    navLinks.classList.remove('active');
-                }
-            });
-        }
-    </script>
+    <!-- Main App Script -->
+    <script src="Scripts/app.js"></script>
 
     <header class="page-header">
         <div class="container">
@@ -115,6 +91,7 @@
     <!-- Footer -->
     <div id="main-footer"></div>
     <script src="Scripts/footer.js"></script>
+    <script src="Scripts/app.js?v=2.5"></script>
 </body>
 
 </html>

@@ -27,43 +27,9 @@
 </head>
 
 <body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="container">
-            <div class="nav-content">
-                <div class="logo" onclick="window.location.href='index.html'" style="cursor:pointer;">
-                    <img src="https://assets.zeronux.store/Logo.png" alt="ZeroNux Store Logo">
-                </div>
-
-                <button class="mobile-menu-btn" aria-label="Toggle Menu">☰</button>
-
-                <div class="nav-links">
-                    <a href="index.html" class="nav-link">الرئيسية</a>
-                    <a href="index.html#products" class="nav-link">المنتجات</a>
-                    <a href="#" class="nav-link active">الكتب الدراسية</a>
-
-                    <button class="currency-btn" onclick="toggleCurrency()"
-                        style="margin-right: 15px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 5px 12px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: 'Cairo', sans-serif;">
-                        <span class="currency-symbol">$</span>
-                        <span class="currency-code">USD</span>
-                    </button>
-                    <!-- Mobile Quick Actions (icon row - simplified for students page) -->
-                    <div class="mobile-quick-actions">
-                        <a href="index.html#about" class="mobile-quick-btn" title="من نحن"
-                            style="text-decoration: none; color: inherit;">
-                            <span class="quick-icon">ℹ️</span>
-                            <span class="quick-label">من نحن</span>
-                        </a>
-                        <a href="index.html#contact" class="mobile-quick-btn" title="اتصل بنا"
-                            style="text-decoration: none; color: inherit;">
-                            <span class="quick-icon">📞</span>
-                            <span class="quick-label">اتصل بنا</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <!-- Header -->
+    <div id="main-header"></div>
+    <script src="Scripts/header.js"></script>
 
     <!-- Page Header -->
     <header class="page-header">
@@ -133,6 +99,9 @@
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <!-- App Script (for Header/Modals) -->
+    <script src="Scripts/app.js?v=2.5"></script>
 
     <!-- Students Page Script -->
     <script src="Scripts/students.js?v=2.6"></script>

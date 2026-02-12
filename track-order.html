@@ -16,50 +16,9 @@
 </head>
 
 <body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="container">
-            <div class="nav-content">
-                <div class="logo" onclick="window.location.href='index.html'">
-                    <img src="https://assets.zeronux.store/Logo.png" alt="ZeroNux Store Logo">
-                </div>
-
-                <button class="mobile-menu-btn" aria-label="Toggle Menu">☰</button>
-
-                <div class="nav-links">
-                    <a href="index.html" class="nav-link">الرئيسية</a>
-                    <a href="index.html#contact" class="nav-link">اتصل بنا</a>
-                </div>
-            </div>
-        </div>
-    </nav>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-            const navLinks = document.querySelector('.nav-links');
-            if (mobileMenuBtn && navLinks) {
-                // Toggle menu
-                mobileMenuBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    navLinks.classList.toggle('active');
-                });
-
-                // Close when clicking outside
-                document.addEventListener('click', (e) => {
-                    if (navLinks.classList.contains('active') && !navLinks.contains(e.target) && e.target !== mobileMenuBtn) {
-                        navLinks.classList.remove('active');
-                    }
-                });
-
-                // Close when clicking a link
-                navLinks.querySelectorAll('a').forEach(link => {
-                    link.addEventListener('click', () => {
-                        navLinks.classList.remove('active');
-                    });
-                });
-            }
-        });
-    </script>
+    <!-- Header -->
+    <div id="main-header"></div>
+    <script src="Scripts/header.js"></script>
 
     <header class="page-header">
         <div class="container">

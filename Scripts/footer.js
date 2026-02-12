@@ -12,9 +12,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     <ul>
                         <li><a href="index.html#home" data-i18n="footer-link-home">الرئيسية</a></li>
                         <li><a href="index.html#products" data-i18n="footer-link-products">المنتجات</a></li>
-                        <li><a href="index.html#about" data-i18n="footer-link-about">من نحن</a></li>
-                        <li><a href="index.html#contact" data-i18n="footer-link-contact">اتصل بنا</a></li>
-                        <li><a href="index.html#refund" data-i18n="footer-link-refund">سياسة الاسترجاع</a></li>
+                        <li><a href="#about" data-i18n="footer-link-about">من نحن</a></li>
+                        <li><a href="#contact" data-i18n="footer-link-contact">اتصل بنا</a></li>
+                        <li><a href="#refund" data-i18n="footer-link-refund">سياسة الاسترجاع</a></li>
                         <li><a href="track-order.html">تتبع طلبك</a></li>
                     </ul>
                 </div>

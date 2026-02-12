@@ -54,96 +54,9 @@
             console.log("نتواصل الآن من بيئة الاختبار: " + window.location.hostname);
         }
     </script>
-    <!-- Announcement Bar -->
-    <div id="announcement-bar" class="announcement-bar" style="display: none;">
-        <div class="announcement-content">
-            <span id="announcement-text"></span>
-        </div>
-    </div>
-
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="container">
-            <div class="nav-content">
-                <div class="logo">
-                    <img src="https://assets.zeronux.store/Logo.png" alt="ZeroNux Store Logo">
-                </div>
-
-                <button class="mobile-menu-btn" aria-label="Toggle Menu">
-                    ☰
-                </button>
-
-                <div class="nav-links">
-                    <a href="#home" class="nav-link active" data-i18n="nav-home">الرئيسية</a>
-                    <a href="students.html" class="nav-link">📚 الكتب الدراسية</a>
-                    <a href="#products" class="nav-link" data-i18n="nav-products">المنتجات</a>
-                    <!-- About & Contact moved to quick actions -->
-
-                    <!-- Mobile Quick Actions (icon row) -->
-                    <div class="mobile-quick-actions">
-                        <button class="mobile-quick-btn" onclick="showWishlistDrawer()" title="المفضلة">
-                            <span class="quick-icon">❤️</span>
-                            <span class="quick-label">المفضلة</span>
-                        </button>
-                        <button class="mobile-quick-btn" onclick="showRecentlyViewedDrawer()" title="شاهدت مؤخراً">
-                            <span class="quick-icon">🕐</span>
-                            <span class="quick-label">الأخيرة</span>
-                        </button>
-                        <button class="mobile-quick-btn" onclick="document.querySelector('.cart-btn').click()"
-                            title="السلة">
-                            <span class="quick-icon">🛒</span>
-                            <span class="quick-label">السلة</span>
-                        </button>
-                        <a href="#about" class="mobile-quick-btn" title="من نحن"
-                            style="text-decoration: none; color: inherit;">
-                            <span class="quick-icon">ℹ️</span>
-                            <span class="quick-label">من نحن</span>
-                        </a>
-                        <a href="#contact" class="mobile-quick-btn" title="اتصل بنا"
-                            style="text-decoration: none; color: inherit;">
-                            <span class="quick-icon">📞</span>
-                            <span class="quick-label">اتصل بنا</span>
-                        </a>
-                    </div>
-                </div>
-
-                <div class="nav-actions">
-                    <div class="currency-switcher">
-                        <button class="currency-btn active" data-currency="USD">
-                            <span class="currency-symbol">$</span>
-                            <span class="currency-code">USD</span>
-                        </button>
-                        <button class="currency-btn" data-currency="LYD">
-                            <span class="currency-symbol">د.ل</span>
-                            <span class="currency-code">LYD</span>
-                        </button>
-                    </div>
-                    <button class="recently-viewed-btn" aria-label="Recently Viewed">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                        </svg>
-                        <span class="recently-viewed-count">0</span>
-                    </button>
-                    <button class="wishlist-btn" aria-label="Wishlist">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-                        </svg>
-                        <span class="wishlist-count">0</span>
-                    </button>
-                    <button class="cart-btn">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M9 2L6 6M18 6L15 2M6 6h12l1 14H5L6 6z" />
-                        </svg>
-                        <span class="cart-count">0</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <!-- Header -->
+    <div id="main-header"></div>
+    <script src="Scripts/header.js"></script>
 
     <!-- Hero Section -->
     <section class="hero" id="home">
@@ -253,34 +166,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
-    <!-- Mobile Bottom Navigation Bar -->
-    <div class="mobile-bottom-nav">
-        <!-- Toggle Button -->
-        <button class="mobile-nav-toggle" aria-label="Toggle Navigation">
-            <span class="toggle-icon">▼</span>
-        </button>
-        <a href="#home" class="mobile-nav-item active" id="mobile-nav-home">
-            <span class="nav-icon">🏠</span>
-            <span class="nav-label">الرئيسية</span>
-        </a>
-        <a href="students.html" class="mobile-nav-item">
-            <span class="nav-icon">📚</span>
-            <span class="nav-label">الكتب</span>
-        </a>
-        <div class="mobile-nav-item" id="mobile-nav-search">
-            <span class="nav-icon">🔍</span>
-            <span class="nav-label">بحث</span>
-        </div>
-        <div class="mobile-nav-item relative" id="mobile-nav-cart">
-            <span class="nav-icon">🛒</span>
-            <span class="cart-count-badge">0</span>
-            <span class="nav-label">السلة</span>
-        </div>
-        <a href="https://wa.me/218916808225" target="_blank" class="mobile-nav-item">
-            <span class="nav-icon">💬</span>
-            <span class="nav-label">دعم</span>
-        </a>
-    </div>
+    <!-- Mobile Bottom Navigation Bar: Injected by header.js -->
 
     <script src="Scripts/app.js?v=2.6"></script>
 </body>
