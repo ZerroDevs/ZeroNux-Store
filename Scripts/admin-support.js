@@ -606,6 +606,8 @@
 
         const tabBtn = document.getElementById('tab-btn-support');
         let loaded = false;
+
+        // Original button click listener
         if (tabBtn) {
             tabBtn.addEventListener('click', () => {
                 if (!loaded) {
@@ -614,6 +616,23 @@
                 }
             });
         }
+
+        // New Sidebar / switchTab detection
+        const checkTab = setInterval(() => {
+            const tabPanel = document.getElementById('tab-support');
+            if (tabPanel) {
+                clearInterval(checkTab);
+                const observer = new MutationObserver(() => {
+                    if (tabPanel.classList.contains('active')) {
+                        if (!loaded) {
+                            loadAdminTickets();
+                            loaded = true;
+                        }
+                    }
+                });
+                observer.observe(tabPanel, { attributes: true, attributeFilter: ['class'] });
+            }
+        }, 500);
     }
 
     if (document.readyState === 'loading') {

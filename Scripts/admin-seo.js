@@ -404,7 +404,7 @@
         injectSeoTab();
         bindLivePreview();
 
-        // Load settings when tab is clicked
+        // Load settings when tab is clicked (old button)
         const tabBtn = document.getElementById('tab-btn-seo');
         let loaded = false;
         if (tabBtn) {
@@ -415,6 +415,23 @@
                 }
             });
         }
+
+        // New Sidebar / switchTab detection
+        const checkTab = setInterval(() => {
+            const tabPanel = document.getElementById('tab-seo');
+            if (tabPanel) {
+                clearInterval(checkTab);
+                const observer = new MutationObserver(() => {
+                    if (tabPanel.classList.contains('active')) {
+                        if (!loaded) {
+                            loadSeoSettings();
+                            loaded = true;
+                        }
+                    }
+                });
+                observer.observe(tabPanel, { attributes: true, attributeFilter: ['class'] });
+            }
+        }, 500);
     }
 
     if (document.readyState === 'loading') {
