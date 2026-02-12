@@ -215,9 +215,15 @@
 
             // Clear button
             document.getElementById('clear-activity-log')?.addEventListener('click', () => {
-                if (confirm('هل تريد مسح كل سجل الأنشطة؟')) {
-                    activityRef?.remove();
-                }
+                showConfirmModal(
+                    'مسح سجل الأنشطة',
+                    'هل أنت متأكد من مسح كل سجل الأنشطة؟ لا يمكن التراجع عن هذا الإجراء.',
+                    () => {
+                        activityRef?.remove()
+                            .then(() => showNotification('تم مسح السجل بنجاح 🗑️'))
+                            .catch(err => showNotification('خطأ: ' + err.message, 'error'));
+                    }
+                );
             });
         }
     }
