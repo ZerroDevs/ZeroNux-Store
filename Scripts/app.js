@@ -2401,28 +2401,3 @@ function showMaintenanceMode(preset, customMessage) {
     // Hide all page content
     document.body.style.overflow = 'hidden';
 }
-
-// Mobile Bottom Nav Toggle
-function initMobileNavToggle() {
-    const toggleBtn = document.querySelector('.mobile-nav-toggle');
-    const bottomNav = document.querySelector('.mobile-bottom-nav');
-
-    if (toggleBtn && bottomNav) {
-        // Load saved state
-        const isHidden = localStorage.getItem('mobileNavHidden') === 'true';
-        if (isHidden) {
-            bottomNav.classList.add('nav-hidden');
-        }
-
-        toggleBtn.addEventListener('click', () => {
-            bottomNav.classList.toggle('nav-hidden');
-            const currentState = bottomNav.classList.contains('nav-hidden');
-            localStorage.setItem('mobileNavHidden', currentState);
-        });
-    }
-}
-
-// Initialize on load
-document.addEventListener('DOMContentLoaded', () => {
-    initMobileNavToggle();
-});
