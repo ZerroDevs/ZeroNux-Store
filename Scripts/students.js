@@ -90,12 +90,17 @@
         const grid = document.getElementById('books-grid');
         if (!grid) return;
 
-        grid.innerHTML = `
-            <div class="books-loading">
-                <div class="spinner"></div>
-                <p>جاري تحميل الكتب...</p>
-            </div>
-        `;
+        // Show skeleton loading placeholders
+        if (typeof showBookSkeletons === 'function') {
+            showBookSkeletons('books-grid', 4);
+        } else {
+            grid.innerHTML = `
+                <div class="books-loading">
+                    <div class="spinner"></div>
+                    <p>جاري تحميل الكتب...</p>
+                </div>
+            `;
+        }
 
         studentBooksRef.on('value', (snapshot) => {
             allBooks = snapshot.val() || {};

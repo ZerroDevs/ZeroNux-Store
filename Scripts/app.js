@@ -1981,7 +1981,12 @@ function loadProductsFromFirebase() {
     if (!productsContainer) return; // Exit if not on products page
 
     // Show loading state
-    productsContainer.innerHTML = '<div class="loading-products">جاري تحميل المنتجات...</div>';
+    // Show skeleton loading placeholders
+    if (typeof showProductSkeletons === 'function') {
+        showProductSkeletons('products-container', 6);
+    } else {
+        productsContainer.innerHTML = '<div class="loading-products">جاري تحميل المنتجات...</div>';
+    }
 
     productsRef.on('value', (snapshot) => {
         const products = snapshot.val();
