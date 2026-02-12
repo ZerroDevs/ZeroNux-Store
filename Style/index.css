@@ -653,6 +653,30 @@ body:has(#announcement-bar[style*="display: block"]) {
     font-size: 1rem;
 }
 
+/* Desktop Search Button */
+.desktop-search-btn {
+    position: relative;
+    padding: 0.55rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.desktop-search-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.desktop-search-btn:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    color: var(--primary);
+}
+
 /* Recently Viewed Button */
 .recently-viewed-btn {
     position: relative;

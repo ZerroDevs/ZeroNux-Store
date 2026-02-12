@@ -58,6 +58,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
 
                 <div class="nav-actions">
+                    <button class="desktop-search-btn" id="desktop-search-btn" aria-label="Search">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                    </button>
                     <div class="currency-switcher">
                         <button class="currency-btn active" data-currency="USD">
                             <span class="currency-symbol">$</span>
@@ -161,22 +168,27 @@ function initMobileMenuLogic() {
         });
     }
 
-    // 2. Mobile Search Button — Global Search Overlay
+    // 2. Search Buttons — Global Search Overlay
+    const searchHandler = () => {
+        // On index.html with an existing search box, scroll to it
+        const onIndexPage = (window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/'));
+        const searchInput = document.getElementById('product-search');
+        if (onIndexPage && searchInput) {
+            searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => searchInput.focus(), 400);
+            return;
+        }
+        // On other pages, open global search overlay
+        openGlobalSearchOverlay();
+    };
+
+    // Mobile bottom nav search
     const mobileSearchBtn = document.getElementById('mobile-nav-search');
-    if (mobileSearchBtn) {
-        mobileSearchBtn.onclick = () => {
-            // On index.html with an existing search box, scroll to it
-            const onIndexPage = (window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/'));
-            const searchInput = document.getElementById('product-search');
-            if (onIndexPage && searchInput) {
-                searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                setTimeout(() => searchInput.focus(), 400);
-                return;
-            }
-            // On other pages, open global search overlay
-            openGlobalSearchOverlay();
-        };
-    }
+    if (mobileSearchBtn) mobileSearchBtn.onclick = searchHandler;
+
+    // Desktop nav search
+    const desktopSearchBtn = document.getElementById('desktop-search-btn');
+    if (desktopSearchBtn) desktopSearchBtn.onclick = searchHandler;
 
     // 3. Mobile Bottom Nav Toggle
     const toggleBtn = document.querySelector('.mobile-nav-toggle');
