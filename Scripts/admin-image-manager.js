@@ -652,7 +652,7 @@
         initClipboardPaste();
         enhanceAdditionalImagesSort();
 
-        // Load gallery when tab is clicked
+        // Load gallery when tab is clicked (old tab button)
         const tabBtn = document.getElementById('tab-btn-images');
         if (tabBtn) {
             tabBtn.addEventListener('click', () => {
@@ -660,6 +660,22 @@
                 if (gallery) renderImageGallery(gallery);
             });
         }
+
+        // Also watch for tab activation via sidebar or switchTab()
+        const checkTab = setInterval(() => {
+            const tabPanel = document.getElementById('tab-images');
+            if (tabPanel) {
+                clearInterval(checkTab);
+                // Use MutationObserver to detect when tab becomes active
+                const observer = new MutationObserver(() => {
+                    if (tabPanel.classList.contains('active')) {
+                        const gallery = document.getElementById('image-manager-gallery');
+                        if (gallery) renderImageGallery(gallery);
+                    }
+                });
+                observer.observe(tabPanel, { attributes: true, attributeFilter: ['class'] });
+            }
+        }, 500);
     }
 
     if (document.readyState === 'loading') {
