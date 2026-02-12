@@ -1020,6 +1020,11 @@ function moveToCart(productId) {
 
 // Show wishlist drawer/modal
 function showWishlistDrawer() {
+    // Prevent multiple instances
+    if (document.querySelector('.wishlist-drawer-overlay')) {
+        document.querySelector('.wishlist-drawer-overlay').remove();
+    }
+
     const overlay = document.createElement('div');
     overlay.className = 'wishlist-drawer-overlay';
 
@@ -1178,6 +1183,11 @@ function initAddToCartButtons() {
 
 // Cart modal
 function showCartModal() {
+    // Prevent multiple instances
+    if (document.querySelector('.cart-modal-overlay')) {
+        document.querySelector('.cart-modal-overlay').remove();
+    }
+
     // Create modal overlay
     const overlay = document.createElement('div');
     overlay.className = 'cart-modal-overlay';
