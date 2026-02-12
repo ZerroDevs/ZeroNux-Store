@@ -195,53 +195,32 @@ function viewOrderDetails(orderId) {
             </div>
         ` : '';
 
-        const modal = document.createElement('div');
-        modal.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-        `;
-
-        modal.innerHTML = `
-            <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 2rem; border-radius: 16px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; position: relative; color: white;">
-                <button onclick="this.closest('div[style*=fixed]').remove()" style="position: absolute; top: 15px; left: 20px; background: none; border: none; color: white; font-size: 28px; cursor: pointer;">&times;</button>
-                
-                <h2 style="margin: 0 0 1.5rem 0; color: #667eea;">📋 تفاصيل الطلب</h2>
-                
-                <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-                    <p style="margin: 0.5rem 0;"><strong>رقم الطلب:</strong> ${order.orderId}</p>
-                    <p style="margin: 0.5rem 0;"><strong>التاريخ:</strong> ${formattedDate}</p>
-                    <p style="margin: 0.5rem 0;"><strong>الحالة:</strong> <span class="order-status-badge status-${order.status}">${statusText[order.status] || order.status}</span></p>
-                    ${order.customerPhone ? `<p style="margin: 0.5rem 0; color: #4facfe;"><strong>📞 رقم الهاتف:</strong> ${order.customerPhone}</p>` : ''}
+        const contentHtml = `
+            <h2 style="margin: 0 0 1.5rem 0; color: #667eea;">📋 تفاصيل الطلب</h2>
+            
+            <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                <p style="margin: 0.5rem 0;"><strong>رقم الطلب:</strong> ${order.orderId}</p>
+                <p style="margin: 0.5rem 0;"><strong>التاريخ:</strong> ${formattedDate}</p>
+                <p style="margin: 0.5rem 0;"><strong>الحالة:</strong> <span class="order-status-badge status-${order.status}">${statusText[order.status] || order.status}</span></p>
+                ${order.customerPhone ? `<p style="margin: 0.5rem 0; color: #4facfe;"><strong>📞 رقم الهاتف:</strong> ${order.customerPhone}</p>` : ''}
+            </div>
+            
+            <h3 style="margin: 1.5rem 0 1rem 0;">المنتجات:</h3>
+            <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
+                ${itemsHtml}
+                <div style="display: flex; justify-content: space-between; padding: 1rem 0 0.5rem 0; margin-top: 1rem; border-top: 2px solid rgba(255,255,255,0.2); font-weight: bold;">
+                    <span>المجموع الأصلي:</span>
+                    <span>${order.currency === 'LYD' ? `${order.total.toFixed(2)} د.ل` : `$${order.total.toFixed(2)}`}</span>
                 </div>
-                
-                <h3 style="margin: 1.5rem 0 1rem 0;">المنتجات:</h3>
-                <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
-                    ${itemsHtml}
-                    <div style="display: flex; justify-content: space-between; padding: 1rem 0 0.5rem 0; margin-top: 1rem; border-top: 2px solid rgba(255,255,255,0.2); font-weight: bold;">
-                        <span>المجموع الأصلي:</span>
-                        <span>${order.currency === 'LYD' ? `${order.total.toFixed(2)} د.ل` : `$${order.total.toFixed(2)}`}</span>
-                    </div>
-                    ${discountHtml}
-                    <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; font-size: 1.2rem; font-weight: bold; color: #4caf50;">
-                        <span>المجموع النهائي:</span>
-                        <span>${order.currency === 'LYD' ? `${order.finalTotal.toFixed(2)} د.ل` : `$${order.finalTotal.toFixed(2)}`}</span>
-                    </div>
+                ${discountHtml}
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; font-size: 1.2rem; font-weight: bold; color: #4caf50;">
+                    <span>المجموع النهائي:</span>
+                    <span>${order.currency === 'LYD' ? `${order.finalTotal.toFixed(2)} د.ل` : `$${order.finalTotal.toFixed(2)}`}</span>
                 </div>
             </div>
         `;
 
-        document.body.appendChild(modal);
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) modal.remove();
-        });
+        showCustomModal(contentHtml, { width: '500px' });
     });
 }
 

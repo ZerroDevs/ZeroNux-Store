@@ -219,12 +219,8 @@ window.bulkDelete = function (type) {
         'حذف جماعي',
         `هل أنت متأكد من حذف ${selectedItems.size} عنصر؟ هذه العملية لا رجعة فيها.`,
         () => {
-            const updates = {};
-            selectedItems.forEach(id => {
-                updates[id] = null; // Removing
-            });
-
-            const ref = type === 'products' ? productsRef : ordersRef; // references from admin.js
+            const db = firebase.database();
+            const ref = type === 'products' ? db.ref('products') : db.ref('orders');
 
             // Construct multi-path update
             const multiPathUpdate = {};
@@ -237,7 +233,10 @@ window.bulkDelete = function (type) {
                     showNotification(`تم حذف ${selectedItems.size} عنصر بنجاح`);
                     clearSelection();
                 })
-                .catch(err => showNotification('خطأ: ' + err.message, 'error'));
+                .catch(err => {
+                    console.error('Bulk delete error:', err);
+                    showAlertModal('خطأ', 'حدث خطأ أثناء الحذف: ' + err.message, 'error');
+                });
         },
         'نعم، حذف الكل'
     );
@@ -329,7 +328,7 @@ window.applyBulkPrice = function () {
     const value = parseFloat(document.getElementById('bulk-price-value').value);
 
     if (isNaN(value)) {
-        alert('الرجاء إدخال قيمة صحيحة');
+        showAlertModal('خطأ في القيمة', 'الرجاء إدخال قيمة رقمية صحيحة لتحديث السعر.', 'error');
         return;
     }
 
@@ -337,21 +336,25 @@ window.applyBulkPrice = function () {
         'تحديث الأسعار',
         'هل أنت متأكد؟ سيتم تغيير الأسعار لجميع المنتجات المحددة.',
         () => {
-            // For relative updates, we need to fetch current prices first (transaction or read-update)
-            // Since we have the data somewhat loaded in UI but not purely reliable for math, 
-            // it's safer to fetch once.
-            // However, to keep it simple and efficient, we will just read all selected products once.
-
-            // We can use the existing 'products' data if globally available or fetch fresh.
-            // 'productsRef' is available.
+            const db = firebase.database();
+            const productsRef = db.ref('products');
 
             let processed = 0;
             const total = selectedItems.size;
+            let errorCount = 0;
+
+            if (total === 0) {
+                if (document.getElementById('bulk-price-modal')) document.getElementById('bulk-price-modal').remove();
+                return;
+            }
+
+            console.log(`Starting bulk update for ${total} items. Type: ${type}, Value: ${value}`);
 
             selectedItems.forEach(id => {
                 productsRef.child(id).transaction((product) => {
                     if (product) {
                         let currentPrice = parseFloat(product.price) || 0;
+                        const originalPrice = currentPrice;
 
                         switch (type) {
                             case 'fixed':
@@ -375,13 +378,26 @@ window.applyBulkPrice = function () {
                         if (currentPrice < 0) currentPrice = 0;
 
                         product.price = parseFloat(currentPrice.toFixed(2));
+                        console.log(`Product ${id}: ${originalPrice} -> ${product.price}`);
                         return product;
                     }
+                    return product; // Return unchanged if null
                 }, (error, committed, snapshot) => {
                     processed++;
+                    if (error) {
+                        console.error('Transaction failed for ' + id, error);
+                        errorCount++;
+                    } else if (!committed) {
+                        console.warn('Transaction not committed for ' + id);
+                    }
+
                     if (processed === total) {
-                        document.getElementById('bulk-price-modal').remove();
-                        showNotification('تم تحديث الأسعار بنجاح! ✅');
+                        if (document.getElementById('bulk-price-modal')) document.getElementById('bulk-price-modal').remove();
+                        if (errorCount > 0) {
+                            showAlertModal('تنبيه', `تم التحديث مع بعض الأخطاء. فشل تحديث ${errorCount} منتج.`, 'warning');
+                        } else {
+                            showNotification('تم تحديث الأسعار بنجاح! ✅');
+                        }
                         clearSelection();
                     }
                 });
@@ -391,3 +407,4 @@ window.applyBulkPrice = function () {
         'primary'
     );
 }
+
