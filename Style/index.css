@@ -1947,7 +1947,8 @@ body:has(#announcement-bar[style*="display: block"]) {
 
     /* Hide top bar buttons on mobile */
     .nav-actions .wishlist-btn,
-    .nav-actions .recently-viewed-btn {
+    .nav-actions .recently-viewed-btn,
+    .nav-actions .desktop-search-btn {
         display: none !important;
     }
 }
