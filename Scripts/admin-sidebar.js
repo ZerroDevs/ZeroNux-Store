@@ -631,6 +631,8 @@
         if (originalSwitchTab) {
             window.switchTab = function (tabName) {
                 originalSwitchTab(tabName);
+                // Save state
+                localStorage.setItem('admin_active_tab', tabName);
                 // Sync sidebar
                 sidebar.querySelectorAll('.sidebar-nav-item').forEach(n => {
                     n.classList.toggle('active', n.getAttribute('data-sidebar-tab') === tabName);
@@ -651,7 +653,16 @@
             if (dashboard && adminMain && dashboard.style.display !== 'none') {
                 clearInterval(check);
                 // Small delay to let other scripts inject their tabs first
-                setTimeout(buildSidebar, 400);
+                setTimeout(() => {
+                    buildSidebar();
+                    // Restore active tab
+                    const savedTab = localStorage.getItem('admin_active_tab');
+                    if (savedTab && savedTab !== 'dashboard') {
+                        if (typeof window.switchTab === 'function') {
+                            window.switchTab(savedTab);
+                        }
+                    }
+                }, 400);
             }
         }, 300);
     }
