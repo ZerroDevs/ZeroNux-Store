@@ -254,5 +254,11 @@
         bookDeleted: (name) => logActivity('delete', '🗑️', `تم حذف كتاب: <strong>${name}</strong>`),
         promoCreated: (code) => logActivity('add', '🎫', `تم إنشاء كوبون: <strong>${code}</strong>`),
         promoDeleted: (code) => logActivity('delete', '🗑️', `تم حذف كوبون: <strong>${code}</strong>`),
+
+        // Bulk Actions
+        bulkDelete: (count, type) => logActivity('delete', '🔥', `تم حذف <strong>${count}</strong> من ${type === 'products' ? 'المنتجات' : 'الطلبات'} جماعياً`),
+        bulkPriceUpdate: (count) => logActivity('edit', '💰', `تم تحديث أسعار <strong>${count}</strong> منتج جماعياً`),
+        bulkStatusUpdate: (count, status) => logActivity('status', '📋', `تم تحديث حالة <strong>${count}</strong> طلب جماعياً إلى: ${status}`),
+        bulkVisibility: (count, visible) => logActivity('visibility', visible ? '👁️' : '🙈', `تم ${visible ? 'إظهار' : 'إخفاء'} <strong>${count}</strong> منتج جماعياً`),
     };
 })();

@@ -231,6 +231,7 @@ window.bulkDelete = function (type) {
             ref.update(multiPathUpdate)
                 .then(() => {
                     showNotification(`تم حذف ${selectedItems.size} عنصر بنجاح`);
+                    if (window.adminLog) window.adminLog.bulkDelete(selectedItems.size, type);
                     clearSelection();
                 })
                 .catch(err => {
@@ -251,6 +252,7 @@ window.bulkToggleVisibility = function (visible) {
     productsRef.update(multiPathUpdate)
         .then(() => {
             showNotification(visible ? 'تم إظهار المنتجات المحددة' : 'تم إخفاء المنتجات المحددة');
+            if (window.adminLog) window.adminLog.bulkVisibility(selectedItems.size, visible);
             clearSelection();
         })
         .catch(err => showNotification('خطأ: ' + err.message, 'error'));
@@ -268,6 +270,7 @@ window.bulkUpdateStatus = function (status) {
     ordersRef.update(multiPathUpdate)
         .then(() => {
             showNotification(`تم تحديث حالة الطلبات إلى: ${status}`);
+            if (window.adminLog) window.adminLog.bulkStatusUpdate(selectedItems.size, status);
             document.getElementById('bulk-order-status').value = "";
             clearSelection();
         })
@@ -397,6 +400,7 @@ window.applyBulkPrice = function () {
                             showAlertModal('تنبيه', `تم التحديث مع بعض الأخطاء. فشل تحديث ${errorCount} منتج.`, 'warning');
                         } else {
                             showNotification('تم تحديث الأسعار بنجاح! ✅');
+                            if (window.adminLog) window.adminLog.bulkPriceUpdate(total);
                         }
                         clearSelection();
                     }
