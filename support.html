@@ -13,6 +13,307 @@
         rel="stylesheet">
     <link rel="stylesheet" href="Style/index.css">
     <link rel="stylesheet" href="Style/secondary.css">
+    <style>
+        /* Support Page Styles */
+        .support-tabs {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .support-tab-btn {
+            padding: 10px 24px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.04);
+            color: rgba(255, 255, 255, 0.6);
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .support-tab-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .support-tab-btn.active {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+            border-color: rgba(102, 126, 234, 0.4);
+            color: #a5b4fc;
+        }
+
+        /* Ticket Form */
+        .ticket-form-card {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Ticket Notification Toast */
+        .ticket-notif {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            z-index: 9999;
+            transition: transform 0.3s ease;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .ticket-notif.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .ticket-notif-success {
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            color: white;
+            box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
+        }
+
+        .ticket-notif-error {
+            background: linear-gradient(135deg, #f44336, #c62828);
+            color: white;
+            box-shadow: 0 4px 20px rgba(244, 67, 54, 0.3);
+        }
+
+        /* Tickets List */
+        .ticket-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .ticket-card:hover {
+            background: rgba(102, 126, 234, 0.08);
+            border-color: rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .ticket-card.ticket-unread {
+            border-right: 3px solid #4caf50;
+        }
+
+        .ticket-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .ticket-card-id {
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .ticket-status {
+            font-size: 0.7rem;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .status-open {
+            background: rgba(76, 175, 80, 0.15);
+            color: #4caf50;
+        }
+
+        .status-replied {
+            background: rgba(33, 150, 243, 0.15);
+            color: #42a5f5;
+        }
+
+        .status-closed {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .ticket-card-subject {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 4px;
+        }
+
+        .ticket-card-preview {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.4);
+            line-height: 1.4;
+        }
+
+        .ticket-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .ticket-card-date {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .ticket-has-reply {
+            font-size: 0.7rem;
+            color: #4caf50;
+            font-weight: 600;
+        }
+
+        .ticket-empty,
+        .ticket-loading {
+            text-align: center;
+            padding: 3rem;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.9rem;
+        }
+
+        /* Chat View */
+        .chat-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 1rem;
+        }
+
+        .chat-back-btn {
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: transparent;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .chat-back-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .chat-header-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-ticket-id {
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .chat-subject {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 1rem;
+        }
+
+        .chat-messages {
+            max-height: 400px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 10px 0;
+            margin-bottom: 1rem;
+        }
+
+        .chat-msg {
+            max-width: 80%;
+            padding: 10px 16px;
+            border-radius: 14px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .chat-msg-customer {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.85);
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-msg-admin {
+            align-self: flex-end;
+            background: rgba(102, 126, 234, 0.2);
+            color: #c5ceff;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-msg-sender {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 4px;
+        }
+
+        .chat-msg-admin .chat-msg-sender {
+            color: #667eea;
+        }
+
+        .chat-msg-text {
+            word-wrap: break-word;
+        }
+
+        .chat-msg-time {
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.25);
+            margin-top: 4px;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input-area textarea {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+            padding: 10px 14px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.85rem;
+            resize: none;
+        }
+
+        .chat-input-area textarea:focus {
+            outline: none;
+            border-color: rgba(102, 126, 234, 0.4);
+        }
+
+        .chat-send-btn {
+            padding: 10px 24px !important;
+            min-width: auto !important;
+        }
+
+        .chat-closed-notice {
+            text-align: center;
+            padding: 1rem;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.85rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+        }
+    </style>
 </head>
 
 <body>
@@ -28,74 +329,100 @@
     <!-- Shared Firebase Config -->
     <script src="Scripts/firebase-config.js"></script>
     <script src="Scripts/cart.js"></script>
-    <!-- Main App Script -->
-    <script src="Scripts/app.js"></script>
 
     <header class="page-header">
         <div class="container">
             <h1 class="page-title">🛠️ مركز الدعم الفني</h1>
-            <p class="page-subtitle">نحن هنا لمساعدتك. كيف يمكننا خدمتك اليوم؟</p>
+            <p class="page-subtitle">نحن هنا لمساعدتك. أرسل تذكرة وسنرد عليك في أقرب وقت.</p>
         </div>
     </header>
 
     <main class="secondary-container">
-        <!-- Support Grid -->
+        <!-- Support Grid (Quick Links) -->
         <div class="support-grid">
             <a href="https://wa.me/218916808225" target="_blank" class="support-card">
                 <span class="support-icon">💬</span>
-                <h3>محادثة مباشرة</h3>
-                <p>تواصل معنا عبر واتساب لرد فوري وسريع</p>
+                <h3>واتساب</h3>
+                <p>تواصل مباشر وسريع</p>
             </a>
-
             <a href="mailto:support@zeronux.store" class="support-card">
                 <span class="support-icon">📧</span>
                 <h3>البريد الإلكتروني</h3>
-                <p>ارسل استفسارك وسنرد عليك خلال 24 ساعة</p>
+                <p>support@zeronux.store</p>
             </a>
-
             <a href="faq.html" class="support-card">
                 <span class="support-icon">❓</span>
                 <h3>الأسئلة الشائعة</h3>
-                <p>تصفح إجابات لأكثر الأسئلة تكراراً</p>
+                <p>إجابات سريعة</p>
             </a>
         </div>
 
-        <!-- Contact Form -->
-        <div class="glass-card contact-form-container">
-            <h2 style="margin-bottom: 2rem; color: #fff; text-align: center;">📝 أرسل لنا رسالة</h2>
-            <form id="contact-form" onsubmit="event.preventDefault(); alert('شكراً لتواصلك! سنرد عليك قريباً.');">
-                <div class="form-input-group">
-                    <label>الاسم بالكامل</label>
-                    <input type="text" class="form-input" placeholder="اسمك الكريم" required>
+        <!-- Tab Switcher -->
+        <div class="support-tabs">
+            <button class="support-tab-btn active" data-view="new-ticket" onclick="switchSupportView('new-ticket')">📝
+                تذكرة جديدة</button>
+            <button class="support-tab-btn" data-view="my-tickets" onclick="switchSupportView('my-tickets')">📋
+                تذاكري</button>
+        </div>
+
+        <!-- New Ticket Form -->
+        <div id="new-ticket-view">
+            <div class="glass-card contact-form-container ticket-form-card">
+                <h2 style="margin-bottom: 2rem; color: #fff; text-align: center;">📝 أرسل تذكرة دعم</h2>
+                <form onsubmit="event.preventDefault(); submitSupportTicket();">
+                    <div class="form-input-group">
+                        <label>الاسم بالكامل *</label>
+                        <input type="text" class="form-input" id="ticket-name" placeholder="اسمك الكريم" required>
+                    </div>
+                    <div class="form-input-group">
+                        <label>البريد الإلكتروني أو رقم الهاتف *</label>
+                        <input type="text" class="form-input" id="ticket-contact" placeholder="وسيلة التواصل معك"
+                            required>
+                    </div>
+                    <div class="form-input-group">
+                        <label>موضوع الرسالة</label>
+                        <select class="form-input" id="ticket-subject">
+                            <option>استفسار عام</option>
+                            <option>مشكلة في الطلب</option>
+                            <option>مشكلة في الدفع</option>
+                            <option>طلب استرجاع</option>
+                            <option>اقتراح</option>
+                            <option>أخرى</option>
+                        </select>
+                    </div>
+                    <div class="form-input-group">
+                        <label>تفاصيل الرسالة *</label>
+                        <textarea class="form-input" id="ticket-message" placeholder="اشرح لنا كيف يمكننا مساعدتك..."
+                            required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="ticket-submit-btn"
+                        style="width: 100%; justify-content: center;">إرسال التذكرة 🚀</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- My Tickets List -->
+        <div id="my-tickets-view" style="display: none;">
+            <div class="glass-card" style="max-width: 700px; margin: 0 auto;">
+                <h2 style="margin-bottom: 1.5rem; color: #fff; text-align: center;">📋 تذاكري السابقة</h2>
+                <div id="my-tickets-list">
+                    <div class="ticket-loading">جاري التحميل...</div>
                 </div>
-                <div class="form-input-group">
-                    <label>البريد الإلكتروني أو رقم الهاتف</label>
-                    <input type="text" class="form-input" placeholder="وسيلة التواصل معك" required>
-                </div>
-                <div class="form-input-group">
-                    <label>موضوع الرسالة</label>
-                    <select class="form-input">
-                        <option>استفسار عام</option>
-                        <option>مشكلة في الطلب</option>
-                        <option>اقتراح</option>
-                        <option>أخرى</option>
-                    </select>
-                </div>
-                <div class="form-input-group">
-                    <label>تفاصيل الرسالة</label>
-                    <textarea class="form-input" placeholder="اشرح لنا كيف يمكننا مساعدتك..."></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">إرسال
-                    الرسالة 🚀</button>
-            </form>
+            </div>
+        </div>
+
+        <!-- Ticket Chat View (shown when clicking a ticket) -->
+        <div id="ticket-chat-view" style="display: none;">
+            <div class="glass-card" style="max-width: 700px; margin: 0 auto;">
+                <!-- Populated dynamically by support.js -->
+            </div>
         </div>
     </main>
 
     <!-- Footer -->
-    <!-- Footer -->
     <div id="main-footer"></div>
     <script src="Scripts/footer.js"></script>
-    <script src="Scripts/app.js?v=2.5"></script>
+    <script src="Scripts/support.js"></script>
     <script src="Scripts/instant-page.js" type="module"></script>
     <script src="Scripts/smart-search.js"></script>
     <script src="Scripts/pwa.js"></script>
