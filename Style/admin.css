@@ -843,3 +843,103 @@ small {
     color: rgba(255, 255, 255, 0.5);
     font-size: 0.85rem;
 }
+
+/* ============================================
+   MOBILE RESPONSIVENESS IMPROVEMENTS
+   ============================================ */
+
+/* New generic classes replacing inline styles */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.select-all-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: #b3b3b3;
+}
+
+.orders-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+
+    /* Stack Section Headers */
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        background: rgba(255, 255, 255, 0.03);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-header h2 {
+        margin-bottom: 0;
+        font-size: 1.25rem;
+    }
+
+    .select-all-label {
+        width: 100%;
+        justify-content: space-between;
+        padding: 0.75rem;
+        background: rgba(255, 255, 255, 0.05);
+        /* Slightly lighter */
+        border-radius: 8px;
+    }
+
+    /* Denser Grid for Stats */
+    .stats-container,
+    .orders-stats-grid {
+        /* Force 2 columns on small screens if possible, else 1 */
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 0.75rem;
+    }
+
+    /* Vertical Stats Cards for space efficiency */
+    .stat-card {
+        padding: 1rem;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.75rem;
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 1.75rem;
+        margin: 0;
+    }
+
+    .stat-info h3 {
+        font-size: 0.8rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .stat-info p {
+        font-size: 1.5rem;
+    }
+
+    /* Layout Spacing */
+    .admin-main {
+        padding: 1rem 0.75rem;
+    }
+
+    .products-section,
+    .form-section {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+}
