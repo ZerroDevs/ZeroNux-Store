@@ -46,7 +46,16 @@
 
             <div class="order-id-box">
                 <span class="order-label">رقم الطلب</span>
-                <span class="order-value" id="order-id">...</span>
+                <div class="order-id-wrapper">
+                    <span class="order-value" id="order-id">...</span>
+                    <button id="copy-order-btn" class="copy-btn" title="نسخ رقم الطلب">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <a href="#" id="whatsapp-btn" class="btn-whatsapp">
@@ -66,53 +75,7 @@
     <script src="Scripts/firebase-config.js"></script>
     <script src="Scripts/cart.js"></script>
     <script src="Scripts/app.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Get order ID from URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const orderId = urlParams.get('orderId');
-            const orderIdEl = document.getElementById('order-id');
-            const whatsappBtn = document.getElementById('whatsapp-btn');
-
-            // Function to update the WhatsApp link
-            function updateWhatsAppLink() {
-                if (!orderId) return;
-
-                // Use global CONTACT_NUMBER from app.js (which might be updated by settings)
-                const phone = (window.CONTACT_NUMBER && window.CONTACT_NUMBER !== '218916808225')
-                    ? window.CONTACT_NUMBER
-                    : '218916808225'; // Fallback to default if not yet loaded or set
-
-
-                const message = `مرحباً، قمت للتو بطلب جديد من المتجر.\nرقم الطلب: ${orderId}\nأرغب في إتمام عملية الدفع والتوصيل.`;
-                const encodedMessage = encodeURIComponent(message);
-
-                if (whatsappBtn) {
-                    whatsappBtn.href = `https://wa.me/${phone}?text=${encodedMessage}`;
-                }
-            }
-
-            if (orderId) {
-                orderIdEl.textContent = orderId;
-
-                // Initial update (might use default number)
-                updateWhatsAppLink();
-
-                // Listen for updates from app.js when settings are loaded
-                document.addEventListener('contact-info-updated', (e) => {
-                    // Force update global if needed, though app.js should have set it
-                    if (e.detail && e.detail.phoneNumber) {
-                        window.CONTACT_NUMBER = e.detail.phoneNumber;
-                    }
-                    updateWhatsAppLink();
-                });
-
-            } else {
-                orderIdEl.textContent = "غير متوفر";
-                if (whatsappBtn) whatsappBtn.style.display = 'none';
-            }
-        });
-    </script>
+    <script src="Scripts/success.js"></script>
     <script src="Scripts/instant-page.js" type="module"></script>
     <script src="Scripts/smart-search.js"></script>
     <script src="Scripts/pwa.js"></script>

@@ -65,6 +65,37 @@ p {
     letter-spacing: 1px;
 }
 
+.order-id-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.copy-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.copy-btn:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.1);
+}
+
+.copy-btn.copied {
+    color: #4cd137;
+    background: rgba(76, 209, 55, 0.1);
+}
+
 .btn-whatsapp {
     background: #25D366;
     color: white;
