@@ -63,6 +63,17 @@
 
         db.ref(TICKETS_REF).push(ticketData)
             .then(() => {
+                // Save user profile for next time
+                if (typeof saveUserProfile === 'function') {
+                    const isPhone = /^[0-9+]+$/.test(contact);
+                    const profileUpdate = { name: name };
+                    if (isPhone) profileUpdate.phone = contact;
+
+                    // Merge with existing profile to avoid overwriting other fields
+                    const existing = getUserProfile() || {};
+                    saveUserProfile({ ...existing, ...profileUpdate });
+                }
+
                 showTicketNotification('تم إرسال تذكرتك بنجاح! رقم التذكرة: ' + ticketId, 'success');
                 // Clear form
                 document.getElementById('ticket-name').value = '';

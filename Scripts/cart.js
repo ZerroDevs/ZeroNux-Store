@@ -412,7 +412,12 @@ function showCartModal() {
                 ${priceHtml}
             </div>
 
-            <div class="phone-input-section" style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+            <div class="name-input-section" style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                <input type="text" id="customer-name" placeholder="👤 الاسم الكامل " 
+                       style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white;">
+            </div>
+
+            <div class="phone-input-section" style="margin-top: 1rem; padding-top: 0;">
                 <input type="tel" id="customer-phone" placeholder="📞 رقم الهاتف (اختياري)" 
                        oninput="this.value = this.value.replace(/[^0-9]/g, '')" 
                        inputmode="numeric"
@@ -671,7 +676,8 @@ window.completeOrder = function () {
     const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
     const orderId = `ORDER_${dateStr}_${randomNum}`;
 
-    // Get customer phone if provided
+    // Get customer info
+    const customerName = document.getElementById('customer-name') ? document.getElementById('customer-name').value.trim() : '';
     const customerPhone = document.getElementById('customer-phone') ? document.getElementById('customer-phone').value.trim() : '';
 
     // Prepare order data for Firebase
@@ -695,6 +701,7 @@ window.completeOrder = function () {
         } : null,
         status: 'pending',
         currency: currentCurrency,
+        customerName: customerName,
         customerPhone: customerPhone,
         timestamp: timestamp,
         lastUpdated: timestamp

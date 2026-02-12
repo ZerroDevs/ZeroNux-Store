@@ -95,6 +95,10 @@ function loadOrders() {
                 <td><input type="checkbox" class="bulk-check" value="${order.id}" data-type="orders"></td>
                 <td><strong>${order.orderId || order.id.slice(-6)}</strong></td>
                 <td>${formattedDate}</td>
+                <td>
+                    <div style="font-weight:bold;">${order.customerName || 'زائر'}</div>
+                    <div style="font-size:0.8rem; color:rgba(255,255,255,0.5);">${order.customerPhone || ''}</div>
+                </td>
                 <td>${order.items ? order.items.length : 0} منتج</td>
                 <td><span class="price-display" data-usd="${parseFloat(totalUSD).toFixed(2)}">${displayPrice}</span></td>
                 <td><span class="order-status-badge status-${order.status}">${statusText[order.status] || order.status}</span></td>
@@ -203,6 +207,7 @@ function viewOrderDetails(orderId) {
                 <p style="margin: 0.5rem 0;"><strong>رقم الطلب:</strong> ${order.orderId}</p>
                 <p style="margin: 0.5rem 0;"><strong>التاريخ:</strong> ${formattedDate}</p>
                 <p style="margin: 0.5rem 0;"><strong>الحالة:</strong> <span class="order-status-badge status-${order.status}">${statusText[order.status] || order.status}</span></p>
+                ${order.customerName ? `<p style="margin: 0.5rem 0;"><strong>👤 العميل:</strong> ${order.customerName}</p>` : ''}
                 ${order.customerPhone ? `<p style="margin: 0.5rem 0; color: #4facfe;"><strong>📞 رقم الهاتف:</strong> ${order.customerPhone}</p>` : ''}
             </div>
             

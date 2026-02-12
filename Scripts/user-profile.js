@@ -76,17 +76,21 @@
         }
     };
 
-    // ---- Auto-fill cart phone field ----
-    function autoFillCartPhone() {
+    // ---- Auto-fill cart fields ----
+    function autoFillCartFields() {
         // Watch for cart modal to appear and auto-fill
         const observer = new MutationObserver((mutations) => {
             for (const mutation of mutations) {
                 for (const node of mutation.addedNodes) {
                     if (node.nodeType === 1 && node.classList && node.classList.contains('cart-modal-overlay')) {
-                        const phoneInput = node.querySelector('#customer-phone');
-                        if (phoneInput) {
-                            const profile = getUserProfile();
-                            if (profile && profile.phone && !phoneInput.value) {
+                        const profile = getUserProfile();
+                        if (profile) {
+                            const nameInput = node.querySelector('#customer-name');
+                            if (nameInput && profile.name && !nameInput.value) {
+                                nameInput.value = profile.name;
+                            }
+                            const phoneInput = node.querySelector('#customer-phone');
+                            if (phoneInput && profile.phone && !phoneInput.value) {
                                 phoneInput.value = profile.phone;
                             }
                         }
@@ -120,16 +124,20 @@
     const originalCompleteOrder = window.completeOrder;
     if (originalCompleteOrder) {
         window.completeOrder = function () {
-            // Grab phone before the cart modal is destroyed
+            // Grab fields before the cart modal is destroyed
+            const nameInput = document.getElementById('customer-name');
             const phoneInput = document.getElementById('customer-phone');
+
+            const name = nameInput ? nameInput.value.trim() : '';
             const phone = phoneInput ? phoneInput.value.trim() : '';
 
-            if (phone) {
+            if (name || phone) {
                 const existing = getUserProfile() || {};
-                saveUserProfile({
-                    ...existing,
-                    phone: phone
-                });
+                const update = { ...existing };
+                if (name) update.name = name;
+                if (phone) update.phone = phone;
+
+                saveUserProfile(update);
             }
 
             // Call original
@@ -291,14 +299,16 @@
 
     // ---- Init ----
     function init() {
-        autoFillCartPhone();
+        autoFillCartFields();
         autoFillSupportForm();
         injectProfileIcon();
 
         // Preload profile from Firebase if not cached
         const cached = localStorage.getItem('user_profile');
         if (!cached) {
-            loadUserProfile();
+            loadUserProfile(() => {
+                autoFillSupportForm();
+            });
         }
     }
 
