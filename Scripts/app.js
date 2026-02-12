@@ -17,7 +17,7 @@ const settingsRef = database.ref('settings');
 
 // Currency conversion functionality
 let EXCHANGE_RATE = 9; // Default rate, will be loaded from Firebase
-let currentCurrency = 'USD';
+let currentCurrency = localStorage.getItem('selectedCurrency') || 'USD';
 
 // Global Contact Info
 let CONTACT_NUMBER = '218916808225'; // Default
@@ -393,8 +393,21 @@ function updatePrices(currency) {
 }
 
 // Currency switcher functionality
-// Currency switcher functionality
 function initCurrencySwitcher() {
+    // Restore saved currency on page load
+    const savedCurrency = localStorage.getItem('selectedCurrency');
+    if (savedCurrency && savedCurrency !== 'USD') {
+        // Update the active button in the header
+        document.querySelectorAll('.currency-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.currency === savedCurrency);
+        });
+        // Apply saved currency prices
+        currentCurrency = savedCurrency;
+        updatePrices(currentCurrency);
+        // Notify other scripts (e.g. students.js)
+        document.dispatchEvent(new CustomEvent('currency-change', { detail: { currency: currentCurrency } }));
+    }
+
     // Use event delegation for dynamically added header
     document.addEventListener('click', (e) => {
         const btn = e.target.closest('.currency-btn');
@@ -408,6 +421,9 @@ function initCurrencySwitcher() {
 
         // Update current currency
         currentCurrency = btn.dataset.currency;
+
+        // Save to localStorage for persistence
+        localStorage.setItem('selectedCurrency', currentCurrency);
 
         // Update all prices
         updatePrices(currentCurrency);

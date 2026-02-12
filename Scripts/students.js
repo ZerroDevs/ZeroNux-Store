@@ -15,7 +15,7 @@
     // Global State (Local to this IIFE)
     let CONTACT_NUMBER = '218916808225';
     let EXCHANGE_RATE = 1;
-    let currentCurrency = 'USD';
+    let currentCurrency = localStorage.getItem('selectedCurrency') || 'USD';
     let allBooks = {};
 
     // ============================================
@@ -51,11 +51,26 @@
     // ============================================
     // CURRENCY TOGGLE
     // ============================================
-    // Listen for global currency change event from app.js
+    // Listen for global currency change event from header.js / app.js
     document.addEventListener('currency-change', (e) => {
         if (e.detail && e.detail.currency) {
             currentCurrency = e.detail.currency;
             renderBooks();
+        }
+    });
+
+    // Also directly watch currency button clicks as a fallback
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.currency-btn');
+        if (btn && btn.dataset.currency) {
+            // Small delay to let header.js update localStorage first
+            setTimeout(() => {
+                const newCurrency = localStorage.getItem('selectedCurrency') || btn.dataset.currency;
+                if (newCurrency !== currentCurrency) {
+                    currentCurrency = newCurrency;
+                    renderBooks();
+                }
+            }, 50);
         }
     });
 

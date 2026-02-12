@@ -212,4 +212,39 @@ function initMobileMenuLogic() {
             if (icon) icon.style.transform = isNowHidden ? 'rotate(180deg)' : 'rotate(0deg)';
         };
     }
+
+    // 4. Currency Switcher — Persist & Sync across all pages
+    const savedCurrency = localStorage.getItem('selectedCurrency');
+    if (savedCurrency) {
+        document.querySelectorAll('.currency-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.currency === savedCurrency);
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.currency-btn');
+        if (!btn) return;
+
+        const currency = btn.dataset.currency;
+
+        // Update active state
+        document.querySelectorAll('.currency-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Save to localStorage
+        localStorage.setItem('selectedCurrency', currency);
+
+        // Update global currentCurrency if app.js defined it
+        if (typeof currentCurrency !== 'undefined') {
+            currentCurrency = currency;
+        }
+
+        // Update prices if updatePrices exists (from app.js)
+        if (typeof updatePrices === 'function') {
+            updatePrices(currency);
+        }
+
+        // Dispatch event for other scripts (students.js, cart.js, etc.)
+        document.dispatchEvent(new CustomEvent('currency-change', { detail: { currency } }));
+    });
 }
