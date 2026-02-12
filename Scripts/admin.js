@@ -24,9 +24,10 @@ function switchTab(tabName) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
-    // Add active class to selected tab and content
-    if (event && event.currentTarget) {
-        event.currentTarget.classList.add('active');
+    // Add active class to the clicked tab button
+    const clickedBtn = document.querySelector(`.tab-btn[onclick*="'${tabName}'"]`);
+    if (clickedBtn) {
+        clickedBtn.classList.add('active');
     }
     const tabContent = document.getElementById(`tab-${tabName}`);
     if (tabContent) {
@@ -35,6 +36,7 @@ function switchTab(tabName) {
         console.error(`Tab content not found: tab-${tabName}`);
     }
 }
+
 
 // ============================================
 // ORDERS MANAGEMENT
@@ -126,6 +128,7 @@ function updateOrderStatus(orderId, newStatus) {
         lastUpdated: Date.now()
     }).then(() => {
         showNotification(`تم تحديث حالة الطلب إلى: ${newStatus === 'pending' ? 'قيد الانتظار' : newStatus === 'completed' ? 'مكتملة' : 'ملغاة'}`);
+        if (window.adminLog) window.adminLog.orderStatus(orderId, newStatus === 'pending' ? 'قيد الانتظار' : newStatus === 'completed' ? 'مكتملة' : 'ملغاة');
     }).catch(error => {
         showNotification('حدث خطأ: ' + error.message, 'error');
     });
@@ -137,6 +140,7 @@ function deleteOrder(orderId) {
     ordersRef.child(orderId).remove()
         .then(() => {
             showNotification('تم حذف الطلب بنجاح');
+            if (window.adminLog) window.adminLog.orderDeleted(orderId);
         })
         .catch(error => {
             showNotification('حدث خطأ: ' + error.message, 'error');
@@ -303,6 +307,7 @@ document.getElementById('promo-form').addEventListener('submit', (e) => {
     promosRef.push(newPromo)
         .then(() => {
             showNotification('تم إنشاء الكوبون بنجاح! 🎟️');
+            if (window.adminLog) window.adminLog.promoCreated(code);
             document.getElementById('promo-form').reset();
         })
         .catch(err => showNotification('خطأ: ' + err.message, 'error'));
@@ -311,7 +316,9 @@ document.getElementById('promo-form').addEventListener('submit', (e) => {
 // Delete Promo
 window.deletePromo = function (id) {
     if (confirm('هل أنت متأكد من حذف هذا الكوبون؟')) {
-        promosRef.child(id).remove();
+        promosRef.child(id).remove().then(() => {
+            if (window.adminLog) window.adminLog.promoDeleted(id.slice(-6));
+        });
     }
 };
 
@@ -535,6 +542,7 @@ document.getElementById('settings-form').addEventListener('submit', (e) => {
     settingsRef.update(settingsData) // Use update instead of set to avoid overwriting entire settings
         .then(() => {
             showNotification('تم حفظ الإعدادات بنجاح! 💾');
+            if (window.adminLog) window.adminLog.settingsSaved();
             // Update dropdown immediately
             populateCategoryDropdown(storeCategories);
         })
@@ -991,6 +999,7 @@ document.getElementById('product-form').addEventListener('submit', (e) => {
         productsRef.child(editingProductId).update(productData)
             .then(() => {
                 showNotification('تم تحديث المنتج بنجاح! ✅');
+                if (window.adminLog) window.adminLog.productEdited(productData.name);
                 resetForm();
             })
             .catch((error) => {
@@ -1001,6 +1010,7 @@ document.getElementById('product-form').addEventListener('submit', (e) => {
         productsRef.push(productData)
             .then(() => {
                 showNotification('تم إضافة المنتج بنجاح! 🎉');
+                if (window.adminLog) window.adminLog.productAdded(productData.name);
                 resetForm();
             })
             .catch((error) => {
@@ -1093,6 +1103,7 @@ window.toggleVisibility = function (id, currentStatus) {
     productsRef.child(id).update({ visible: newStatus })
         .then(() => {
             showNotification(newStatus ? 'المنتج الآن مرئي 👁️' : 'تم إخفاء المنتج 👁️‍🗨️');
+            if (window.adminLog) window.adminLog.productVisibility(id.slice(-6), newStatus);
         })
         .catch((error) => {
             showNotification('حدث خطأ: ' + error.message, 'error');
@@ -1105,6 +1116,7 @@ window.deleteProduct = function (id) {
         productsRef.child(id).remove()
             .then(() => {
                 showNotification('تم حذف المنتج بنجاح! 🗑️');
+                if (window.adminLog) window.adminLog.productDeleted(id.slice(-6));
             })
             .catch((error) => {
                 showNotification('حدث خطأ: ' + error.message, 'error');
@@ -1242,6 +1254,7 @@ document.getElementById('book-form').addEventListener('submit', (e) => {
         studentBooksRef.child(editingBookId).update(bookData)
             .then(() => {
                 showNotification('تم تحديث الكتاب بنجاح! ✅');
+                if (window.adminLog) window.adminLog.bookEdited(bookData.name);
                 resetBookForm();
             })
             .catch(err => showNotification('خطأ: ' + err.message, 'error'));
@@ -1249,6 +1262,7 @@ document.getElementById('book-form').addEventListener('submit', (e) => {
         studentBooksRef.push(bookData)
             .then(() => {
                 showNotification('تم إضافة الكتاب بنجاح! 📚');
+                if (window.adminLog) window.adminLog.bookAdded(bookData.name);
                 resetBookForm();
             })
             .catch(err => showNotification('خطأ: ' + err.message, 'error'));
@@ -1285,7 +1299,10 @@ window.toggleBookVisibility = function (id, currentStatus) {
 window.deleteBook = function (id) {
     if (confirm('هل أنت متأكد من حذف هذا الكتاب؟')) {
         studentBooksRef.child(id).remove()
-            .then(() => showNotification('تم حذف الكتاب 🗑️'))
+            .then(() => {
+                showNotification('تم حذف الكتاب 🗑️');
+                if (window.adminLog) window.adminLog.bookDeleted(id.slice(-6));
+            })
             .catch(err => showNotification('خطأ: ' + err.message, 'error'));
     }
 };
