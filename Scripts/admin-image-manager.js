@@ -238,23 +238,22 @@
     `;
     document.head.appendChild(style);
 
-    // ---- All Images Gallery (from products) ----
+    // ---- All Images Gallery (from products and books) ----
     function collectAllImages() {
         const images = [];
-        const productsRef = window.database?.ref('products');
-        if (!productsRef) return Promise.resolve(images);
+        const db = window.database;
+        if (!db) return Promise.resolve(images);
 
-        return new Promise(resolve => {
-            productsRef.once('value', snapshot => {
-                const products = snapshot.val();
-                if (!products) { resolve(images); return; }
-
+        const productsPromise = db.ref('products').once('value').then(snapshot => {
+            const products = snapshot.val();
+            if (products) {
                 Object.entries(products).forEach(([id, product]) => {
                     if (product.image) {
                         images.push({
                             url: product.image,
-                            productName: product.name,
-                            productId: id,
+                            name: product.name,
+                            id: id,
+                            source: 'product',
                             type: 'main'
                         });
                     }
@@ -262,17 +261,35 @@
                         product.additionalImages.forEach((url, idx) => {
                             images.push({
                                 url: url,
-                                productName: product.name + ` (${idx + 1})`,
-                                productId: id,
+                                name: product.name + ` (${idx + 1})`,
+                                id: id,
+                                source: 'product',
                                 type: 'gallery'
                             });
                         });
                     }
                 });
-
-                resolve(images);
-            });
+            }
         });
+
+        const booksPromise = db.ref('studentBooks').once('value').then(snapshot => {
+            const books = snapshot.val();
+            if (books) {
+                Object.entries(books).forEach(([id, book]) => {
+                    if (book.image) {
+                        images.push({
+                            url: book.image,
+                            name: book.name || 'كتاب بدون عنوان',
+                            id: id,
+                            source: 'book',
+                            type: 'main'
+                        });
+                    }
+                });
+            }
+        });
+
+        return Promise.all([productsPromise, booksPromise]).then(() => images);
     }
 
     function renderImageGallery(container) {
@@ -289,12 +306,13 @@
             // Stats
             const statsDiv = document.createElement('div');
             statsDiv.className = 'img-manager-stats';
-            const mainCount = images.filter(i => i.type === 'main').length;
-            const galleryCount = images.filter(i => i.type === 'gallery').length;
+            const productCount = images.filter(i => i.source === 'product').length;
+            const bookCount = images.filter(i => i.source === 'book').length;
+
             statsDiv.innerHTML = `
                 <span class="img-stat-chip">📷 الإجمالي: <strong>${images.length}</strong></span>
-                <span class="img-stat-chip">🖼️ رئيسية: <strong>${mainCount}</strong></span>
-                <span class="img-stat-chip">🗂️ معرض: <strong>${galleryCount}</strong></span>
+                <span class="img-stat-chip">📦 منتجات: <strong>${productCount}</strong></span>
+                <span class="img-stat-chip">📚 كتب: <strong>${bookCount}</strong></span>
             `;
             container.appendChild(statsDiv);
 
@@ -305,10 +323,12 @@
             images.forEach(img => {
                 const card = document.createElement('div');
                 card.className = 'img-manager-card';
+                const typeIcon = img.source === 'book' ? '📚' : '📦';
+
                 card.innerHTML = `
-                    <img src="${img.url}" alt="${img.productName}" loading="lazy">
+                    <img src="${img.url}" alt="${img.name}" loading="lazy">
                     <div class="img-overlay">
-                        <div class="img-overlay-name" title="${img.productName}">${img.productName}</div>
+                        <div class="img-overlay-name" title="${img.name}">${typeIcon} ${img.name}</div>
                         <div class="img-overlay-actions">
                             <button class="img-copy-btn" data-url="${img.url}">📋 نسخ الرابط</button>
                         </div>
@@ -327,7 +347,7 @@
 
                 // Click to view full
                 card.addEventListener('click', () => {
-                    showImagePreview(img.url, img.productName);
+                    showImagePreview(img.url, img.name);
                 });
 
                 grid.appendChild(card);
