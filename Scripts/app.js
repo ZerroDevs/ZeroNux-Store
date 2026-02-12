@@ -1393,6 +1393,12 @@ function showProductDetails(productId) {
         overlay.appendChild(modal);
         document.body.appendChild(overlay);
 
+        // Inject reviews section if reviews.js is loaded
+        if (typeof buildReviewsSection === 'function') {
+            const reviewsSection = buildReviewsSection(productId);
+            modal.appendChild(reviewsSection);
+        }
+
         // Styles for modal content
         const modalStyles = document.createElement('style');
         modalStyles.textContent = `
