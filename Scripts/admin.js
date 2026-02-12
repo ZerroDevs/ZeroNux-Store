@@ -1,21 +1,14 @@
 // ============================================
 // FIREBASE CONFIGURATION
 // ============================================
-const firebaseConfig = {
-    apiKey: "AIzaSyCiS9TwRDxlpQ1Z_A6QcBi0f6307vI49ws",
-    authDomain: "zeronuxstore.firebaseapp.com",
-    databaseURL: "https://zeronuxstore-default-rtdb.firebaseio.com", // YOU NEED TO CREATE DATABASE AND UPDATE THIS!
-    projectId: "zeronuxstore",
-    storageBucket: "zeronuxstore.firebasestorage.app",
-    messagingSenderId: "372553296362",
-    appId: "1:372553296362:web:4bca9efd5bc12e3f0f6a93",
-    measurementId: "G-HSL9HN8V61"
-};
+// ============================================
+// FIREBASE CONFIGURATION
+// ============================================
+// Config moved to Scripts/firebase-config.js
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-const auth = firebase.auth();
+// Initialize References
+const database = window.database || firebase.database();
+const auth = window.auth || firebase.auth();
 const productsRef = database.ref('products');
 const settingsRef = database.ref('settings');
 const promosRef = database.ref('promos');

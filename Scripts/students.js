@@ -4,23 +4,10 @@
 (function () {
     console.log("Students script initialized");
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyCiS9TwRDxlpQ1Z_A6QcBi0f6307vI49ws",
-        authDomain: "zeronuxstore.firebaseapp.com",
-        databaseURL: "https://zeronuxstore-default-rtdb.firebaseio.com",
-        projectId: "zeronuxstore",
-        storageBucket: "zeronuxstore.firebasestorage.app",
-        messagingSenderId: "372553296362",
-        appId: "1:372553296362:web:4bca9efd5bc12e3f0f6a93",
-        measurementId: "G-HSL9HN8V61"
-    };
+    // Config moved to Scripts/firebase-config.js
 
-    // Initialize Firebase only if not already initialized
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-
-    const database = firebase.database();
+    // References
+    const database = window.database || firebase.database();
     const studentBooksRef = database.ref('studentBooks');
     const bookRequestsRef = database.ref('bookRequests');
     const settingsRef = database.ref('settings');
