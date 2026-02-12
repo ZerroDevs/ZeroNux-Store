@@ -101,6 +101,7 @@ function loadOrders() {
                 <td>
                     <div class="order-actions">
                         <button class="btn btn-secondary" onclick="viewOrderDetails('${order.id}')" title="عرض التفاصيل">👁️</button>
+                        <button class="btn btn-secondary" onclick="generateInvoice('${order.id}')" title="طباعة فاتورة" style="background: rgba(102,126,234,0.15); border-color: rgba(102,126,234,0.3);">🖨️</button>
                         <select onchange="updateOrderStatus('${order.id}', this.value)" class="status-select" style="padding: 0.4rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 6px; cursor: pointer;">
                             <option value="">تغيير الحالة</option>
                             <option value="pending" ${order.status === 'pending' ? 'disabled' : ''}>قيد الانتظار</option>
