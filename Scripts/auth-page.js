@@ -282,6 +282,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // Check Terms
+            const termsCheckbox = document.getElementById('signup-terms');
+            if (termsCheckbox && !termsCheckbox.checked) {
+                showError('signup-error', 'يجب الموافقة على الشروط والأحكام للمتابعة');
+                return;
+            }
+
             // Check Turnstile
             const signupBox = document.getElementById('signup-box');
             const turnstileInput = signupBox.querySelector('[name="cf-turnstile-response"]');

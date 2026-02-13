@@ -22,7 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h4 data-i18n="footer-customer-service">خدمة العملاء</h4>
                     <ul>
                         <li><a href="faq.html" data-i18n="footer-link-faq">الأسئلة الشائعة</a></li>
-                        <li><a href="terms.html" data-i18n="footer-link-support">الشروط والسياسات</a></li>
+                        <li><a href="privacy.html" data-i18n="footer-link-privacy">سياسة الخصوصية</a></li>
+                        <li><a href="terms.html" data-i18n="footer-link-terms">الشروط والسياسات</a></li>
                         <li><a href="support.html" data-i18n="footer-link-support">الدعم الفني</a></li>
                     </ul>
                 </div>
