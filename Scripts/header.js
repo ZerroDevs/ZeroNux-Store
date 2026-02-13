@@ -244,7 +244,8 @@ function initMobileMenuLogic() {
         // Save to localStorage
         localStorage.setItem('selectedCurrency', currency);
 
-        // Update global currentCurrency if app.js defined it
+        // Update global currentCurrency
+        window.currentCurrency = currency;
         if (typeof currentCurrency !== 'undefined') {
             currentCurrency = currency;
         }

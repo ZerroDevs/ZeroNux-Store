@@ -16,8 +16,14 @@ const settingsRef = database.ref('settings');
 // ============================================
 
 // Currency conversion functionality
-let EXCHANGE_RATE = 9; // Default rate, will be loaded from Firebase
-let currentCurrency = localStorage.getItem('selectedCurrency') || 'USD';
+// Currency conversion functionality
+window.EXCHANGE_RATE = 9; // Default rate, will be loaded from Firebase
+window.currentCurrency = localStorage.getItem('selectedCurrency') || 'USD';
+
+// Keep local references for backward compatibility if needed within this file, 
+// though using window.VAR is safer for external scripts.
+let EXCHANGE_RATE = window.EXCHANGE_RATE;
+let currentCurrency = window.currentCurrency;
 
 // Global Contact Info
 let CONTACT_NUMBER = '218916808225'; // Default
@@ -31,8 +37,9 @@ function loadSettings() {
         if (settings) {
             // 1. Update Exchange Rate
             if (settings.exchangeRate) {
-                EXCHANGE_RATE = settings.exchangeRate;
-                updatePrices(currentCurrency);
+                window.EXCHANGE_RATE = settings.exchangeRate;
+                EXCHANGE_RATE = settings.exchangeRate; // Sync local var
+                updatePrices(window.currentCurrency);
             }
 
             // 2. Update Phone Number
@@ -407,10 +414,11 @@ function initCurrencySwitcher() {
             b.classList.toggle('active', b.dataset.currency === savedCurrency);
         });
         // Apply saved currency prices
+        window.currentCurrency = savedCurrency;
         currentCurrency = savedCurrency;
-        updatePrices(currentCurrency);
+        updatePrices(window.currentCurrency);
         // Notify other scripts (e.g. students.js)
-        document.dispatchEvent(new CustomEvent('currency-change', { detail: { currency: currentCurrency } }));
+        document.dispatchEvent(new CustomEvent('currency-change', { detail: { currency: window.currentCurrency } }));
     }
 
     // Use event delegation for dynamically added header
@@ -421,20 +429,21 @@ function initCurrencySwitcher() {
         // Remove active class from all buttons
         document.querySelectorAll('.currency-btn').forEach(b => b.classList.remove('active'));
 
-        // Add active class to clicked button
+        // Update active class to clicked button
         btn.classList.add('active');
 
         // Update current currency
-        currentCurrency = btn.dataset.currency;
+        window.currentCurrency = btn.dataset.currency;
+        currentCurrency = window.currentCurrency; // Sync local
 
         // Save to localStorage for persistence
-        localStorage.setItem('selectedCurrency', currentCurrency);
+        localStorage.setItem('selectedCurrency', window.currentCurrency);
 
         // Update all prices
-        updatePrices(currentCurrency);
+        updatePrices(window.currentCurrency);
 
         // Dispatch event for other scripts (like students.js)
-        const event = new CustomEvent('currency-change', { detail: { currency: currentCurrency } });
+        const event = new CustomEvent('currency-change', { detail: { currency: window.currentCurrency } });
         document.dispatchEvent(event);
     });
 }

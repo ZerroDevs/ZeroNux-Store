@@ -656,7 +656,9 @@ window.applyPromoCode = function () {
 window.completeOrder = function () {
     if (cart.length === 0) return;
 
-    const currentCurrency = window.currentCurrency || 'USD';
+    // Priority: Window Global > LocalStorage > Default USD
+    // We check LocalStorage specifically because header.js updates it reliably
+    const currentCurrency = window.currentCurrency || localStorage.getItem('selectedCurrency') || 'USD';
     const EXCHANGE_RATE = window.EXCHANGE_RATE || 1;
 
     // Calculate total in BASE USD first (with quantities)
