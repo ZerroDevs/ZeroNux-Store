@@ -231,3 +231,24 @@ body {
 .auth-container {
     animation: fadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
+
+/* Password Strength Styles */
+.strength-weak .bar:nth-child(1) {
+    background: #ff4444 !important;
+}
+
+.strength-medium .bar:nth-child(1),
+.strength-medium .bar:nth-child(2) {
+    background: #ffbb33 !important;
+}
+
+.strength-strong .bar:nth-child(1),
+.strength-strong .bar:nth-child(2),
+.strength-strong .bar:nth-child(3) {
+    background: #00C851 !important;
+}
+
+#signup-confirm-password.error {
+    border-color: #ff4444;
+    box-shadow: 0 0 0 2px rgba(255, 68, 68, 0.2);
+}

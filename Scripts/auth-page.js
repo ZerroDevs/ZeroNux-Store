@@ -16,6 +16,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Check URL Hash to switch tabs (e.g. login.html#signup)
+    if (window.location.hash === '#signup') {
+        const signupBox = document.getElementById('signup-box');
+        const loginBox = document.getElementById('login-box');
+        if (signupBox && loginBox) {
+            loginBox.style.display = 'none';
+            signupBox.style.display = 'block';
+        }
+    }
+
     // Toggle between Login, Signup, and Forgot Password
     toggleLinks.forEach(link => {
         link.addEventListener('click', (e) => {
@@ -171,19 +181,90 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+    // --- Password Strength & Confirmation Logic ---
+    const signupPassInput = document.getElementById('signup-password');
+    const signupConfirmInput = document.getElementById('signup-confirm-password');
+    const strengthContainer = document.getElementById('password-strength-container');
+    const strengthText = document.getElementById('strength-text');
+    const signupError = document.getElementById('signup-error');
 
-    // Email Signup
+    if (signupPassInput && strengthContainer) {
+        signupPassInput.addEventListener('input', () => {
+            const val = signupPassInput.value;
+            if (val.length === 0) {
+                strengthContainer.style.display = 'none';
+                return;
+            }
+            strengthContainer.style.display = 'block';
+
+            // Strength Logic
+            let score = 0;
+            let label = "ضعيفة جداً";
+
+            if (val.length >= 8) score++;
+            if (val.length >= 8 && /[0-9]/.test(val)) score++;
+            if (val.length >= 8 && /[^A-Za-z0-9]/.test(val)) score++;
+            if (val.length > 12) score++; // Bonus for length
+
+            strengthContainer.classList.remove('strength-weak', 'strength-medium', 'strength-strong');
+
+            if (val.length < 8) {
+                label = "قصيرة جداً (8+ أحرف)";
+                // No class, default grey bars
+            } else if (score < 2) {
+                strengthContainer.classList.add('strength-weak');
+                label = "ضعيفة";
+            } else if (score === 2) {
+                strengthContainer.classList.add('strength-medium');
+                label = "متوسطة";
+            } else {
+                strengthContainer.classList.add('strength-strong');
+                label = "قوية 💪";
+            }
+
+            strengthText.textContent = label;
+            checkMatch();
+        });
+    }
+
+    if (signupConfirmInput) {
+        signupConfirmInput.addEventListener('input', checkMatch);
+    }
+
+    function checkMatch() {
+        if (!signupConfirmInput || !signupPassInput) return;
+        const pass = signupPassInput.value;
+        const confirm = signupConfirmInput.value;
+
+        if (confirm.length > 0 && pass !== confirm) {
+            signupConfirmInput.classList.add('error');
+        } else {
+            signupConfirmInput.classList.remove('error');
+        }
+    }
+
+    // --- Signup Submission ---
     if (emailSignupBtn) {
         emailSignupBtn.addEventListener('click', async (e) => {
             e.preventDefault();
-            clearError('signup-error');
-
-            const name = document.getElementById('signup-name').value;
             const email = document.getElementById('signup-email').value;
-            const password = document.getElementById('signup-password').value;
+            const password = signupPassInput.value;
+            const confirm = signupConfirmInput ? signupConfirmInput.value : '';
+            const name = document.getElementById('signup-name').value;
 
+            // Simple Validation
             if (!email || !password || !name) {
-                showError('signup-error', "الرجاء ملء جميع الحقول");
+                showError('signup-error', 'الرجاء تعبئة جميع الحقول');
+                return;
+            }
+
+            if (password.length < 8) {
+                showError('signup-error', 'كلمة المرور يجب أن تكون 8 أحرف على الأقل');
+                return;
+            }
+
+            if (signupConfirmInput && password !== confirm) {
+                showError('signup-error', 'كلمات المرور غير متطابقة');
                 return;
             }
 

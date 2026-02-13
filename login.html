@@ -91,7 +91,23 @@
                     <input type="email" id="signup-email" placeholder="البريد الإلكتروني" required>
                 </div>
                 <div class="input-group">
-                    <input type="password" id="signup-password" placeholder="كلمة المرور" required>
+                    <input type="password" id="signup-password" placeholder="كلمة المرور (8+ أحرف)" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="signup-confirm-password" placeholder="تأكيد كلمة المرور" required>
+                </div>
+
+                <!-- Password Strength Meter -->
+                <div id="password-strength-container" style="display: none; margin-bottom: 15px; text-align: right;">
+                    <div class="strength-bars" style="display: flex; gap: 5px; margin-bottom: 5px;">
+                        <div class="bar"
+                            style="height: 4px; flex: 1; background: rgba(255,255,255,0.1); border-radius: 2px;"></div>
+                        <div class="bar"
+                            style="height: 4px; flex: 1; background: rgba(255,255,255,0.1); border-radius: 2px;"></div>
+                        <div class="bar"
+                            style="height: 4px; flex: 1; background: rgba(255,255,255,0.1); border-radius: 2px;"></div>
+                    </div>
+                    <span id="strength-text" style="font-size: 12px; color: rgba(255,255,255,0.5);"></span>
                 </div>
                 <!-- Turnstile Widget -->
                 <div class="cf-turnstile" data-sitekey="0x4AAAAAACbUZq3bGjYUQStW" data-theme="dark"></div>
