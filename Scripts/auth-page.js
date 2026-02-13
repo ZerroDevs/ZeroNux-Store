@@ -201,8 +201,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 const user = userCredential.user;
 
                 if (!user.emailVerified) {
+                    const errorDiv = document.getElementById('login-error');
+                    errorDiv.style.display = 'block';
+                    errorDiv.innerHTML = `
+                        يرجى تأكيد بريدك الإلكتروني أولاً.
+                        <br>
+                        <button id="resend-verify-btn" style="background:none; border:none; color:var(--accent-color); text-decoration:underline; cursor:pointer; padding:5px; font-family:inherit;">
+                            إعادة إرسال رابط التفعيل
+                        </button>
+                    `;
+
+                    // Add listener to the new button
+                    document.getElementById('resend-verify-btn').addEventListener('click', async (e) => {
+                        e.preventDefault();
+                        e.target.textContent = "جاري الإرسال...";
+                        e.target.disabled = true;
+                        try {
+                            await user.sendEmailVerification();
+                            e.target.textContent = "تم الإرسال! تحقق من بريدك.";
+                            e.target.style.color = "#00C851";
+                            e.target.style.textDecoration = "none";
+                        } catch (err) {
+                            console.error("Resend Error", err);
+                            e.target.textContent = "فشل الإرسال. حاول لاحقاً.";
+                            e.target.style.color = "#ff4444";
+                        }
+                    });
+
                     await firebase.auth().signOut();
-                    showError('login-error', "يرجى تأكيد بريدك الإلكتروني أولاً. تحقق من صندوق الوارد الخاص بك.");
                     return;
                 }
 
