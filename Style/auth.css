@@ -1,4 +1,8 @@
 /* file:///c:/Users/START/Desktop/Projects/ZeroNux Store/Style/auth.css */
+* {
+    box-sizing: border-box;
+}
+
 :root {
     --primary-color: #667eea;
     --secondary-color: #764ba2;
@@ -24,8 +28,8 @@ body {
     align-items: center;
     min-height: 100vh;
     margin: 0;
-    overflow: hidden;
-    /* Prevent scrollbars if animation goes out */
+    overflow-x: hidden;
+    padding: 20px;
 }
 
 /* Background Particles/Animation Effect (Optional - keeping it clean for now) */
@@ -42,6 +46,44 @@ body {
     text-align: center;
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* ... existing styles ... */
+
+@media (max-width: 768px) {
+    body {
+        /* Ensure scrolling works on small screens */
+        align-items: flex-start;
+        /* Prevent top cut-off */
+        padding-top: 20px;
+        padding-bottom: 20px;
+        height: auto;
+    }
+
+    .auth-container {
+        margin: auto;
+        width: 100%;
+        max-width: 100%;
+        border-radius: 16px;
+        padding: 30px 20px;
+        /* Reduced padding for mobile */
+    }
+
+    .auth-header img {
+        width: 60px;
+        /* Smaller logo on mobile */
+        height: 60px;
+    }
+
+    .auth-header h2 {
+        font-size: 22px;
+        /* Smaller title */
+    }
+
+    .input-group input {
+        font-size: 16px;
+        /* Prevent zoom on iOS */
+    }
 }
 
 .auth-header {
@@ -323,4 +365,60 @@ input[type="checkbox"]:hover {
 #signup-confirm-password.error {
     border-color: #ff4444;
     box-shadow: 0 0 0 2px rgba(255, 68, 68, 0.2);
+}
+
+.back-home {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px 20px;
+    border-radius: 50px;
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+}
+
+.back-home:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+    border-color: var(--accent-color);
+}
+
+@media (max-width: 768px) {
+    .back-home {
+        top: 15px;
+        left: 15px;
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+}
+
+
+
+@media (max-width: 768px) {
+    body {
+        /* Ensure scrolling works on small screens */
+        align-items: flex-start;
+        /* Prevent top cut-off */
+        padding-top: 40px;
+        padding-bottom: 40px;
+        height: auto;
+    }
+
+    .auth-container {
+        margin: auto;
+        width: 100%;
+        max-width: 100%;
+        border-radius: 16px;
+    }
 }
