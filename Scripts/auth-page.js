@@ -175,6 +175,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
+                // Set Persistence based on Checkbox
+                const rememberMe = document.getElementById('remember-me');
+                const persistence = rememberMe && rememberMe.checked ?
+                    firebase.auth.Auth.Persistence.LOCAL :
+                    firebase.auth.Auth.Persistence.SESSION;
+
+                await firebase.auth().setPersistence(persistence);
+
                 const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
                 const user = userCredential.user;
 
@@ -184,7 +192,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                window.location.href = 'index.html';
+                // Smart Redirect: Go back to where they came from (if it's not login/register page)
+                const params = new URLSearchParams(window.location.search);
+                const redirectUrl = params.get('redirect') || 'index.html';
+                window.location.href = redirectUrl;
+
             } catch (error) {
                 console.error("Login Error:", error);
                 let msg = "فشل تسجيل الدخول: " + error.message;
