@@ -146,22 +146,40 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Google Sign In
-    if (googleBtn) {
-        googleBtn.addEventListener('click', async () => {
-            clearError('login-error'); // Assuming login box is visible
-            try {
-                const provider = new firebase.auth.GoogleAuthProvider();
-                await firebase.auth().signInWithPopup(provider);
-                window.location.href = 'index.html'; // Redirect on success
-            } catch (error) {
-                console.error("Google Sign In Error:", error);
+    // Google Sign In Logic
+    const googleSignupBtn = document.getElementById('google-signup-btn');
 
-                // Determine which box is visible to show error
-                const isSignupVisible = document.getElementById('signup-box').style.display === 'block';
-                const errorId = isSignupVisible ? 'signup-error' : 'login-error';
-                showError(errorId, "فشل تسجيل الدخول باستخدام Google: " + error.message);
-            }
-        });
+    async function handleGoogleLogin(e) {
+        if (e) e.preventDefault();
+
+        clearError('login-error');
+        clearError('signup-error');
+
+        try {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            await firebase.auth().signInWithPopup(provider);
+
+            // Smart Redirect
+            const params = new URLSearchParams(window.location.search);
+            const redirectUrl = params.get('redirect') || 'index.html';
+            window.location.href = redirectUrl;
+
+        } catch (error) {
+            console.error("Google Sign In Error:", error);
+
+            // Determine which box is visible to show error
+            const isSignupVisible = document.getElementById('signup-box') && document.getElementById('signup-box').style.display === 'block';
+            const errorId = isSignupVisible ? 'signup-error' : 'login-error';
+            showError(errorId, "فشل تسجيل الدخول باستخدام Google: " + error.message);
+        }
+    }
+
+    if (googleBtn) {
+        googleBtn.addEventListener('click', handleGoogleLogin);
+    }
+
+    if (googleSignupBtn) {
+        googleSignupBtn.addEventListener('click', handleGoogleLogin);
     }
 
     // Email Login
