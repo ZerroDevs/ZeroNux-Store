@@ -242,7 +242,6 @@ body {
     cursor: pointer;
     font-size: 1.2rem;
     opacity: 0.6;
-    transition: opacity 0.2s;
     user-select: none;
 }
 
@@ -264,6 +263,61 @@ body {
 .strength-strong .bar:nth-child(2),
 .strength-strong .bar:nth-child(3) {
     background: #00C851 !important;
+}
+
+/* Custom Checkbox Styling */
+input[type="checkbox"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: rgba(255, 255, 255, 0.1);
+    margin: 0;
+    font: inherit;
+    color: currentColor;
+    width: 20px !important;
+    height: 20px !important;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    top: 5px;
+}
+
+input[type="checkbox"]:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+input[type="checkbox"]:checked::before {
+    content: "✔";
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+input[type="checkbox"]:hover {
+    border-color: var(--primary-color);
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.remember-group,
+.terms-group {
+    display: flex;
+    align-items: center;
+    gap: 12px !important;
+    margin: 15px 0;
+}
+
+.remember-group label,
+.terms-group label {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.85);
+    cursor: pointer;
+    user-select: none;
+    line-height: 1.5;
 }
 
 #signup-confirm-password.error {

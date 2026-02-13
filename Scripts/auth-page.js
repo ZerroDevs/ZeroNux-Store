@@ -16,38 +16,52 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Check URL Hash to switch tabs (e.g. login.html#signup)
-    if (window.location.hash === '#signup') {
-        const signupBox = document.getElementById('signup-box');
+    // Helper to switch tabs
+    function switchTab(tabId) {
         const loginBox = document.getElementById('login-box');
-        if (signupBox && loginBox) {
-            loginBox.style.display = 'none';
-            signupBox.style.display = 'block';
+        const signupBox = document.getElementById('signup-box');
+        const forgotBox = document.getElementById('forgot-box');
+
+        // Hide all first
+        if (loginBox) loginBox.style.display = 'none';
+        if (signupBox) signupBox.style.display = 'none';
+        if (forgotBox) forgotBox.style.display = 'none';
+
+        // Show target
+        if (tabId === 'signup') {
+            if (signupBox) signupBox.style.display = 'block';
+        } else if (tabId === 'forgot' || tabId === 'reset') {
+            if (forgotBox) forgotBox.style.display = 'block';
+        } else {
+            if (loginBox) loginBox.style.display = 'block';
         }
     }
+
+    // Check URL Hash on Load
+    function checkHash() {
+        const hash = window.location.hash.substring(1); // remove #
+        if (hash === 'signup' || hash === 'forgot' || hash === 'reset') {
+            switchTab(hash);
+        } else {
+            switchTab('login');
+        }
+    }
+
+    // Listen for hash changes (e.g. back button)
+    window.addEventListener('hashchange', checkHash);
+
+    // Initial check
+    checkHash();
 
     // Toggle between Login, Signup, and Forgot Password
     toggleLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const target = link.dataset.target;
-            const loginBox = document.getElementById('login-box');
-            const signupBox = document.getElementById('signup-box');
-            const forgotBox = document.getElementById('forgot-box');
 
-            // Hide all first
-            if (loginBox) loginBox.style.display = 'none';
-            if (signupBox) signupBox.style.display = 'none';
-            if (forgotBox) forgotBox.style.display = 'none';
-
-            // Show target
-            if (target === 'signup') {
-                if (signupBox) signupBox.style.display = 'block';
-            } else if (target === 'forgot') {
-                if (forgotBox) forgotBox.style.display = 'block';
-            } else {
-                if (loginBox) loginBox.style.display = 'block';
-            }
+            // Update URL Hash without scrolling
+            history.pushState(null, null, '#' + target);
+            checkHash();
         });
     });
 
