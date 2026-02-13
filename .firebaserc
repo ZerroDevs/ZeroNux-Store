@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "zeronuxstore"
-  }
+  },
+  "targets": {
+    "zeronuxstore": {
+      "hosting": {
+        "admin": [
+          "admin-zeronux-store"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

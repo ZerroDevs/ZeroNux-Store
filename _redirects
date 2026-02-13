@@ -1,0 +1,3 @@
+# Admin Subdomain Redirect
+# Redirects all traffic from admin.zeronux.store to zeronux.store/admin.html
+https://admin.zeronux.store/* https://zeronux.store/admin.html 301
