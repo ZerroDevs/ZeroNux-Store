@@ -232,6 +232,24 @@ body {
     animation: fadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Password Toggle */
+.toggle-password {
+    position: absolute;
+    left: 15px;
+    /* Arabic RTL flip check: usually right, but for RTL it should be on LEFT */
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 1.2rem;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    user-select: none;
+}
+
+.toggle-password:hover {
+    opacity: 1;
+}
+
 /* Password Strength Styles */
 .strength-weak .bar:nth-child(1) {
     background: #ff4444 !important;

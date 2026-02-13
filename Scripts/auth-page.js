@@ -117,6 +117,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Toggle Password Visibility
+    window.togglePassword = function (fieldId, icon) {
+        const input = document.getElementById(fieldId);
+        if (input) {
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = '🔒'; // Change icon to indicate "hide"
+            } else {
+                input.type = 'password';
+                icon.textContent = '👁️'; // Change icon to indicate "show"
+            }
+        }
+    };
+
     // Google Sign In
     if (googleBtn) {
         googleBtn.addEventListener('click', async () => {

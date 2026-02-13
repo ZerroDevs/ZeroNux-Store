@@ -49,6 +49,7 @@
                 </div>
                 <div class="input-group">
                     <input type="password" id="login-password" placeholder="كلمة المرور" required>
+                    <span class="toggle-password" onclick="togglePassword('login-password', this)">👁️</span>
                 </div>
                 <!-- Turnstile Widget -->
                 <div class="cf-turnstile" data-sitekey="0x4AAAAAACbUZq3bGjYUQStW" data-theme="dark"></div>
@@ -92,9 +93,11 @@
                 </div>
                 <div class="input-group">
                     <input type="password" id="signup-password" placeholder="كلمة المرور (8+ أحرف)" required>
+                    <span class="toggle-password" onclick="togglePassword('signup-password', this)">👁️</span>
                 </div>
                 <div class="input-group">
                     <input type="password" id="signup-confirm-password" placeholder="تأكيد كلمة المرور" required>
+                    <span class="toggle-password" onclick="togglePassword('signup-confirm-password', this)">👁️</span>
                 </div>
 
                 <!-- Password Strength Meter -->
