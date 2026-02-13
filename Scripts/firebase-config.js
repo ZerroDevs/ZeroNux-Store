@@ -3,7 +3,7 @@
 // ============================================
 const firebaseConfig = {
     apiKey: "AIzaSyCiS9TwRDxlpQ1Z_A6QcBi0f6307vI49ws",
-    authDomain: "zeronuxstore.firebaseapp.com",
+    authDomain: "auth.zeronux.store",
     databaseURL: "https://zeronuxstore-default-rtdb.firebaseio.com",
     projectId: "zeronuxstore",
     storageBucket: "zeronuxstore.firebasestorage.app",
