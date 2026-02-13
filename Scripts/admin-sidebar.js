@@ -332,7 +332,7 @@
                     height: 100vh;
                     transform: translateX(100%);
                     box-shadow: -8px 0 30px rgba(0,0,0,0.4);
-                    z-index: 100;
+                    z-index: 1000; /* Above header (999) */
                 }
                 .admin-sidebar.open {
                     transform: translateX(0);
@@ -415,6 +415,92 @@
             .btn-header-logout:hover {
                 background: rgba(255,59,48,0.2);
             }
+            
+            /* View Store Selector */
+            .view-store-group {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 10px;
+                padding: 2px;
+            }
+            
+            .view-store-btn {
+                background: transparent;
+                border: none;
+                color: white;
+                padding: 6px 12px;
+                border-radius: 8px;
+                font-size: 0.85rem;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                text-decoration: none;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            
+            .view-store-btn:hover {
+                background: rgba(255,255,255,0.1);
+            }
+            
+            .view-store-select {
+                background: transparent;
+                border: none;
+                color: rgba(255,255,255,0.7);
+                font-size: 0.8rem;
+                padding: 6px 4px;
+                cursor: pointer;
+                outline: none;
+                border-radius: 6px;
+                transition: all 0.2s;
+            }
+            
+            .view-store-select:hover {
+                background: rgba(255,255,255,0.05);
+                color: white;
+            }
+            
+            .view-store-select option {
+                background: #1a1a2e;
+                color: white;
+            }
+
+            /* Mobile Responsiveness */
+            @media (max-width: 768px) {
+                .header-content {
+                    flex-direction: column;
+                    gap: 10px;
+                    padding: 0.5rem;
+                }
+                
+                .header-title-area {
+                    align-items: center;
+                    text-align: center;
+                    width: 100%;
+                }
+                
+                .header-actions {
+                    width: 100%;
+                    justify-content: center;
+                    gap: 8px;
+                }
+                
+                .btn-text {
+                    display: none;
+                }
+                
+                .view-store-btn, .btn-header-logout {
+                    padding: 8px;
+                }
+                
+                .view-store-select {
+                    max-width: 120px;
+                    font-size: 0.75rem;
+                }
+            }
         `;
         document.head.appendChild(style);
     }
@@ -435,15 +521,50 @@
                     <h1 class="header-page-title" id="header-page-title">نظرة عامة</h1>
                 </div>
                 <div class="header-actions">
-                    <a href="index.html" class="btn-header-action" target="_blank">
-                        <span>🌐</span> عرض المتجر
-                    </a>
+                    <div class="view-store-group">
+                        <a href="index.html" class="view-store-btn" id="view-store-btn" target="_blank">
+                            <span>🌐</span> <span class="btn-text">عرض المتجر</span>
+                        </a>
+                        <select id="view-store-select" class="view-store-select" title="اختر وجهة العرض">
+                            <option value="local">المحلي (Index)</option>
+                            <option value="live">المباشر (ZeroNux.store)</option>
+                        </select>
+                    </div>
+                    
                     <button id="logout-btn-enhanced" class="btn-header-action btn-header-logout">
-                        <span>🚪</span> تسجيل خروج
+                        <span>🚪</span> <span class="btn-text">تسجيل خروج</span>
                     </button>
                 </div>
             </div>
         `;
+
+        // Logic for View Store Selector
+        const viewStoreBtn = document.getElementById('view-store-btn');
+        const viewStoreSelect = document.getElementById('view-store-select');
+
+        if (viewStoreBtn && viewStoreSelect) {
+            // Load saved preference
+            const savedTarget = localStorage.getItem('admin_view_store_target') || 'local';
+            viewStoreSelect.value = savedTarget;
+
+            // Set initial href
+            updateViewStoreLink(savedTarget);
+
+            // Listen for changes
+            viewStoreSelect.addEventListener('change', (e) => {
+                const target = e.target.value;
+                localStorage.setItem('admin_view_store_target', target);
+                updateViewStoreLink(target);
+            });
+
+            function updateViewStoreLink(target) {
+                if (target === 'live') {
+                    viewStoreBtn.href = 'https://zeronux.store';
+                } else {
+                    viewStoreBtn.href = 'index.html';
+                }
+            }
+        }
 
         // Re-attach logout listener
         const logoutBtn = document.getElementById('logout-btn-enhanced');
