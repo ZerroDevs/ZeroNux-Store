@@ -137,8 +137,12 @@ document.addEventListener('DOMContentLoaded', () => {
         headerContainer.innerHTML = headerHTML;
     }
 
+
     // Initialize Mobile Menu and Bottom Nav immediately
     initMobileMenuLogic();
+
+    // Initialize Auth Logic
+    initAuthLogic();
 });
 
 function initMobileMenuLogic() {
@@ -247,4 +251,164 @@ function initMobileMenuLogic() {
         // Dispatch event for other scripts (students.js, cart.js, etc.)
         document.dispatchEvent(new CustomEvent('currency-change', { detail: { currency } }));
     });
+}
+
+function initAuthLogic() {
+    // Add specific styles for the user dropdown and button
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .user-avatar-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+        .user-avatar-btn:hover {
+            transform: scale(1.1);
+        }
+        .user-dropdown-container {
+            z-index: 10001;
+            margin-left: 0 !important; /* Reset margin */
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Target the main nav content to place next to logo
+    const navContent = document.querySelector('.nav-content');
+    const logo = document.querySelector('.logo');
+
+    // Create User Button (Hidden initially)
+    const userBtn = document.createElement('div');
+    userBtn.className = 'user-dropdown-container';
+    userBtn.style.position = 'relative';
+
+    // Insert AFTER the Logo (Visually to the left of logo in RTL, or right of logo in LTR)
+    // The user requested "Right of header near the logo". In RTL, Logo is Right-most.
+    if (navContent && logo) {
+        // navContent is flex row.
+        // Logo is first child.
+        // Inserting after logo makes it the second child.
+        if (logo.nextSibling) {
+            navContent.insertBefore(userBtn, logo.nextSibling);
+        } else {
+            navContent.appendChild(userBtn);
+        }
+    } else {
+        // Fallback to nav-actions if logo not found
+        const navActions = document.querySelector('.nav-actions');
+        if (navActions) navActions.appendChild(userBtn);
+    }
+
+    // Default "Not Signed In" State
+    // We might want to HIDE it if not signed in, or show a "Sign In" text?
+    // User request implied they want the avatar there.
+    // If not signed in, let's keep the Icon but maybe styled better.
+    userBtn.innerHTML = `
+        <a href="login.html" class="auth-btn" aria-label="Sign In" style="display: flex; align-items: center; justify-content: center; color: white; opacity: 0.8; transition: opacity 0.2s;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M20 21a8 8 0 1 0-16 0" />
+            </svg>
+        </a>
+    `;
+
+    // Auth State Listener
+    if (firebase.auth) {
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+                // User is signed in
+                const defaultAvatar = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || 'User') + '&background=random';
+                const photoURL = user.photoURL || defaultAvatar;
+                const displayName = user.displayName || 'مستخدم';
+
+                // Check if user is admin
+                // We need to fetch the admin list from Firebase Settings
+                const db = firebase.database();
+                db.ref('settings/adminEmails').once('value').then(snapshot => {
+                    const admins = snapshot.val();
+                    let isAdmin = false;
+
+                    if (admins && user.email) {
+                        // Check if email exists in the values of the admins object/array
+                        const adminEmails = Object.values(admins);
+                        // Case insensitive check
+                        isAdmin = adminEmails.some(email => email.toLowerCase() === user.email.toLowerCase());
+                    }
+
+                    const adminBadge = isAdmin ? '<span style="background: #f5576c; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-right: 5px;">مسؤول</span>' : '';
+                    const adminLink = isAdmin ? `
+                        <a href="admin.html" style="display: flex; align-items: center; gap: 10px; padding: 10px; color: #f5576c; text-decoration: none; border-radius: 8px; transition: background 0.2s; font-weight: bold;">
+                            <span>🛠️</span> لوحة التحكم
+                        </a>
+                    ` : '';
+
+                    userBtn.innerHTML = `
+                        <button class="user-avatar-btn" id="user-avatar-btn">
+                            <img src="${photoURL}" 
+                                 alt="${displayName}" 
+                                 onerror="this.src='${defaultAvatar}'"
+                                 style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid ${isAdmin ? '#f5576c' : '#667eea'}; background: #fff;">
+                        </button>
+                        <div class="user-dropdown-menu" id="user-dropdown" style="display: none; position: absolute; top: 120%; right: -10px; background: #1a1a2e; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 220px; padding: 10px; z-index: 10002; text-align: right; backdrop-filter: blur(10px);">
+                            <div style="padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 5px;">
+                                <strong style="display: block; color: white;">${displayName} ${adminBadge}</strong>
+                                <small style="color: rgba(255,255,255,0.6); font-size: 12px;">${user.email}</small>
+                            </div>
+                            
+                            ${adminLink}
+                            
+                            <a href="uorder.html" style="display: flex; align-items: center; gap: 10px; padding: 10px; color: rgba(255,255,255,0.8); text-decoration: none; border-radius: 8px; transition: background 0.2s;">
+                                <span>📦</span> طلباتي
+                            </a>
+                            <button id="logout-action" style="background: none; border: none; width: 100%; text-align: right; display: flex; align-items: center; gap: 10px; padding: 10px; color: #ff4444; cursor: pointer; border-radius: 8px; font-family: inherit; font-size: inherit; margin-top: 5px;">
+                                <span>🚪</span> تسجيل الخروج
+                            </button>
+                        </div>
+                    `;
+
+                    // Re-attach listeners since we overwrote innerHTML
+                    const avatarBtn = document.getElementById('user-avatar-btn');
+                    const dropdown = document.getElementById('user-dropdown');
+
+                    if (avatarBtn && dropdown) {
+                        avatarBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+                        });
+
+                        document.addEventListener('click', (e) => {
+                            if (!userBtn.contains(e.target)) {
+                                dropdown.style.display = 'none';
+                            }
+                        });
+                    }
+
+                    const logoutBtn = document.getElementById('logout-action');
+                    if (logoutBtn) {
+                        logoutBtn.addEventListener('click', () => {
+                            firebase.auth().signOut().then(() => {
+                                window.location.reload();
+                            });
+                        });
+                    }
+
+                }); // End db lookup
+
+            } else {
+                // User is signed out
+                userBtn.innerHTML = `
+                    <a href="login.html" class="auth-btn" aria-label="Sign In" style="display: flex; align-items: center; justify-content: center; color: white; opacity: 0.8; transition: opacity 0.2s;">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="8" r="4" />
+                            <path d="M20 21a8 8 0 1 0-16 0" />
+                        </svg>
+                    </a>
+                `;
+            }
+        });
+    }
 }

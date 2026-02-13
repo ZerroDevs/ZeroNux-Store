@@ -393,7 +393,7 @@ window.applyThemePreset = function (preset) {
     });
 });
 
-// Load settings (exchange rate, phone, facebook, email, theme)
+// Load settings (exchange rate, phone, facebook, email, theme, admins)
 function loadSettings() {
     settingsRef.once('value', (snapshot) => {
         const settings = snapshot.val();
@@ -430,6 +430,9 @@ function loadSettings() {
                 document.getElementById('announcement-text').value = settings.announcementText;
             }
 
+            // Admin Emails
+            loadAdminEmails(settings.adminEmails);
+
             // Maintenance Mode
             if (settings.maintenanceEnabled !== undefined) {
                 const checkbox = document.getElementById('maintenance-enabled');
@@ -463,9 +466,80 @@ function loadSettings() {
             document.getElementById('exchange-rate').value = 9;
             window.exchangeRate = 9;
             populateCategoryDropdown('برامج, ألعاب, اشتراكات');
+            loadAdminEmails(null);
         }
     });
 }
+
+function loadAdminEmails(adminEmails) {
+    const list = document.getElementById('admin-emails-list');
+    list.innerHTML = '';
+
+    if (!adminEmails || Object.keys(adminEmails).length === 0) {
+        list.innerHTML = '<p style="color: rgba(255,255,255,0.5); text-align: center;">لا يوجد مسؤولين إضافيين.</p>';
+        return;
+    }
+
+    // Convert object to array if needed (Firebase stores arrays as objects with numeric keys sometimes)
+    // or if it's a map of email -> true
+    // Let's assume we store it as an object/map for easier deletion logic: { "sanitized_email": "email@example.com" }
+
+    Object.entries(adminEmails).forEach(([key, email]) => {
+        const item = document.createElement('div');
+        item.style.display = 'flex';
+        item.style.justifyContent = 'space-between';
+        item.style.alignItems = 'center';
+        item.style.marginBottom = '5px';
+        item.style.background = 'rgba(255,255,255,0.05)';
+        item.style.padding = '8px';
+        item.style.borderRadius = '4px';
+
+        item.innerHTML = `
+            <span>${email}</span>
+            <button onclick="removeAdminEmail('${key}')" type="button" style="background: none; border: none; color: #ff4444; cursor: pointer;">🗑️</button>
+        `;
+        list.appendChild(item);
+    });
+}
+
+window.addAdminEmail = function () {
+    const emailInput = document.getElementById('new-admin-email');
+    const email = emailInput.value.trim();
+
+    if (!email) {
+        showNotification('الرجاء إدخال البريد الإلكتروني', 'error');
+        return;
+    }
+
+    // Create a safe key for Firebase path (replace . with , or just use push)
+    // Using push is safer for lists.
+    // Or we can sanitize email to use as key: email.replace(/\./g, ',')
+    const emailKey = email.replace(/\./g, ',');
+
+    settingsRef.child('adminEmails').child(emailKey).set(email)
+        .then(() => {
+            showNotification('تم إضافة المسؤول بنجاح');
+            emailInput.value = '';
+            // Reload settings to update UI
+            loadSettings();
+        })
+        .catch(err => {
+            showNotification('خطأ: ' + err.message, 'error');
+        });
+};
+
+window.removeAdminEmail = function (key) {
+    showConfirmModal('حذف مسؤول', 'هل أنت متأكد من إزالة هذا البريد من قائمة المسؤولين؟', () => {
+        settingsRef.child('adminEmails').child(key).remove()
+            .then(() => {
+                showNotification('تم إزالة المسؤول');
+                loadSettings();
+            })
+            .catch(err => {
+                showNotification('خطأ: ' + err.message, 'error');
+            });
+    });
+};
 
 function populateCategoryDropdown(categoriesString) {
     const select = document.getElementById('product-category');

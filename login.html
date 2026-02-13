@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - متجر زيرونكس</title>
+    <link rel="icon" type="image/png" href="https://assets.zeronux.store/Logo.png">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Cairo:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="Style/auth.css">
+</head>
+
+<body>
+
+    <div class="auth-container">
+        <!-- Logo Header -->
+        <div class="auth-header">
+            <a href="index.html">
+                <img src="https://assets.zeronux.store/Logo.png" alt="ZeroNux Store">
+            </a>
+            <h2>أهلاً بك مجدداً 👋</h2>
+            <p>سجل الدخول للمتابعة إلى متجر زيرونكس</p>
+        </div>
+
+        <!-- Login Box -->
+        <div id="login-box">
+            <!-- Social Login -->
+            <div class="social-login">
+                <button class="social-btn" id="google-btn">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                    تسجيل الدخول باستخدام Google
+                </button>
+            </div>
+
+            <div class="divider"><span>أو باستخدام البريد الإلكتروني</span></div>
+
+            <!-- Email Form -->
+            <form class="email-form">
+                <div class="input-group">
+                    <input type="email" id="login-email" placeholder="البريد الإلكتروني" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="login-password" placeholder="كلمة المرور" required>
+                </div>
+                <button type="submit" class="submit-btn" id="email-login-btn">تسجيل الدخول</button>
+            </form>
+
+            <div class="toggle-auth">
+                ليس لديك حساب؟ <a data-target="signup">إنشاء حساب جديد</a>
+            </div>
+        </div>
+
+        <!-- Signup Box (Hidden by default) -->
+        <div id="signup-box" style="display: none;">
+            <!-- Social Login -->
+            <div class="social-login">
+                <button class="social-btn" id="google-signup-btn">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                    التسجيل باستخدام Google
+                </button>
+            </div>
+
+            <div class="divider"><span>أو باستخدام البريد الإلكتروني</span></div>
+
+            <!-- Email Form -->
+            <form class="email-form">
+                <div class="input-group">
+                    <input type="text" id="signup-name" placeholder="الاسم الكامل" required>
+                </div>
+                <div class="input-group">
+                    <input type="email" id="signup-email" placeholder="البريد الإلكتروني" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="signup-password" placeholder="كلمة المرور" required>
+                </div>
+                <button type="submit" class="submit-btn" id="email-signup-btn">إنشاء حساب</button>
+            </form>
+
+            <div class="toggle-auth">
+                لديك حساب بالفعل؟ <a data-target="login">تسجيل الدخول</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="Scripts/firebase-config.js"></script>
+    <script src="Scripts/auth-page.js"></script>
+
+</body>
+
+</html>
