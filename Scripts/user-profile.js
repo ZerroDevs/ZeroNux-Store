@@ -16,13 +16,27 @@
         return id;
     }
 
+    // ---- Get Current ID (UID or Visitor ID) ----
+    function getCurrentId() {
+        if (firebase.auth().currentUser) {
+            return firebase.auth().currentUser.uid;
+        }
+        return getVisitorId();
+    }
+
     // ---- Save Profile ----
     window.saveUserProfile = function (data) {
         const db = firebase.database();
-        const visitorId = getVisitorId();
+        const userId = getCurrentId();
+        const isAuth = !!firebase.auth().currentUser;
+
+        // If user is just a visitor, we save to 'userProfiles/visitor_...'
+        // If user is logged in, we save to 'userProfiles/uid'
+        // Ideally, we should migrate visitor data to uid on login (handled in auth listener below)
 
         const profileData = {
-            visitorId: visitorId,
+            id: userId,
+            isAuth: isAuth,
             name: data.name || '',
             phone: data.phone || '',
             city: data.city || '',
@@ -34,26 +48,38 @@
         // Also cache in localStorage for instant load
         localStorage.setItem('user_profile', JSON.stringify(profileData));
 
-        return db.ref(PROFILE_REF + '/' + visitorId).update(profileData);
+        return db.ref(PROFILE_REF + '/' + userId).update(profileData);
     };
 
     // ---- Load Profile ----
     window.loadUserProfile = function (callback) {
         // First try localStorage (instant)
+        // BUT check if the cached profile matches current auth state
         const cached = localStorage.getItem('user_profile');
+        const currentUser = firebase.auth().currentUser;
+
         if (cached) {
             try {
                 const profile = JSON.parse(cached);
-                if (callback) callback(profile);
-                return;
+
+                // If logged in, but cache is visitor -> ignore cache (fetch fresh)
+                // If not logged in, but cache is auth -> ignore cache
+                let isValidCache = true;
+                if (currentUser && profile.id !== currentUser.uid) isValidCache = false;
+                if (!currentUser && profile.isAuth) isValidCache = false;
+
+                if (isValidCache) {
+                    if (callback) callback(profile);
+                    // We still fetch in background to update
+                }
             } catch (e) { /* fall through */ }
         }
 
         // Then try Firebase
         const db = firebase.database();
-        const visitorId = getVisitorId();
+        const userId = getCurrentId();
 
-        db.ref(PROFILE_REF + '/' + visitorId).once('value').then(snapshot => {
+        db.ref(PROFILE_REF + '/' + userId).once('value').then(snapshot => {
             const profile = snapshot.val();
             if (profile) {
                 localStorage.setItem('user_profile', JSON.stringify(profile));
@@ -297,19 +323,73 @@
         });
     };
 
+    // ---- Auth State Observer to Sync Data ----
+    // This runs once when auth state is determined
+    firebase.auth().onAuthStateChanged(user => {
+        if (user) {
+            // User just logged in (or we just loaded and found they are logged in)
+
+            // Check if we have "Visitor Data" in localStorage that needs to be transferred?
+            // Strategy:
+            // 1. Check if we have a visitor profile in localStorage (with no isAuth or different ID)
+            // 2. If so, read it.
+            // 3. Read the user's REAL profile from DB.
+            // 4. If real profile is empty, fill it with visitor data.
+            // 5. Clear sensitive visitor traces.
+
+            const cached = localStorage.getItem('user_profile');
+            if (cached) {
+                try {
+                    const localProfile = JSON.parse(cached);
+                    // If local profile is NOT the current user (e.g. it was a guest session)
+                    if (localProfile.id !== user.uid) {
+                        // We have guest data!
+                        console.log("Syncing guest data to new user account...");
+
+                        // Fetch remote profile first to avoid overwriting existing data
+                        const db = firebase.database();
+                        db.ref(PROFILE_REF + '/' + user.uid).once('value').then(snapshot => {
+                            const remoteProfile = snapshot.val();
+
+                            // If remote profile is empty/incomplete, use local data
+                            // We prioritize remote data if it exists
+                            const mergedData = {
+                                id: user.uid,
+                                isAuth: true,
+                                name: (remoteProfile && remoteProfile.name) || localProfile.name || user.displayName || '',
+                                phone: (remoteProfile && remoteProfile.phone) || localProfile.phone || '',
+                                city: (remoteProfile && remoteProfile.city) || localProfile.city || '',
+                                address: (remoteProfile && remoteProfile.address) || localProfile.address || '',
+                                notes: (remoteProfile && remoteProfile.notes) || localProfile.notes || '',
+                                updatedAt: Date.now()
+                            };
+
+                            // Save merged data to DB
+                            db.ref(PROFILE_REF + '/' + user.uid).update(mergedData).then(() => {
+                                // Update local cache
+                                localStorage.setItem('user_profile', JSON.stringify(mergedData));
+                                console.log("Profile sync complete.");
+
+                                // Refresh UI
+                                autoFillSupportForm();
+                            });
+                        });
+                    }
+                } catch (e) { }
+            }
+        }
+    });
+
     // ---- Init ----
     function init() {
         autoFillCartFields();
         autoFillSupportForm();
         injectProfileIcon();
 
-        // Preload profile from Firebase if not cached
-        const cached = localStorage.getItem('user_profile');
-        if (!cached) {
-            loadUserProfile(() => {
-                autoFillSupportForm();
-            });
-        }
+        // Trigger load
+        loadUserProfile(() => {
+            autoFillSupportForm();
+        });
     }
 
     if (document.readyState === 'loading') {
