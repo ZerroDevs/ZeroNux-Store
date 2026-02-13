@@ -9,9 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const emailLoginBtn = document.getElementById('email-login-btn');
     const emailSignupBtn = document.getElementById('email-signup-btn');
 
-    // Check if user is already logged in
+    // Check if user is already logged in and verified
     firebase.auth().onAuthStateChanged(user => {
-        if (user) {
+        if (user && user.emailVerified) {
             window.location.href = 'index.html';
         }
     });
@@ -59,7 +59,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                await firebase.auth().signInWithEmailAndPassword(email, password);
+                const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                if (!user.emailVerified) {
+                    await firebase.auth().signOut();
+                    alert("يرجى تأكيد بريدك الإلكتروني أولاً. تحقق من صندوق الوارد الخاص بك.");
+                    return;
+                }
+
                 window.location.href = 'index.html';
             } catch (error) {
                 console.error("Login Error:", error);
@@ -83,11 +91,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
                 // Update profile with name
-                await userCredential.user.updateProfile({
+                await user.updateProfile({
                     displayName: name
                 });
-                window.location.href = 'index.html';
+
+                // Send Verification Email
+                await user.sendEmailVerification();
+
+                // Sign out immediately to prevent access
+                await firebase.auth().signOut();
+
+                // Redirect to verification page
+                window.location.href = 'verify-email.html';
             } catch (error) {
                 console.error("Signup Error:", error);
                 alert("فشل إنشاء الحساب: " + error.message);

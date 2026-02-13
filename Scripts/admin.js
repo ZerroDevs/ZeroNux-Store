@@ -17,6 +17,40 @@ const studentBooksRef = database.ref('studentBooks');
 const bookRequestsRef = database.ref('bookRequests');
 
 // ============================================
+// ADMIN SECURITY CHECK
+// ============================================
+auth.onAuthStateChanged(user => {
+    if (!user) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    // Check if user is in admin list
+    settingsRef.child('adminEmails').once('value').then(snapshot => {
+        const admins = snapshot.val();
+        let isAdmin = false;
+
+        if (admins && user.email) {
+            const adminEmails = Object.values(admins);
+            isAdmin = adminEmails.some(email => email.toLowerCase() === user.email.toLowerCase());
+        }
+
+        if (!isAdmin) {
+            // Show unauthorized overlay
+            document.body.style.opacity = '1';
+            document.getElementById('unauthorized-overlay').style.display = 'flex';
+            // Hide other content just in case
+            document.getElementById('admin-dashboard').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'none';
+        } else {
+            // User is admin, show UI
+            document.body.style.opacity = '1';
+            document.body.style.pointerEvents = 'auto'; // Re-enable clicks
+        }
+    });
+});
+
+// ============================================
 // TAB SWITCHING
 // ============================================
 function switchTab(tabName) {
