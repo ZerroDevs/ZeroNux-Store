@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 titleEl.textContent = "✅ تم التحقق بنجاح";
                 messageEl.textContent = "تم تأكيد بريدك الإلكتروني. يمكنك الآن تسجيل الدخول.";
                 contentEl.innerHTML = `
-                    <a href="login.html" class="submit-btn" style="display: inline-block; text-decoration: none; margin-top: 10px;">تسجيل الدخول</a>
+                    <a href="https://zeronux.store/login.html" class="submit-btn" style="display: inline-block; text-decoration: none; margin-top: 10px;">تسجيل الدخول</a>
                 `;
             })
             .catch((error) => {
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 titleEl.textContent = "فشل التحقق";
                 messageEl.textContent = "الرابط غير صالح أو انتهت صلاحيته.";
                 contentEl.innerHTML = `
-                    <a href="login.html" style="color: var(--accent-color);">العودة</a>
+                    <a href="https://zeronux.store/login.html" style="color: var(--accent-color);">العودة</a>
                 `;
             });
     }
@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     resetForm.style.display = 'none';
                     contentEl.style.display = 'block';
                     contentEl.innerHTML = `
-                        <a href="login.html" class="submit-btn" style="display: inline-block; text-decoration: none; margin-top: 10px;">تسجيل الدخول</a>
+                        <a href="https://zeronux.store/login.html" class="submit-btn" style="display: inline-block; text-decoration: none; margin-top: 10px;">تسجيل الدخول</a>
                     `;
                 })
                 .catch((error) => {

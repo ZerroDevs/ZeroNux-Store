@@ -1,4 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // DOMAIN GUARD: Redirect 'auth' subdomain to main domain for non-action pages
+    if (window.location.hostname === 'auth.zeronux.store') {
+        window.location.href = 'https://zeronux.store' + window.location.pathname + window.location.search;
+        return; // Stop execution
+    }
+
     // Determine current page for active link highlighting
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
