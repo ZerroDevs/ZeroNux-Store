@@ -680,9 +680,14 @@ window.completeOrder = function () {
     const customerName = document.getElementById('customer-name') ? document.getElementById('customer-name').value.trim() : '';
     const customerPhone = document.getElementById('customer-phone') ? document.getElementById('customer-phone').value.trim() : '';
 
+    // Get User ID if logged in
+    const user = firebase.auth().currentUser;
+    const userId = user ? user.uid : (localStorage.getItem('support_visitor_id') || 'guest');
+
     // Prepare order data for Firebase
     const orderData = {
         orderId: orderId,
+        userId: userId, // Link order to user
         items: cart.map(item => {
             // Save item price in the CURRENCY USED for the order
             const itemPrice = currentCurrency === 'USD' ? item.price : (item.price * EXCHANGE_RATE);
