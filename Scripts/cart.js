@@ -688,6 +688,7 @@ window.completeOrder = function () {
     const orderData = {
         orderId: orderId,
         userId: userId, // Link order to user
+        currency: currentCurrency,
         items: cart.map(item => {
             // Save item price in the CURRENCY USED for the order
             const itemPrice = currentCurrency === 'USD' ? item.price : (item.price * EXCHANGE_RATE);

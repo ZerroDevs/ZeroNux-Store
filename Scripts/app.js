@@ -1046,6 +1046,7 @@ function initSmoothScrolling() {
 // Navbar scroll effect
 function initNavbarScroll() {
     const navbar = document.querySelector('.navbar');
+    if (!navbar) return; // Exit if navbar not found
 
     window.addEventListener('scroll', () => {
         if (window.scrollY > 50) {
@@ -1798,6 +1799,14 @@ function showRefundModal() {
         z-index: 10000;
         animation: fadeIn 0.3s ease-out;
     `;
+
+    const successModal = document.getElementById('success-modal');
+    if (successModal) {
+        successModal.style.display = 'flex';
+        setTimeout(() => {
+            successModal.classList.add('active');
+        }, 10);
+    }
 
     const modal = document.createElement('div');
     modal.style.cssText = `

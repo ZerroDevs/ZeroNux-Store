@@ -370,6 +370,9 @@ function initAuthLogic() {
                             <a href="uorder.html" style="display: flex; align-items: center; gap: 10px; padding: 10px; color: rgba(255,255,255,0.8); text-decoration: none; border-radius: 8px; transition: background 0.2s;">
                                 <span>📦</span> طلباتي
                             </a>
+                            <a href="profile.html" style="display: flex; align-items: center; gap: 10px; padding: 10px; color: rgba(255,255,255,0.8); text-decoration: none; border-radius: 8px; transition: background 0.2s;">
+                                <span>⚙️</span> الإعدادات
+                            </a>
                             <button id="change-password-action" style="background: none; border: none; width: 100%; text-align: right; display: flex; align-items: center; gap: 10px; padding: 10px; color: rgba(255,255,255,0.8); cursor: pointer; border-radius: 8px; font-family: inherit; font-size: inherit; transition: background 0.2s;">
                                 <span>🔒</span> تغيير كلمة المرور
                             </button>
