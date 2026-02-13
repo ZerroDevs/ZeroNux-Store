@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
     const signupForm = document.getElementById('signup-form');
-    const toggleLinks = document.querySelectorAll('.toggle-auth a');
+    const toggleLinks = document.querySelectorAll('[data-target]');
     const googleBtn = document.getElementById('google-btn');
     const appleBtn = document.getElementById('apple-btn');
     const emailLoginBtn = document.getElementById('email-login-btn');
@@ -16,21 +16,66 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Toggle between Login and Signup
+    // Toggle between Login, Signup, and Forgot Password
     toggleLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const target = link.dataset.target;
+            const loginBox = document.getElementById('login-box');
+            const signupBox = document.getElementById('signup-box');
+            const forgotBox = document.getElementById('forgot-box');
 
+            // Hide all first
+            if (loginBox) loginBox.style.display = 'none';
+            if (signupBox) signupBox.style.display = 'none';
+            if (forgotBox) forgotBox.style.display = 'none';
+
+            // Show target
             if (target === 'signup') {
-                document.getElementById('login-box').style.display = 'none';
-                document.getElementById('signup-box').style.display = 'block';
+                if (signupBox) signupBox.style.display = 'block';
+            } else if (target === 'forgot') {
+                if (forgotBox) forgotBox.style.display = 'block';
             } else {
-                document.getElementById('signup-box').style.display = 'none';
-                document.getElementById('login-box').style.display = 'block';
+                if (loginBox) loginBox.style.display = 'block';
             }
         });
     });
+
+    // Forgot Password Logic
+    const forgotBtn = document.getElementById('forgot-btn');
+    if (forgotBtn) {
+        forgotBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('forgot-email').value;
+            const errorDiv = document.getElementById('forgot-error');
+            const successDiv = document.getElementById('forgot-success');
+
+            // Reset UI
+            if (errorDiv) { errorDiv.style.display = 'none'; errorDiv.textContent = ''; }
+            if (successDiv) successDiv.style.display = 'none';
+
+            if (!email) {
+                if (errorDiv) { errorDiv.style.display = 'block'; errorDiv.textContent = "الرجاء إدخال البريد الإلكتروني"; }
+                return;
+            }
+
+            try {
+                // Use custom action URL for better UX if configured, otherwise standard firebase
+                // Custom URL should be in the template settings, so standard call works.
+                await firebase.auth().sendPasswordResetEmail(email);
+
+                if (successDiv) successDiv.style.display = 'block';
+                // Optional: switch back to login after a few seconds
+            } catch (error) {
+                console.error("Forgot Password Error:", error);
+                let msg = "فشل إرسال الرابط: " + error.message;
+                if (error.code === 'auth/user-not-found') {
+                    msg = "هذا البريد غير مسجل لدينا"; // More user friendly
+                }
+                if (errorDiv) { errorDiv.style.display = 'block'; errorDiv.textContent = msg; }
+            }
+        });
+    }
 
     // Helper to show errors
     function showError(elementId, message) {

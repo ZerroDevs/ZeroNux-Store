@@ -364,6 +364,9 @@ function initAuthLogic() {
                             <a href="uorder.html" style="display: flex; align-items: center; gap: 10px; padding: 10px; color: rgba(255,255,255,0.8); text-decoration: none; border-radius: 8px; transition: background 0.2s;">
                                 <span>📦</span> طلباتي
                             </a>
+                            <button id="change-password-action" style="background: none; border: none; width: 100%; text-align: right; display: flex; align-items: center; gap: 10px; padding: 10px; color: rgba(255,255,255,0.8); cursor: pointer; border-radius: 8px; font-family: inherit; font-size: inherit; transition: background 0.2s;">
+                                <span>🔒</span> تغيير كلمة المرور
+                            </button>
                             <button id="logout-action" style="background: none; border: none; width: 100%; text-align: right; display: flex; align-items: center; gap: 10px; padding: 10px; color: #ff4444; cursor: pointer; border-radius: 8px; font-family: inherit; font-size: inherit; margin-top: 5px;">
                                 <span>🚪</span> تسجيل الخروج
                             </button>
@@ -380,8 +383,9 @@ function initAuthLogic() {
                             dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
                         });
 
+                        // Close dropdown when clicking outside
                         document.addEventListener('click', (e) => {
-                            if (!userBtn.contains(e.target)) {
+                            if (!userBtn.contains(e.target) && dropdown.style.display === 'block') {
                                 dropdown.style.display = 'none';
                             }
                         });
@@ -395,6 +399,120 @@ function initAuthLogic() {
                             });
                         });
                     }
+
+
+                    // Inject Modal HTML into body
+                    const modalHTML = `
+        <div id="custom-confirm-modal" class="custom-modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>🔐 تغيير كلمة المرور</h3>
+                </div>
+                <div class="modal-body">
+                    <p>هل تريد إرسال رابط لإعادة تعيين كلمة المرور إلى بريدك الإلكتروني؟</p>
+                </div>
+                <div class="modal-footer">
+                    <button id="confirm-yes-btn" class="modal-btn confirm">نعم، أرسل الرابط</button>
+                    <button id="confirm-no-btn" class="modal-btn cancel">إلغاء</button>
+                </div>
+            </div>
+        </div>
+        <div id="custom-toast" class="custom-toast"></div>
+        <style>
+            .custom-modal {
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
+                z-index: 20000; display: flex; align-items: center; justify-content: center;
+                animation: fadeIn 0.3s ease;
+            }
+            .modal-content {
+                background: #1a1a2e; border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 16px; padding: 25px; width: 90%; max-width: 400px;
+                text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                transform: translateY(0); animation: slideUp 0.3s ease;
+            }
+            .modal-header h3 { color: white; margin-bottom: 10px; font-size: 20px; }
+            .modal-body p { color: rgba(255,255,255,0.7); margin-bottom: 25px; line-height: 1.6; }
+            .modal-footer { display: flex; gap: 10px; justify-content: center; }
+            .modal-btn {
+                padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer;
+                font-family: inherit; font-weight: 600; transition: all 0.2s;
+            }
+            .modal-btn.confirm { background: var(--primary-color, #667eea); color: white; flex: 1; }
+            .modal-btn.confirm:hover { filter: brightness(1.1); transform: translateY(-2px); }
+            .modal-btn.cancel { background: rgba(255,255,255,0.1); color: white; flex: 1; }
+            .modal-btn.cancel:hover { background: rgba(255,255,255,0.2); }
+            
+            .custom-toast {
+                position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+                background: #333; color: white; padding: 12px 24px; border-radius: 30px;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.3); z-index: 20001;
+                opacity: 0; pointer-events: none; transition: all 0.3s; font-size: 14px;
+            }
+            .custom-toast.show { opacity: 1; transform: translateX(-50%) translateY(-10px); }
+            .custom-toast.success { background: #4caf50; }
+            .custom-toast.error { background: #ff4444; }
+
+            @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+            @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        </style>
+    `;
+                    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+                    // CHANGE PASSWORD LOGIC
+                    const changePassBtn = document.getElementById('change-password-action');
+                    if (changePassBtn) {
+                        changePassBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+
+                            const modal = document.getElementById('custom-confirm-modal');
+                            const yesBtn = document.getElementById('confirm-yes-btn');
+                            const noBtn = document.getElementById('confirm-no-btn');
+
+                            modal.style.display = 'flex';
+
+                            // Handle Yes
+                            yesBtn.onclick = () => {
+                                yesBtn.textContent = "جاري الإرسال...";
+                                yesBtn.disabled = true;
+
+                                firebase.auth().sendPasswordResetEmail(user.email)
+                                    .then(() => {
+                                        modal.style.display = 'none';
+                                        showToast("✅ تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.", "success");
+                                        yesBtn.textContent = "نعم، أرسل الرابط";
+                                        yesBtn.disabled = false;
+                                    })
+                                    .catch((error) => {
+                                        console.error(error);
+                                        modal.style.display = 'none';
+                                        showToast("❌ فشل الإرسال: " + error.message, "error");
+                                        yesBtn.textContent = "نعم، أرسل الرابط";
+                                        yesBtn.disabled = false;
+                                    });
+                            };
+
+                            // Handle No
+                            noBtn.onclick = () => {
+                                modal.style.display = 'none';
+                            };
+
+                            // Close on outside click
+                            modal.onclick = (e) => {
+                                if (e.target === modal) modal.style.display = 'none';
+                            };
+                        });
+                    }
+
+                    function showToast(msg, type = 'normal') {
+                        const toast = document.getElementById('custom-toast');
+                        toast.textContent = msg;
+                        toast.className = `custom-toast show ${type}`;
+                        setTimeout(() => {
+                            toast.className = 'custom-toast';
+                        }, 4000);
+                    }
+
 
                 }); // End db lookup
 

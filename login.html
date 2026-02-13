@@ -56,6 +56,13 @@
                 <div class="auth-error" id="login-error"></div>
 
                 <button type="submit" class="submit-btn" id="email-login-btn">تسجيل الدخول</button>
+
+                <div style="text-align: center; margin-top: 15px;">
+                    <a data-target="forgot"
+                        style="font-size: 13px; color: var(--text-secondary); text-decoration: none; cursor: pointer; transition: color 0.2s;"
+                        onmouseover="this.style.color='var(--accent-color)'"
+                        onmouseout="this.style.color='var(--text-secondary)'">نسيت كلمة المرور؟</a>
+                </div>
             </form>
 
             <div class="toggle-auth">
@@ -96,6 +103,33 @@
 
             <div class="toggle-auth">
                 لديك حساب بالفعل؟ <a data-target="login">تسجيل الدخول</a>
+            </div>
+        </div>
+
+        <!-- Forgot Password Box -->
+        <div id="forgot-box" style="display: none;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h3 style="color: #fff; margin-bottom: 10px;">استعادة كلمة المرور</h3>
+                <p style="font-size: 14px; color: var(--text-secondary);">أدخل بريدك الإلكتروني لاستلام رابط إعادة
+                    التعيين</p>
+            </div>
+
+            <form class="email-form">
+                <div class="input-group">
+                    <input type="email" id="forgot-email" placeholder="البريد الإلكتروني المسجل" required>
+                </div>
+
+                <div class="auth-error" id="forgot-error"></div>
+                <div class="auth-success" id="forgot-success"
+                    style="display: none; background: rgba(76, 175, 80, 0.1); color: #4caf50; padding: 10px; border-radius: 8px; font-size: 14px; margin-bottom: 10px; border: 1px solid rgba(76, 175, 80, 0.3);">
+                    تم إرسال رابط إعادة التعيين إلى بريدك الإلكتروني!
+                </div>
+
+                <button type="submit" class="submit-btn" id="forgot-btn">إرسال الرابط</button>
+            </form>
+
+            <div class="toggle-auth">
+                <a data-target="login">العودة لتسجيل الدخول</a>
             </div>
         </div>
     </div>
