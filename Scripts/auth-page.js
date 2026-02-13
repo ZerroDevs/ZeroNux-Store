@@ -59,6 +59,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // Check Turnstile
+            const forgotBox = document.getElementById('forgot-box');
+            const turnstileInput = forgotBox.querySelector('[name="cf-turnstile-response"]');
+            const token = turnstileInput ? turnstileInput.value : null;
+
+            if (!token) {
+                if (errorDiv) { errorDiv.style.display = 'block'; errorDiv.textContent = "الرجاء إتمام التحقق (أنا لست روبوت)"; }
+                return;
+            }
+
             try {
                 // Use custom action URL for better UX if configured, otherwise standard firebase
                 // Custom URL should be in the template settings, so standard call works.
