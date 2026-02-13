@@ -76,6 +76,25 @@ body {
     margin-bottom: 25px;
 }
 
+/* Error Message Styling */
+.auth-error {
+    display: none;
+    background: rgba(255, 68, 68, 0.15);
+    /* Slightly more visible background */
+    color: #ff4444;
+    /* Bright Red */
+    padding: 12px;
+    border-radius: 12px;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-size: 14px;
+    font-weight: 600;
+    /* Make it bold */
+    border: 1px solid rgba(255, 68, 68, 0.3);
+    text-align: right;
+    animation: shake 0.4s cubic-bezier(.36, .07, .19, .97) both;
+}
+
 .social-btn {
     display: flex;
     align-items: center;
