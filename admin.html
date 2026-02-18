@@ -151,6 +151,9 @@
                 <button class="tab-btn" onclick="switchTab('settings')">
                     <span>⚙️</span> الإعدادات
                 </button>
+                <button class="tab-btn" onclick="switchTab('activity')">
+                    <span>📝</span> السجل
+                </button>
             </div>
 
             <!-- Dashboard Tab -->
@@ -532,267 +535,346 @@
                 <section class="form-section">
                     <h2>⚙️ الإعدادات</h2>
                     <form id="settings-form">
-                        <div class="form-row">
+                        <!-- Settings Sub-tabs Navigation -->
+                        <div class="settings-tabs-nav"
+                            style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; overflow-x: auto;">
+                            <button type="button" class="btn-tab active" onclick="switchSettingsTab('general')"
+                                style="background: none; border: none; color: rgba(255,255,255,0.6); padding: 8px 16px; cursor: pointer; border-bottom: 2px solid transparent; font-weight: 600;">⚙️
+                                عام (General)</button>
+                            <button type="button" class="btn-tab" onclick="switchSettingsTab('home')"
+                                style="background: none; border: none; color: rgba(255,255,255,0.6); padding: 8px 16px; cursor: pointer; border-bottom: 2px solid transparent; font-weight: 600;">🏠
+                                الرئيسية (Home)</button>
+                            <button type="button" class="btn-tab" onclick="switchSettingsTab('appearance')"
+                                style="background: none; border: none; color: rgba(255,255,255,0.6); padding: 8px 16px; cursor: pointer; border-bottom: 2px solid transparent; font-weight: 600;">🎨
+                                المظهر (Appearance)</button>
+                            <button type="button" class="btn-tab" onclick="switchSettingsTab('maintenance')"
+                                style="background: none; border: none; color: rgba(255,255,255,0.6); padding: 8px 16px; cursor: pointer; border-bottom: 2px solid transparent; font-weight: 600;">🔧
+                                الصيانة (Maintenance)</button>
+                        </div>
+
+                        <!-- 1. General Tab -->
+                        <div id="settings-tab-general" class="settings-subtab-content">
+                            <h3>⚙️ إعدادات عامة</h3>
                             <div class="form-group">
-                                <label>سعر صرف الدولار (1 USD = ؟ LYD)</label>
-                                <input type="number" id="exchange-rate" placeholder="9" step="0.01" min="0" required>
-                                <small>المبلغ بالدينار الليبي الذي يعادل 1 دولار أمريكي</small>
+                                <label>سعر الصرف (USD to LYD)</label>
+                                <input type="number" id="exchange-rate" step="0.01" placeholder="مثلاً: 5.00" required>
+                                <small>سيتم تحديث جميع الأسعار تلقائياً بناءً على هذا السعر</small>
                             </div>
 
-                            <div class="form-group">
-                                <label>رقم الهاتف (الواتساب)</label>
-                                <input type="text" id="contact-phone" placeholder="2189xxxxxxx" required>
-                                <small>سيتم استخدامه لزر الواتساب وفي تذييل الصفحة</small>
-                            </div>
+                            <hr style="border-color: rgba(255,255,255,0.1); margin: 2rem 0;">
 
-                            <div class="form-group">
-                                <label>رابط صفحة الفيسبوك</label>
-                                <input type="url" id="facebook-url" placeholder="https://facebook.com/..." required>
-                                <small>رابط صفحتك على الفيسبوك</small>
-                            </div>
-
-                            <div class="form-group">
-                                <label>البريد الإلكتروني</label>
-                                <input type="email" id="contact-email" placeholder="support@example.com" required>
-                                <small>البريد الذي سيظهر في تذييل الصفحة</small>
-                            </div>
-                        </div>
-
-                        <hr style="border-color: rgba(255,255,255,0.1); margin: 2rem 0;">
-
-                        <h3>🖼️ تخصيص الواجهة (Hero Section)</h3>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>العنوان الرئيسي</label>
-                                <input type="text" id="hero-title" placeholder="متجر زيرونكس">
-                            </div>
-                            <div class="form-group">
-                                <label>العنوان الفرعي</label>
-                                <input type="text" id="hero-subtitle" placeholder="مرحباً بك في">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>الوصف الترحيبي</label>
-                            <textarea id="hero-description" rows="3"
-                                placeholder="اكتشف منتجات عالية الجودة..."></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label>رابط صورة الخلفية</label>
-                            <input type="url" id="hero-image" placeholder="https://example.com/hero.jpg">
-                            <small>يفضل صورة عرضية عالية الدقة (1920x1080)</small>
-                        </div>
-
-                        <div class="form-group">
-                            <label>تصنيفات المتجر</label>
-                            <input type="text" id="store-categories" placeholder="برامج, ألعاب, اشتراكات"
-                                value="برامج, ألعاب, اشتراكات">
-                            <small>اكتب التصنيفات مفصول بينها بفاصلة (,)</small>
-                        </div>
-
-                        <hr style="border-color: rgba(255,255,255,0.1); margin: 2rem 0;">
-
-                        <h3>� شريط الإعلانات</h3>
-                        <div class="form-group">
-                            <label style="display: flex; align-items: center; gap: 10px;">
-                                <input type="checkbox" id="announcement-enabled" style="width: auto;">
-                                تفعيل شريط الإعلانات
-                            </label>
-                        </div>
-                        <div class="form-group">
-                            <label>نص الإعلان</label>
-                            <input type="text" id="announcement-text"
-                                placeholder="� عرض خاص: استخدم كود ZERO10 للحصول على خصم 10%!">
-                            <small>سيظهر في أعلى الصفحة بشكل متحرك</small>
-                        </div>
-
-                        <hr style="border-color: rgba(255,255,255,0.1); margin: 2rem 0;">
-
-                        <h3>🛡️ إدارة المسؤولين</h3>
-                        <div class="form-group">
-                            <label>البريد الإلكتروني للمسؤول</label>
-                            <div style="display: flex; gap: 10px;">
-                                <input type="email" id="new-admin-email" placeholder="email@example.com">
-                                <button type="button" onclick="addAdminEmail()" class="btn"
-                                    style="background: #4caf50; color: white;">إضافة</button>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>المسؤولون الحاليون</label>
-                            <div id="admin-emails-list"
-                                style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; min-height: 50px;">
-                                <p style="color: rgba(255,255,255,0.5); text-align: center;">جاري التحميل...</p>
-                            </div>
-                        </div>
-
-                        <hr style="border-color: rgba(255,255,255,0.1); margin: 2rem 0;">
-
-                        <h3>🔧 وضع الصيانة</h3>
-                        <div class="form-group">
-                            <label style="display: flex; align-items: center; gap: 10px;">
-                                <input type="checkbox" id="maintenance-enabled" style="width: auto;">
-                                تفعيل وضع الصيانة (إيقاف الموقع مؤقتاً)
-                            </label>
-                            <small>عند التفعيل، سيتم إخفاء الموقع وعرض رسالة الصيانة للزوار</small>
-                        </div>
-
-                        <div class="form-row" id="maintenance-fields" style="display: none;">
-                            <div class="form-group">
-                                <label>نوع الرسالة</label>
-                                <select id="maintenance-preset">
-                                    <option value="maintenance">🔧 الموقع تحت الصيانة</option>
-                                    <option value="locked">🔒 الموقع مغلق حالياً</option>
-                                    <option value="soon">⏰ سنعود قريباً</option>
-                                    <option value="custom">✏️ رسالة مخصصة</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group" id="custom-message-field" style="display: none;">
-                            <label>الرسالة المخصصة</label>
-                            <textarea id="maintenance-custom-message" rows="3"
-                                placeholder="اكتب رسالتك هنا..."></textarea>
-                            <small>سيتم عرض هذه الرسالة للزوار عند تفعيل وضع الصيانة</small>
-                        </div>
-
-                        <hr style="border-color: rgba(255,255,255,0.1); margin: 2rem 0;">
-
-                        <h3>🎨 تخصيص المظهر (Theme)</h3>
-                        <div class="form-group">
-                            <label>اختر مظهر جاهز</label>
-                            <div class="theme-presets"
-                                style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
-                                <button type="button" class="btn"
-                                    style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: 2px solid white;"
-                                    onclick="applyThemePreset('purple')">الأساسي (Purple)</button>
-                                <button type="button" class="btn"
-                                    style="background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white; opacity: 0.8;"
-                                    onclick="applyThemePreset('red')">أحمر (Red)</button>
-                                <button type="button" class="btn"
-                                    style="background: linear-gradient(135deg, #2193b0, #6dd5ed); color: white; opacity: 0.8;"
-                                    onclick="applyThemePreset('blue')">أزرق (Blue)</button>
-                                <button type="button" class="btn"
-                                    style="background: #000000; color: white; border: 1px solid #333;"
-                                    onclick="applyThemePreset('pitchblack')">داكن جداً (Pitch Black)</button>
-                                <button type="button" class="btn"
-                                    style="background: #ffffff; color: #333; border: 1px solid #ccc; opacity: 0.8;"
-                                    onclick="applyThemePreset('light')">فاتح (Light Mode) ☀️</button>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>اللون الأساسي (Primary)</label>
-                                <input type="color" id="theme-primary" value="#667eea"
-                                    style="height: 50px; cursor: pointer;">
-                            </div>
-                            <div class="form-group">
-                                <label>اللون الثانوي (Secondary)</label>
-                                <input type="color" id="theme-secondary" value="#f5576c"
-                                    style="height: 50px; cursor: pointer;">
-                            </div>
-                            <div class="form-group">
-                                <label>لون التمييز (Accent)</label>
-                                <input type="color" id="theme-accent" value="#4facfe"
-                                    style="height: 50px; cursor: pointer;">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label style="color: #64ffda;">🌟 تأثيرات الطقس (Seasonal Effects)</label>
-                            <select id="theme-effect" style="margin-top: 5px; border-color: #64ffda;">
-                                <option value="">🚫 بدون (None)</option>
-                                <option value="snow">❄️ تساقط الثلوج (Snow)</option>
-                                <option value="rain">🌧️ أمطار (Rain)</option>
-                                <option value="confetti">🎉 احتفال (Confetti)</option>
-                                <option value="ramadan">🌙 رمضان (Ramadan)</option>
-                                <option value="eid-fitr">🎈 عيد الفطر (Eid Al-Fitr)</option>
-                                <option value="eid-adha">🐑 عيد الأضحى (Eid Al-Adha)</option>
-                                <option value="christmas">🎅 الكريسماس (Christmas)</option>
-                                <option value="desert">🏜️ الصحراء (Desert)</option>
-                            </select>
-
-                            <!-- Effect Controls -->
-                            <div class="effect-controls"
-                                style="margin-top: 15px; background: rgba(100, 255, 218, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(100, 255, 218, 0.2);">
-                                <div class="form-group" style="margin-bottom: 10px;">
-                                    <label style="font-size: 0.9em; display: flex; justify-content: space-between;">
-                                        <span>سرعة التأثير (Speed)</span>
-                                        <span id="effect-speed-val">1.0x</span>
-                                    </label>
-                                    <input type="range" id="effect-speed" min="0.1" max="5.0" step="0.1" value="1.0"
-                                        oninput="document.getElementById('effect-speed-val').textContent = this.value + 'x'">
+                            <h3>📞 معلومات التواصل</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>رقم الهاتف (واتساب)</label>
+                                    <input type="text" id="contact-phone" placeholder="2189xxxxxxxx" required>
+                                    <small>الرقم الذي سيتم التواصل عليه عبر واتساب</small>
                                 </div>
-
-                                <div class="form-group" style="margin-bottom: 10px;">
-                                    <label style="font-size: 0.9em; display: flex; justify-content: space-between;">
-                                        <span>كثافة العناصر (Density)</span>
-                                        <span id="effect-density-val">1.0x</span>
-                                    </label>
-                                    <input type="range" id="effect-density" min="0.1" max="3.0" step="0.1" value="1.0"
-                                        oninput="document.getElementById('effect-density-val').textContent = this.value + 'x'">
+                                <div class="form-group">
+                                    <label>رابط الفيسبوك</label>
+                                    <input type="url" id="facebook-url" placeholder="https://facebook.com/..." required>
+                                    <small>رابط صفحتك على الفيسبوك</small>
                                 </div>
 
                                 <div class="form-group">
-                                    <label style="font-size: 0.9em; display: flex; justify-content: space-between;">
-                                        <span>حجم العناصر (Size)</span>
-                                        <span id="effect-size-val">1.0x</span>
-                                    </label>
-                                    <input type="range" id="effect-size" min="0.5" max="3.0" step="0.1" value="1.0"
-                                        oninput="document.getElementById('effect-size-val').textContent = this.value + 'x'">
-                                </div>
-
-                                <div style="display: flex; gap: 10px; margin-top: 5px; flex-wrap: wrap;">
-                                    <button type="button" id="toggle-effect-preview" class="btn btn-sm"
-                                        style="background: #2563eb; color: white; font-size: 0.8em; flex: 1; min-width: 100%; opacity: 0.7;">
-                                        👁️‍🗨️ المعاينة متوقفة (Preview Off)
-                                    </button>
-                                    <button type="button" id="save-effect-settings" class="btn btn-sm"
-                                        style="background: #4caf50; color: white; font-size: 0.8em; flex: 1;">
-                                        💾 حفظ التأثيرات (Save)
-                                    </button>
-                                    <button type="button" id="reset-effect-defaults" class="btn btn-sm"
-                                        style="background: rgba(255, 255, 255, 0.1); font-size: 0.8em; flex: 1;">
-                                        ↺ استعادة (Reset)
-                                    </button>
+                                    <label>البريد الإلكتروني</label>
+                                    <input type="email" id="contact-email" placeholder="support@example.com" required>
+                                    <small>البريد الذي سيظهر في تذييل الصفحة</small>
                                 </div>
                             </div>
+
+                            <hr style="border-color: rgba(255,255,255,0.1); margin: 2rem 0;">
+
+                            <h3>🛡️ إدارة المسؤولين</h3>
+                            <div class="form-group">
+                                <label>البريد الإلكتروني للمسؤول</label>
+                                <div style="display: flex; gap: 10px;">
+                                    <input type="email" id="new-admin-email" placeholder="email@example.com">
+                                    <button type="button" onclick="addAdminEmail()" class="btn"
+                                        style="background: #4caf50; color: white;">إضافة</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>المسؤولون الحاليون</label>
+                                <div id="admin-emails-list"
+                                    style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; min-height: 50px;">
+                                    <p style="color: rgba(255,255,255,0.5); text-align: center;">جاري التحميل...</p>
+                                </div>
+                            </div>
                         </div>
 
-                        <h4
-                            style="margin: 1rem 0; color: rgba(255,255,255,0.7); border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
-                            الخلفيات والنصوص (Deep Theme)</h4>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>خلفية الصفحة (Bg Primary)</label>
-                                <input type="color" id="theme-bg-primary" value="#0f0f1e"
-                                    style="height: 50px; cursor: pointer;">
+                        <!-- 2. Home Tab -->
+                        <div id="settings-tab-home" class="settings-subtab-content" style="display: none;">
+                            <h3>🖼️ تخصيص الواجهة (Hero Section)</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>العنوان الرئيسي</label>
+                                    <input type="text" id="hero-title" placeholder="متجر زيرونكس">
+                                </div>
+                                <div class="form-group">
+                                    <label>العنوان الفرعي</label>
+                                    <input type="text" id="hero-subtitle" placeholder="مرحباً بك في">
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label>خلفية الأقسام (Bg Secondary)</label>
-                                <input type="color" id="theme-bg-secondary" value="#1a1a2e"
-                                    style="height: 50px; cursor: pointer;">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>لون النص الأساسي</label>
-                                <input type="color" id="theme-text-primary" value="#ffffff"
-                                    style="height: 50px; cursor: pointer;">
-                            </div>
-                            <div class="form-group">
-                                <label>لون النص الثانوي</label>
-                                <input type="color" id="theme-text-secondary" value="#b3b3b3"
-                                    style="height: 50px; cursor: pointer;">
-                            </div>
-                        </div>
-                        <input type="hidden" id="theme-preset-name" value="custom">
 
-                        <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">حفظ الإعدادات</button>
+                            <div class="form-group">
+                                <label>الوصف الترحيبي</label>
+                                <textarea id="hero-description" rows="3"
+                                    placeholder="اكتشف منتجات عالية الجودة..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>رابط صورة الخلفية</label>
+                                <input type="url" id="hero-image" placeholder="https://example.com/hero.jpg">
+                                <small>يفضل صورة عرضية عالية الدقة (1920x1080)</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>تصنيفات المتجر</label>
+                                <input type="text" id="store-categories" placeholder="برامج, ألعاب, اشتراكات"
+                                    value="برامج, ألعاب, اشتراكات">
+                                <small>اكتب التصنيفات مفصول بينها بفاصلة (,)</small>
+                            </div>
+
+                            <hr style="border-color: rgba(255,255,255,0.1); margin: 2rem 0;">
+
+                            <h3>📢 شريط الإعلانات</h3>
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 10px;">
+                                    <input type="checkbox" id="announcement-enabled" style="width: auto;">
+                                    تفعيل شريط الإعلانات
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>نص الإعلان</label>
+                                <input type="text" id="announcement-text"
+                                    placeholder="🎉 عرض خاص: استخدم كود ZERO10 للحصول على خصم 10%!">
+                                <small>سيظهر في أعلى الصفحة بشكل متحرك</small>
+                            </div>
+                        </div>
+
+                        <!-- 3. Maintenance Tab -->
+                        <div id="settings-tab-maintenance" class="settings-subtab-content" style="display: none;">
+                            <h3>🔧 وضع الصيانة</h3>
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 10px;">
+                                    <input type="checkbox" id="maintenance-enabled" style="width: auto;">
+                                    تفعيل وضع الصيانة (إيقاف الموقع مؤقتاً)
+                                </label>
+                                <small>عند التفعيل، سيتم إخفاء الموقع وعرض رسالة الصيانة للزوار</small>
+                            </div>
+
+                            <div class="form-row" id="maintenance-fields" style="display: none;">
+                                <div class="form-group">
+                                    <label>نوع الرسالة</label>
+                                    <select id="maintenance-preset">
+                                        <option value="maintenance">🔧 الموقع تحت الصيانة</option>
+                                        <option value="locked">🔒 الموقع مغلق حالياً</option>
+                                        <option value="soon">⏰ سنعود قريباً</option>
+                                        <option value="custom">✏️ رسالة مخصصة</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group" id="custom-message-field" style="display: none;">
+                                <label>الرسالة المخصصة</label>
+                                <textarea id="maintenance-custom-message" rows="3"
+                                    placeholder="اكتب رسالتك هنا..."></textarea>
+                                <small>سيتم عرض هذه الرسالة للزوار عند تفعيل وضع الصيانة</small>
+                            </div>
+                        </div>
+
+                        <!-- 4. Appearance Tab -->
+                        <div id="settings-tab-appearance" class="settings-subtab-content" style="display: none;">
+                            <h3>🎨 تخصيص المظهر (Theme)</h3>
+                            <div class="form-group">
+                                <label>اختر مظهر جاهز</label>
+                                <div class="theme-presets"
+                                    style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                                    <button type="button" class="btn"
+                                        style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: 2px solid white;"
+                                        onclick="applyThemePreset('purple')">الأساسي (Purple)</button>
+                                    <button type="button" class="btn"
+                                        style="background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white; opacity: 0.8;"
+                                        onclick="applyThemePreset('red')">أحمر (Red)</button>
+                                    <button type="button" class="btn"
+                                        style="background: linear-gradient(135deg, #2193b0, #6dd5ed); color: white; opacity: 0.8;"
+                                        onclick="applyThemePreset('blue')">أزرق (Blue)</button>
+                                    <button type="button" class="btn"
+                                        style="background: #000000; color: white; border: 1px solid #333;"
+                                        onclick="applyThemePreset('pitchblack')">داكن جداً (Pitch Black)</button>
+                                    <button type="button" class="btn"
+                                        style="background: #ffffff; color: #333; border: 1px solid #ccc; opacity: 0.8;"
+                                        onclick="applyThemePreset('light')">فاتح (Light Mode) ☀️</button>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>اللون الأساسي (Primary)</label>
+                                    <input type="color" id="theme-primary" value="#667eea"
+                                        style="height: 50px; cursor: pointer;">
+                                </div>
+                                <div class="form-group">
+                                    <label>اللون الثانوي (Secondary)</label>
+                                    <input type="color" id="theme-secondary" value="#f5576c"
+                                        style="height: 50px; cursor: pointer;">
+                                </div>
+                                <div class="form-group">
+                                    <label>لون التمييز (Accent)</label>
+                                    <input type="color" id="theme-accent" value="#4facfe"
+                                        style="height: 50px; cursor: pointer;">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label style="color: #64ffda;">🌟 تأثيرات الطقس (Seasonal Effects)</label>
+                                <select id="theme-effect" style="margin-top: 5px; border-color: #64ffda;">
+                                    <option value="">🚫 بدون (None)</option>
+                                    <option value="snow">❄️ تساقط الثلوج (Snow)</option>
+                                    <option value="rain">🌧️ أمطار (Rain)</option>
+                                    <option value="confetti">🎉 احتفال (Confetti)</option>
+                                    <option value="ramadan">🌙 رمضان (Ramadan)</option>
+                                    <option value="eid-fitr">🎈 عيد الفطر (Eid Al-Fitr)</option>
+                                    <option value="eid-adha">🐑 عيد الأضحى (Eid Al-Adha)</option>
+                                    <option value="christmas">🎅 الكريسماس (Christmas)</option>
+                                    <option value="desert">🏜️ الصحراء (Desert)</option>
+                                </select>
+
+                                <!-- Effect Controls -->
+                                <div class="effect-controls"
+                                    style="margin-top: 15px; background: rgba(100, 255, 218, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(100, 255, 218, 0.2);">
+                                    <div class="form-group" style="margin-bottom: 10px;">
+                                        <label style="font-size: 0.9em; display: flex; justify-content: space-between;">
+                                            <span>سرعة التأثير (Speed)</span>
+                                            <span id="effect-speed-val">1.0x</span>
+                                        </label>
+                                        <input type="range" id="effect-speed" min="0.1" max="5.0" step="0.1" value="1.0"
+                                            oninput="document.getElementById('effect-speed-val').textContent = this.value + 'x'">
+                                    </div>
+
+                                    <div class="form-group" style="margin-bottom: 10px;">
+                                        <label style="font-size: 0.9em; display: flex; justify-content: space-between;">
+                                            <span>كثافة العناصر (Density)</span>
+                                            <span id="effect-density-val">1.0x</span>
+                                        </label>
+                                        <input type="range" id="effect-density" min="0.1" max="3.0" step="0.1"
+                                            value="1.0"
+                                            oninput="document.getElementById('effect-density-val').textContent = this.value + 'x'">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label style="font-size: 0.9em; display: flex; justify-content: space-between;">
+                                            <span>حجم العناصر (Size)</span>
+                                            <span id="effect-size-val">1.0x</span>
+                                        </label>
+                                        <input type="range" id="effect-size" min="0.5" max="3.0" step="0.1" value="1.0"
+                                            oninput="document.getElementById('effect-size-val').textContent = this.value + 'x'">
+                                    </div>
+
+                                    <div style="display: flex; gap: 10px; margin-top: 5px; flex-wrap: wrap;">
+                                        <button type="button" id="toggle-effect-preview" class="btn btn-sm"
+                                            style="background: #2563eb; color: white; font-size: 0.8em; flex: 1; min-width: 100%; opacity: 0.7;">
+                                            👁️‍🗨️ المعاينة متوقفة (Preview Off)
+                                        </button>
+                                        <button type="button" id="save-effect-settings" class="btn btn-sm"
+                                            style="background: #4caf50; color: white; font-size: 0.8em; flex: 1;">
+                                            💾 حفظ التأثيرات (Save)
+                                        </button>
+                                        <button type="button" id="reset-effect-defaults" class="btn btn-sm"
+                                            style="background: rgba(255, 255, 255, 0.1); font-size: 0.8em; flex: 1;">
+                                            ↺ استعادة (Reset)
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h4
+                                style="margin: 1rem 0; color: rgba(255,255,255,0.7); border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                                الخلفيات والنصوص (Deep Theme)</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>خلفية الصفحة (Bg Primary)</label>
+                                    <input type="color" id="theme-bg-primary" value="#0f0f1e"
+                                        style="height: 50px; cursor: pointer;">
+                                </div>
+                                <div class="form-group">
+                                    <label>خلفية الأقسام (Bg Secondary)</label>
+                                    <input type="color" id="theme-bg-secondary" value="#1a1a2e"
+                                        style="height: 50px; cursor: pointer;">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>لون النص الأساسي</label>
+                                    <input type="color" id="theme-text-primary" value="#ffffff"
+                                        style="height: 50px; cursor: pointer;">
+                                </div>
+                                <div class="form-group">
+                                    <label>لون النص الثانوي</label>
+                                    <input type="color" id="theme-text-secondary" value="#8892b0"
+                                        style="height: 50px; cursor: pointer;">
+                                </div>
+                                <input type="hidden" id="theme-preset-name" value="custom">
+                            </div>
+                        </div>
+
+                        <div class="form-actions"
+                            style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                                حفظ جميع الإعدادات 💾
+                            </button>
+                        </div>
                     </form>
                 </section>
             </div>
+            <!-- Activity Log Tab -->
+            <div id="tab-activity" class="tab-content">
+                <section class="form-section">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                        <h2>📝 سجل الأنشطة</h2>
+                        <div style="display: flex; gap: 10px;">
+                            <button id="export-activity-log" class="btn"
+                                style="background: rgba(100, 255, 218, 0.1); color: #64ffda; border: 1px solid rgba(100, 255, 218, 0.3);">
+                                📥 تصدير (CSV)
+                            </button>
+                            <button id="clear-activity-log" class="btn"
+                                style="background: rgba(244, 67, 54, 0.1); color: #f44336; border: 1px solid rgba(244, 67, 54, 0.3);">
+                                🗑️ مسح السجل
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filter Toolbar -->
+                    <div class="activity-toolbar"
+                        style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; gap: 15px; border: 1px solid rgba(255,255,255,0.05); flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <input type="text" id="activity-search" placeholder="🔍 ابحث في السجل..."
+                                style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: white;">
+                        </div>
+                        <div style="flex: 0 0 150px;">
+                            <select id="activity-filter-type"
+                                style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: white;">
+                                <option value="all">الكل (All)</option>
+                                <option value="add">➕ إضافة</option>
+                                <option value="edit">✏️ تعديل</option>
+                                <option value="delete">🗑️ حذف</option>
+                                <option value="settings">⚙️ إعدادات</option>
+                                <option value="status">📋 حالة</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="activity-timeline" id="activity-timeline"
+                        style="max-height: 600px; overflow-y: auto; padding-right: 5px;">
+                        <div class="activity-empty"
+                            style="text-align: center; padding: 3rem; color: rgba(255,255,255,0.3);">جاري التحميل...
+                        </div>
+                    </div>
+                </section>
+            </div>
+
         </main>
     </div>
 

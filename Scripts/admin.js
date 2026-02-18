@@ -799,6 +799,39 @@ document.getElementById('settings-form').addEventListener('submit', (e) => {
         });
 });
 
+// Settings Tab Switcher
+window.switchSettingsTab = function (tabId) {
+    // Hide all contents
+    document.querySelectorAll('.settings-subtab-content').forEach(el => el.style.display = 'none');
+
+    // Deactivate all buttons
+    document.querySelectorAll('.settings-tabs-nav .btn-tab').forEach(btn => {
+        btn.classList.remove('active');
+        btn.style.color = 'rgba(255,255,255,0.6)';
+        btn.style.borderBottomColor = 'transparent';
+    });
+
+    // Show active content
+    const activeContent = document.getElementById('settings-tab-' + tabId);
+    if (activeContent) activeContent.style.display = 'block';
+
+    // Activate button
+    // We need to find the specific button clicked, but since we pass ID, we can find by iterating logic or just rely upon 'onclick' in HTML passing 'this' or finding by index. 
+    // Easier approach: The clicked button called this function. 
+    // To make it simple and cleaner, we'll iterate buttons to find which one calls the tabId
+    // or we can perform a simple check.
+
+    // Better visual update:
+    const buttons = document.querySelectorAll('.settings-tabs-nav .btn-tab');
+    buttons.forEach(btn => {
+        if (btn.getAttribute('onclick').includes(tabId)) {
+            btn.classList.add('active');
+            btn.style.color = '#fff';
+            btn.style.borderBottomColor = '#64ffda'; // Accent color
+        }
+    });
+};
+
 // ============================================
 // ADMIN AUTHENTICATION (SECURE - Firebase Auth)
 // NO HARDCODED PASSWORDS - 100% SECURE!
