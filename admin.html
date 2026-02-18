@@ -712,6 +712,52 @@
                                 <option value="christmas">🎅 الكريسماس (Christmas)</option>
                                 <option value="desert">🏜️ الصحراء (Desert)</option>
                             </select>
+
+                            <!-- Effect Controls -->
+                            <div class="effect-controls"
+                                style="margin-top: 15px; background: rgba(100, 255, 218, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(100, 255, 218, 0.2);">
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label style="font-size: 0.9em; display: flex; justify-content: space-between;">
+                                        <span>سرعة التأثير (Speed)</span>
+                                        <span id="effect-speed-val">1.0x</span>
+                                    </label>
+                                    <input type="range" id="effect-speed" min="0.1" max="5.0" step="0.1" value="1.0"
+                                        oninput="document.getElementById('effect-speed-val').textContent = this.value + 'x'">
+                                </div>
+
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label style="font-size: 0.9em; display: flex; justify-content: space-between;">
+                                        <span>كثافة العناصر (Density)</span>
+                                        <span id="effect-density-val">1.0x</span>
+                                    </label>
+                                    <input type="range" id="effect-density" min="0.1" max="3.0" step="0.1" value="1.0"
+                                        oninput="document.getElementById('effect-density-val').textContent = this.value + 'x'">
+                                </div>
+
+                                <div class="form-group">
+                                    <label style="font-size: 0.9em; display: flex; justify-content: space-between;">
+                                        <span>حجم العناصر (Size)</span>
+                                        <span id="effect-size-val">1.0x</span>
+                                    </label>
+                                    <input type="range" id="effect-size" min="0.5" max="3.0" step="0.1" value="1.0"
+                                        oninput="document.getElementById('effect-size-val').textContent = this.value + 'x'">
+                                </div>
+
+                                <div style="display: flex; gap: 10px; margin-top: 5px; flex-wrap: wrap;">
+                                    <button type="button" id="toggle-effect-preview" class="btn btn-sm"
+                                        style="background: #2563eb; color: white; font-size: 0.8em; flex: 1; min-width: 100%; opacity: 0.7;">
+                                        👁️‍🗨️ المعاينة متوقفة (Preview Off)
+                                    </button>
+                                    <button type="button" id="save-effect-settings" class="btn btn-sm"
+                                        style="background: #4caf50; color: white; font-size: 0.8em; flex: 1;">
+                                        💾 حفظ التأثيرات (Save)
+                                    </button>
+                                    <button type="button" id="reset-effect-defaults" class="btn btn-sm"
+                                        style="background: rgba(255, 255, 255, 0.1); font-size: 0.8em; flex: 1;">
+                                        ↺ استعادة (Reset)
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         <h4
@@ -775,6 +821,7 @@
     <script src="Scripts/admin-support.js"></script>
     <script src="Scripts/admin-reviews.js"></script>
     <script src="Scripts/instant-page.js" type="module"></script>
+    <script src="Scripts/seasonal-effects.js"></script>
     <script src="Scripts/smart-search.js"></script>
     <script src="Scripts/pwa.js"></script>
 </body>

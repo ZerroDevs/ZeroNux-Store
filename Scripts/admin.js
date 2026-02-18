@@ -427,6 +427,115 @@ window.applyThemePreset = function (preset) {
     });
 });
 
+// Toggle Effect Controls Visibility
+let isAdminPreviewEnabled = false;
+
+document.getElementById('theme-effect').addEventListener('change', function () {
+    const controls = document.querySelector('.effect-controls');
+    if (controls) {
+        controls.style.display = this.value ? 'block' : 'none';
+
+        // Update live preview if enabled
+        if (window.SeasonalEffects && isAdminPreviewEnabled) {
+            window.SeasonalEffects.init({
+                type: this.value,
+                speed: parseFloat(document.getElementById('effect-speed').value) || 1.0,
+                density: parseFloat(document.getElementById('effect-density').value) || 1.0,
+                size: parseFloat(document.getElementById('effect-size').value) || 1.0
+            });
+        }
+    }
+});
+
+// Update live preview on slider change
+['effect-speed', 'effect-density', 'effect-size'].forEach(id => {
+    document.getElementById(id).addEventListener('input', function () {
+        if (window.SeasonalEffects && isAdminPreviewEnabled) {
+            window.SeasonalEffects.init({
+                type: document.getElementById('theme-effect').value,
+                speed: parseFloat(document.getElementById('effect-speed').value) || 1.0,
+                density: parseFloat(document.getElementById('effect-density').value) || 1.0,
+                size: parseFloat(document.getElementById('effect-size').value) || 1.0
+            });
+        }
+    });
+});
+
+// Toggle Preview Button
+document.getElementById('toggle-effect-preview').addEventListener('click', function () {
+    isAdminPreviewEnabled = !isAdminPreviewEnabled;
+
+    if (isAdminPreviewEnabled) {
+        this.innerHTML = '👁️ عرض/إخفاء التأثير هنا (Toggle Preview)';
+        this.style.opacity = '1';
+        // Show effect
+        if (window.SeasonalEffects) {
+            window.SeasonalEffects.init({
+                type: document.getElementById('theme-effect').value,
+                speed: parseFloat(document.getElementById('effect-speed').value) || 1.0,
+                density: parseFloat(document.getElementById('effect-density').value) || 1.0,
+                size: parseFloat(document.getElementById('effect-size').value) || 1.0
+            });
+        }
+    } else {
+        this.innerHTML = '👁️‍🗨️ المعاينة متوقفة (Preview Off)';
+        this.style.opacity = '0.7';
+        // Hide effect
+        if (window.SeasonalEffects) {
+            window.SeasonalEffects.init({ type: 'none' });
+        }
+    }
+});
+
+// Reset Effect Defaults
+document.getElementById('reset-effect-defaults').addEventListener('click', function () {
+    // Reset inputs
+    document.getElementById('effect-speed').value = 1.0;
+    document.getElementById('effect-density').value = 1.0;
+    document.getElementById('effect-size').value = 1.0;
+
+    // Reset labels
+    document.getElementById('effect-speed-val').textContent = '1.0x';
+    document.getElementById('effect-density-val').textContent = '1.0x';
+    document.getElementById('effect-size-val').textContent = '1.0x';
+
+    // Update live preview
+    if (window.SeasonalEffects && isAdminPreviewEnabled) {
+        window.SeasonalEffects.init({
+            type: document.getElementById('theme-effect').value,
+            speed: 1.0,
+            density: 1.0,
+            size: 1.0
+        });
+    }
+
+    showNotification('تم استعادة الإعدادات الافتراضية للتأثير', 'success');
+});
+
+// Save Effect Settings Independently
+document.getElementById('save-effect-settings').addEventListener('click', function () {
+    const effect = document.getElementById('theme-effect').value;
+    const effectConfig = {
+        speed: parseFloat(document.getElementById('effect-speed').value) || 1.0,
+        density: parseFloat(document.getElementById('effect-density').value) || 1.0,
+        size: parseFloat(document.getElementById('effect-size').value) || 1.0
+    };
+
+    // Update Firebase
+    const updates = {};
+    updates['theme/effect'] = effect;
+    updates['theme/effectConfig'] = effectConfig;
+    updates['lastUpdated'] = Date.now();
+
+    settingsRef.update(updates)
+        .then(() => {
+            showNotification('تم حفظ تأثيرات الطقس بنجاح! 💾');
+        })
+        .catch((error) => {
+            showNotification('حدث خطأ أثناء الحفظ: ' + error.message, 'error');
+        });
+});
+
 // Load settings (exchange rate, phone, facebook, email, theme, admins)
 function loadSettings() {
     settingsRef.once('value', (snapshot) => {
@@ -494,6 +603,28 @@ function loadSettings() {
                 if (settings.theme.textSecondary) document.getElementById('theme-text-secondary').value = settings.theme.textSecondary;
                 if (settings.theme.preset) document.getElementById('theme-preset-name').value = settings.theme.preset;
                 if (settings.theme.effect) document.getElementById('theme-effect').value = settings.theme.effect;
+
+                // Load Effect Config
+                const effectConfig = settings.theme.effectConfig || { speed: 1.0, density: 1.0, size: 1.0 };
+                document.getElementById('effect-speed').value = effectConfig.speed || 1.0;
+                document.getElementById('effect-speed-val').textContent = (effectConfig.speed || 1.0) + 'x';
+
+                document.getElementById('effect-density').value = effectConfig.density || 1.0;
+                document.getElementById('effect-density-val').textContent = (effectConfig.density || 1.0) + 'x';
+
+                document.getElementById('effect-size').value = effectConfig.size || 1.0;
+                document.getElementById('effect-size-val').textContent = (effectConfig.size || 1.0) + 'x';
+
+                // Update live effect if available
+                if (window.SeasonalEffects && settings.theme.effect && isAdminPreviewEnabled) {
+                    window.SeasonalEffects.init({
+                        type: settings.theme.effect,
+                        ...effectConfig
+                    });
+                } else if (window.SeasonalEffects) {
+                    // Ensure it's off if preview is disabled, even if setting exists
+                    window.SeasonalEffects.init({ type: 'none' });
+                }
             }
         } else {
             // Default exchange rate
@@ -629,7 +760,12 @@ document.getElementById('settings-form').addEventListener('submit', (e) => {
         textSecondary: document.getElementById('theme-text-secondary').value,
         preset: document.getElementById('theme-preset-name').value,
         // Save Effect
-        effect: document.getElementById('theme-effect').value
+        effect: document.getElementById('theme-effect').value,
+        effectConfig: {
+            speed: parseFloat(document.getElementById('effect-speed').value) || 1.0,
+            density: parseFloat(document.getElementById('effect-density').value) || 1.0,
+            size: parseFloat(document.getElementById('effect-size').value) || 1.0
+        }
     };
 
     const settingsData = {
