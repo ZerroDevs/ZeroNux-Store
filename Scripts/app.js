@@ -1183,46 +1183,46 @@ function showProductDetails(productId) {
                     إضافة للسلة
                 </button>`;
 
-        // Gallery Logic
+        // Gallery Logic - Swipeable 
         let imageSectionHTML = '';
-        let hasGallery = false;
 
+        // Combine main image and additional images
+        const galleryImages = [product.image];
         if (product.additionalImages && product.additionalImages.length > 0) {
-            hasGallery = true;
-            const allImages = [product.image, ...product.additionalImages];
-
-            let thumbnailsHTML = '';
-            allImages.forEach((img, index) => {
-                thumbnailsHTML += `
-                    <div class="gallery-thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainImage(this, '${img}')">
-                        <img src="${img}" alt="Thumbnail ${index + 1}">
-                    </div>
-                `;
-            });
-
-            imageSectionHTML = `
-                <div class="product-gallery">
-                    <div class="gallery-main-image">
-                        <img src="${product.image}" id="main-product-image" alt="${product.name}" 
-                             onclick="openLightbox(this.src)" 
-                             style="cursor: zoom-in;"
-                             onerror="this.src='https://via.placeholder.com/500x300?text=No+Image'">
-                    </div>
-                    <div class="gallery-thumbnails">
-                        ${thumbnailsHTML}
-                    </div>
-                </div>
-            `;
-        } else {
-            imageSectionHTML = `
-                <div class="product-modal-image">
-                    <img src="${product.image}" alt="${product.name}" 
-                         onclick="openLightbox(this.src)" 
-                         style="cursor: zoom-in;"
-                         onerror="this.src='https://via.placeholder.com/500x300?text=No+Image'">
-                </div>
-            `;
+            galleryImages.push(...product.additionalImages);
         }
+
+        const slidesHTML = galleryImages.map((img, index) => `
+            <div class="gallery-slide" id="slide-${index}">
+                <div class="gallery-image-wrapper" onmousemove="handleZoom(event)" onmouseleave="resetZoom(event)" onclick="openLightbox('${img}')">
+                    <img src="${img}" class="gallery-image" alt="${product.name}" onerror="this.src='https://via.placeholder.com/500x500?text=No+Image'">
+                </div>
+            </div>
+        `).join('');
+
+        const thumbnailsHTML = galleryImages.map((img, index) => `
+            <div class="gallery-thumbnail ${index === 0 ? 'active' : ''}" onclick="scrollToSlide(${index})">
+                <img src="${img}" alt="Thumbnail ${index + 1}">
+            </div>
+        `).join('');
+
+        // Navigation arrows only if multiple images
+        const navArrows = galleryImages.length > 1 ? `
+            <button class="gallery-nav prev" onclick="scrollGallery(-1)">&#10094;</button>
+            <button class="gallery-nav next" onclick="scrollGallery(1)">&#10095;</button>
+        ` : '';
+
+        imageSectionHTML = `
+            <div class="product-gallery">
+                <div class="gallery-carousel-container">
+                    <div class="gallery-track" id="gallery-track" onscroll="syncThumbnails()">
+                        ${slidesHTML}
+                    </div>
+                    ${navArrows}
+                </div>
+                ${galleryImages.length > 1 ? `<div class="gallery-thumbnails">${thumbnailsHTML}</div>` : ''}
+            </div>
+        `;
 
         modal.innerHTML = `
             <div class="product-modal-header">
@@ -1245,6 +1245,14 @@ function showProductDetails(productId) {
                     <span class="modal-price">${displayPrice}</span>
                 </div>
                 ${modalActionButton}
+            </div>
+            <div class="product-modal-share-bar">
+                <span>مشاركة المنتج:</span>
+                <div class="share-buttons">
+                    <button class="share-btn whatsapp" onclick="shareProduct('whatsapp', '${productId}', '${product.name}')">📱 واتساب</button>
+                    <button class="share-btn facebook" onclick="shareProduct('facebook', '${productId}')">📘 فيسبوك</button>
+                    <button class="share-btn copy" onclick="shareProduct('copy', '${productId}')">📋 نسخ الرابط</button>
+                </div>
             </div>
         `;
 
@@ -1280,14 +1288,28 @@ function showProductDetails(productId) {
         .product-modal-image { padding: 0 2rem; }
         .product-modal-image img { width: 100%; max-height: 300px; object-fit: contain; border-radius: 12px; }
         
-        /* Gallery Styles */
-        .product-gallery { padding: 0 2rem; display: flex; flex-direction: column; gap: 1rem; }
-        .gallery-main-image { width: 100%; height: 300px; border-radius: 12px; overflow: hidden; background: rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; position: relative; }
-        .gallery-main-image img { max-width: 100%; max-height: 100%; object-fit: contain; animation: fadeIn 0.3s ease; }
-        .gallery-thumbnails { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: thin; }
-        .gallery-thumbnail { min-width: 60px; height: 60px; border-radius: 8px; overflow: hidden; cursor: pointer; border: 2px solid transparent; opacity: 0.6; transition: all 0.2s ease; }
+        /* Gallery Styles - Swipeable Carousel */
+        .product-gallery { padding: 0 2rem; display: flex; flex-direction: column; gap: 1rem; position: relative; }
+        .gallery-carousel-container { position: relative; width: 100%; height: 400px; overflow: hidden; border-radius: 12px; background: rgba(0,0,0,0.2); }
+        .gallery-track { display: flex; width: 100%; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; }
+        .gallery-track::-webkit-scrollbar { display: none; }
+        .gallery-slide { flex: 0 0 100%; width: 100%; height: 100%; scroll-snap-align: center; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        
+        .gallery-image-wrapper { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; cursor: zoom-in; position: relative; overflow: hidden; }
+        .gallery-image { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.1s ease-out; transform-origin: center center; pointer-events: none; /* Let wrapper handle events */ }
+        /* Add hover to wrapper to enable pointer events on image effectively or just handle on wrapper */
+
+        /* Navigation Arrows */
+        .gallery-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; font-size: 1.5rem; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 50%; transition: background 0.3s; z-index: 10; user-select: none; opacity: 0; }
+        .gallery-carousel-container:hover .gallery-nav { opacity: 1; }
+        .gallery-nav:hover { background: rgba(0,0,0,0.8); }
+        .gallery-nav.prev { left: 10px; }
+        .gallery-nav.next { right: 10px; }
+
+        .gallery-thumbnails { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: thin; justify-content: center; margin-top: 0.5rem; }
+        .gallery-thumbnail { min-width: 60px; height: 60px; border-radius: 8px; overflow: hidden; cursor: pointer; border: 2px solid transparent; opacity: 0.5; transition: all 0.2s ease; }
         .gallery-thumbnail img { width: 100%; height: 100%; object-fit: cover; }
-        .gallery-thumbnail:hover { opacity: 1; }
+        .gallery-thumbnail:hover { opacity: 0.8; }
         .gallery-thumbnail.active { border-color: #667eea; opacity: 1; transform: scale(1.05); }
 
         .product-modal-body { padding: 2rem; }
@@ -1304,6 +1326,34 @@ function showProductDetails(productId) {
         .modal-price { font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
         .add-to-cart-modal { padding: 1rem 2rem; white-space: nowrap; }
         .add-to-cart-modal:disabled { background: #555; cursor: not-allowed; transform: none !important; box-shadow: none !important; opacity: 0.7; }
+
+        /* Share Bar Styles */
+        .product-modal-share-bar { padding: 1.5rem 2rem; background: rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.08); flex-wrap: wrap; gap: 1rem; border-radius: 0 0 16px 16px; margin-top: 0; }
+        .product-modal-share-bar span { color: rgba(255,255,255,0.8); font-size: 0.95rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; }
+        .product-modal-share-bar span::before { content: '🔗'; font-size: 1.1rem; }
+        
+        .share-buttons { display: flex; gap: 0.8rem; }
+        .share-btn { 
+            border: 1px solid rgba(255,255,255,0.1); 
+            background: rgba(255,255,255,0.05); 
+            padding: 0.6rem 1.2rem; 
+            border-radius: 50px; 
+            font-size: 0.9rem; 
+            font-weight: 500;
+            cursor: pointer; 
+            color: rgba(255,255,255,0.9); 
+            display: flex; align-items: center; gap: 0.5rem; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            position: relative; overflow: hidden;
+        }
+        
+        .share-btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); color: white; border-color: transparent; }
+        
+        .share-btn.whatsapp:hover { background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); }
+        .share-btn.facebook:hover { background: linear-gradient(135deg, #1877F2 0%, #0C5DC7 100%); }
+        .share-btn.copy:hover { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        
+        .share-btn:active { transform: translateY(-1px); }
     `;
         document.head.appendChild(modalStyles);
 
@@ -1345,16 +1395,66 @@ function showProductDetails(productId) {
     });
 }
 
-// Change main image in product details gallery
-window.changeMainImage = function (thumbnail, src) {
-    const mainImage = document.getElementById('main-product-image');
-    if (mainImage) {
-        mainImage.src = src;
-
-        // Update active class
-        document.querySelectorAll('.gallery-thumbnail').forEach(t => t.classList.remove('active'));
-        thumbnail.classList.add('active');
+// Gallery Helper Functions
+window.scrollGallery = function (direction) {
+    const track = document.getElementById('gallery-track');
+    if (track) {
+        const slideWidth = track.clientWidth;
+        track.scrollBy({ left: direction * slideWidth, behavior: 'smooth' });
     }
+};
+
+window.scrollToSlide = function (index) {
+    const track = document.getElementById('gallery-track');
+    const slide = document.getElementById(`slide-${index}`);
+    if (track && slide) {
+        track.scrollTo({ left: slide.offsetLeft, behavior: 'smooth' });
+    }
+};
+
+window.handleZoom = function (e) {
+    const wrapper = e.currentTarget;
+    const img = wrapper.querySelector('.gallery-image');
+    if (!img) return;
+
+    const rect = wrapper.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const xPercent = (x / rect.width) * 100;
+    const yPercent = (y / rect.height) * 100;
+
+    img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+    img.style.transform = 'scale(2)'; // Zoom level
+};
+
+window.resetZoom = function (e) {
+    const wrapper = e.currentTarget;
+    const img = wrapper.querySelector('.gallery-image');
+    if (img) {
+        img.style.transform = 'scale(1)';
+        setTimeout(() => {
+            img.style.transformOrigin = 'center center';
+        }, 100);
+    }
+};
+
+window.syncThumbnails = function () {
+    const track = document.getElementById('gallery-track');
+    if (!track) return;
+
+    const scrollLeft = track.scrollLeft;
+    const slideWidth = track.clientWidth;
+    const index = Math.round(scrollLeft / slideWidth);
+
+    document.querySelectorAll('.gallery-thumbnail').forEach((thumb, i) => {
+        if (i === index) {
+            thumb.classList.add('active');
+            thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        } else {
+            thumb.classList.remove('active');
+        }
+    });
 };
 
 // Initialize product card click handlers
@@ -2188,10 +2288,34 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     console.log('ZeroNux Store initialized successfully!');
+    // Check for product ID in URL for direct access
+    const urlParams = new URLSearchParams(window.location.search);
+    const directProductId = urlParams.get('id');
+    if (directProductId) {
+        // Small delay to ensure styles/scripts are ready, though not strictly necessary
+        setTimeout(() => {
+            showProductDetails(directProductId);
+        }, 500);
+    }
 });
 
-// Mobile Bottom Navigation
-// Mobile Bottom Navigation and Menu Logic handled by header.js
+// Share Product Function
+window.shareProduct = function (platform, productId, productName) {
+    const productUrl = window.location.origin + window.location.pathname + '?id=' + productId;
+
+    if (platform === 'whatsapp') {
+        const text = `شاهد هذا المنتج المميز: ${productName}\n${productUrl}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    } else if (platform === 'facebook') {
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}`, '_blank');
+    } else if (platform === 'copy') {
+        navigator.clipboard.writeText(productUrl).then(() => {
+            showNotification('تم نسخ الرابط! 📋');
+        }).catch(() => {
+            showNotification('فشل نسخ الرابط');
+        });
+    }
+};
 
 // Search functionality
 function initSearch() {
