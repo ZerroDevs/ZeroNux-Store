@@ -1,9 +1,6 @@
 // ============================================
 // FIREBASE CONFIGURATION
 // ============================================
-// ============================================
-// FIREBASE CONFIGURATION
-// ============================================
 // Config moved to Scripts/firebase-config.js
 
 // References (using global window objects from firebase-config.js)
@@ -15,7 +12,6 @@ const settingsRef = database.ref('settings');
 // ZERONUX STORE APPLICATION
 // ============================================
 
-// Currency conversion functionality
 // Currency conversion functionality
 window.EXCHANGE_RATE = 9; // Default rate, will be loaded from Firebase
 window.currentCurrency = localStorage.getItem('selectedCurrency') || 'USD';
@@ -29,6 +25,9 @@ let currentCurrency = window.currentCurrency;
 let CONTACT_NUMBER = '218916808225'; // Default
 let FACEBOOK_URL = '';
 let CONTACT_EMAIL = ''; // Will be loaded from Firebase
+
+// Announcement Rotation Global
+let announcementIntervalId = null;
 
 // Load settings (Exchange Rate & Contact Info)
 function loadSettings() {
@@ -108,11 +107,31 @@ function loadSettings() {
 
             // 7. Update Announcement Bar
             const announcementBar = document.getElementById('announcement-bar');
-            const announcementText = document.getElementById('announcement-text');
 
-            if (settings.announcementEnabled && settings.announcementText) {
-                announcementText.textContent = settings.announcementText;
-                announcementBar.style.display = 'block';
+            // Clear existing interval
+            if (announcementIntervalId) {
+                clearInterval(announcementIntervalId);
+                announcementIntervalId = null;
+            }
+
+            if (settings.announcementEnabled) {
+                let announcements = settings.announcements || [];
+
+                // Legacy support / Fallback
+                if (announcements.length === 0 && settings.announcementText) {
+                    announcements = [{
+                        text: settings.announcementText,
+                        backgroundColor: '#667eea',
+                        textColor: '#ffffff'
+                    }];
+                }
+
+                if (announcements.length > 0) {
+                    startAnnouncementRotation(announcements, settings.announcementInterval || 5);
+                    announcementBar.style.display = 'block';
+                } else {
+                    announcementBar.style.display = 'none';
+                }
             } else {
                 announcementBar.style.display = 'none';
             }
@@ -158,6 +177,48 @@ function loadSettings() {
             }
         }
     });
+}
+
+function startAnnouncementRotation(announcements, intervalSeconds) {
+    const announcementBar = document.getElementById('announcement-bar');
+    const content = announcementBar.querySelector('.announcement-content') || announcementBar;
+
+    let currentIndex = 0;
+
+    const showAnnouncement = (index) => {
+        const item = announcements[index];
+
+        // Build HMTL
+        let html = item.text;
+        if (item.link) {
+            html = `<a href="${item.link}" style="color: inherit; text-decoration: underline; text-underline-offset: 3px;">${item.text}</a>`;
+        }
+
+        // Apply styles with transitions
+        announcementBar.style.transition = 'background-color 0.5s ease';
+        announcementBar.style.backgroundColor = item.backgroundColor || '#667eea';
+        announcementBar.style.color = item.textColor || '#ffffff';
+
+        // Text transition (fade out -> change -> fade in)
+        content.style.transition = 'opacity 0.3s ease';
+        content.style.opacity = '0';
+
+        setTimeout(() => {
+            content.innerHTML = html;
+            content.style.opacity = '1';
+        }, 300);
+    };
+
+    // Show first one immediately
+    showAnnouncement(0);
+
+    // If more than one, start rotation
+    if (announcements.length > 1) {
+        announcementIntervalId = setInterval(() => {
+            currentIndex = (currentIndex + 1) % announcements.length;
+            showAnnouncement(currentIndex);
+        }, intervalSeconds * 1000);
+    }
 }
 
 

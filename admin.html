@@ -638,18 +638,95 @@
 
                             <hr style="border-color: rgba(255,255,255,0.1); margin: 2rem 0;">
 
-                            <h3>📢 شريط الإعلانات</h3>
+                            <hr style="border-color: rgba(255,255,255,0.1); margin: 2rem 0;">
+
+                            <h3>📢 مدير شريط الإعلانات</h3>
                             <div class="form-group">
                                 <label style="display: flex; align-items: center; gap: 10px;">
                                     <input type="checkbox" id="announcement-enabled" style="width: auto;">
                                     تفعيل شريط الإعلانات
                                 </label>
                             </div>
+
                             <div class="form-group">
-                                <label>نص الإعلان</label>
-                                <input type="text" id="announcement-text"
-                                    placeholder="🎉 عرض خاص: استخدم كود ZERO10 للحصول على خصم 10%!">
-                                <small>سيظهر في أعلى الصفحة بشكل متحرك</small>
+                                <label>مدة العرض (ثواني)</label>
+                                <input type="number" id="announcement-interval" min="2" max="60" value="5">
+                                <small>الوقت الذي سيظهر فيه كل إعلان قبل الانتقال للتالي</small>
+                            </div>
+
+                            <div class="announcements-manager"
+                                style="margin-top: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <h4 style="margin: 0;">الإعلانات النشطة</h4>
+                                    <button type="button" class="btn btn-sm btn-primary"
+                                        onclick="openAnnouncementModal()">
+                                        ➕ إضافة إعلان
+                                    </button>
+                                </div>
+
+                                <div id="announcements-list" class="announcements-list"
+                                    style="display: flex; flex-direction: column; gap: 10px;">
+                                    <!-- Announcements will be loaded here -->
+                                    <div style="text-align: center; color: rgba(255,255,255,0.5); padding: 10px;">
+                                        لا توجد إعلانات حالياً
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Announcement Modal (Hidden) -->
+                            <div id="announcement-modal" class="custom-modal" style="display: none;">
+                                <div class="modal-content" style="max-width: 500px;">
+                                    <div class="modal-header">
+                                        <h3>تعديل الإعلان</h3>
+                                    </div>
+                                    <div class="modal-body" style="text-align: right;">
+                                        <input type="hidden" id="edit-announcement-id">
+                                        <div class="form-group">
+                                            <label>نص الإعلان</label>
+                                            <input type="text" id="edit-announcement-text"
+                                                placeholder="اكتب نص الإعلان هنا..." required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>رابط (اختياري)</label>
+                                            <input type="url" id="edit-announcement-link" placeholder="https://...">
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label>لون الخلفية</label>
+                                                <div style="display: flex; align-items: center; gap: 10px;">
+                                                    <input type="color" id="edit-announcement-bg" value="#667eea"
+                                                        style="height: 40px; width: 60px; padding: 0; border: none;">
+                                                    <span id="bg-color-val"
+                                                        style="font-family: monospace; opacity: 0.7;">#667eea</span>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>لون النص</label>
+                                                <div style="display: flex; align-items: center; gap: 10px;">
+                                                    <input type="color" id="edit-announcement-color" value="#ffffff"
+                                                        style="height: 40px; width: 60px; padding: 0; border: none;">
+                                                    <span id="text-color-val"
+                                                        style="font-family: monospace; opacity: 0.7;">#ffffff</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group"
+                                            style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
+                                            <label>معاينة حيّة:</label>
+                                            <div id="announcement-preview"
+                                                style="padding: 10px; text-align: center; border-radius: 4px; transition: all 0.3s;">
+                                                نص الإعلان التجريبي
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-primary"
+                                            onclick="saveAnnouncement()">حفظ</button>
+                                        <button type="button" class="btn btn-secondary"
+                                            onclick="closeAnnouncementModal()">إلغاء</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

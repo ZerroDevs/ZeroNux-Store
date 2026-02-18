@@ -569,9 +569,24 @@ function loadSettings() {
             if (settings.announcementEnabled !== undefined) {
                 document.getElementById('announcement-enabled').checked = settings.announcementEnabled;
             }
-            if (settings.announcementText) {
-                document.getElementById('announcement-text').value = settings.announcementText;
+            if (settings.announcementInterval) {
+                document.getElementById('announcement-interval').value = settings.announcementInterval;
             }
+
+            // Load Active Announcements
+            if (settings.announcements) {
+                activeAnnouncements = settings.announcements || [];
+            } else if (settings.announcementText) {
+                // Migration: If old text exists but no new list, create one item
+                activeAnnouncements = [{
+                    text: settings.announcementText,
+                    backgroundColor: '#667eea',
+                    textColor: '#ffffff'
+                }];
+            } else {
+                activeAnnouncements = [];
+            }
+            renderAnnouncementsList();
 
             // Admin Emails
             loadAdminEmails(settings.adminEmails);
@@ -743,7 +758,8 @@ document.getElementById('settings-form').addEventListener('submit', (e) => {
     const storeCategories = document.getElementById('store-categories').value;
 
     const announcementEnabled = document.getElementById('announcement-enabled').checked;
-    const announcementText = document.getElementById('announcement-text').value;
+    const announcementInterval = parseInt(document.getElementById('announcement-interval').value) || 5;
+    // Announcements list is already in activeAnnouncements global var, we save it from there
 
     const maintenanceEnabled = document.getElementById('maintenance-enabled').checked;
     const maintenancePreset = document.getElementById('maintenance-preset').value;
@@ -779,7 +795,8 @@ document.getElementById('settings-form').addEventListener('submit', (e) => {
         heroImage: heroImage,
         storeCategories: storeCategories,
         announcementEnabled: announcementEnabled,
-        announcementText: announcementText,
+        announcementInterval: announcementInterval,
+        announcements: activeAnnouncements, // Save the array
         maintenanceEnabled: maintenanceEnabled,
         maintenancePreset: maintenancePreset,
         maintenanceCustomMessage: maintenanceCustomMessage,
@@ -787,7 +804,7 @@ document.getElementById('settings-form').addEventListener('submit', (e) => {
         lastUpdated: Date.now() // Keep lastUpdated
     };
 
-    settingsRef.update(settingsData) // Use update instead of set to avoid overwriting entire settings
+    settingsRef.update(settingsData)
         .then(() => {
             showNotification('تم حفظ الإعدادات بنجاح! 💾');
             if (window.adminLog) window.adminLog.settingsSaved();
@@ -797,6 +814,151 @@ document.getElementById('settings-form').addEventListener('submit', (e) => {
         .catch((error) => {
             showNotification('حدث خطأ: ' + error.message, 'error');
         });
+});
+
+// ============================================
+// ANNOUNCEMENT MANAGER LOGIC
+// ============================================
+let activeAnnouncements = [];
+
+function renderAnnouncementsList() {
+    const list = document.getElementById('announcements-list');
+    list.innerHTML = '';
+
+    if (!activeAnnouncements || activeAnnouncements.length === 0) {
+        list.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.5); padding: 10px;">لا توجد إعلانات حالياً</div>';
+        return;
+    }
+
+    activeAnnouncements.forEach((ann, index) => {
+        const item = document.createElement('div');
+        item.className = 'announcement-item';
+        item.style.cssText = `
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px;
+            border-right: 4px solid ${ann.backgroundColor || '#667eea'};
+        `;
+
+        item.innerHTML = `
+            <div style="flex: 1; margin-left: 10px;">
+                <div style="font-weight: bold; color: white;">${ann.text}</div>
+                ${ann.link ? `<div style="font-size: 0.8rem; color: rgba(255,255,255,0.5); text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 300px;">🔗 ${ann.link}</div>` : ''}
+            </div>
+            <div style="display: flex; gap: 5px;">
+                <button type="button" onclick="editAnnouncement(${index})" class="btn btn-sm btn-secondary" style="padding: 5px 10px;">✏️</button>
+                <button type="button" onclick="deleteAnnouncement(${index})" class="btn btn-sm btn-danger" style="padding: 5px 10px;">🗑️</button>
+            </div>
+        `;
+        list.appendChild(item);
+    });
+}
+
+window.openAnnouncementModal = function (editIndex = null) {
+    const modal = document.getElementById('announcement-modal');
+    const idInput = document.getElementById('edit-announcement-id');
+    const textInput = document.getElementById('edit-announcement-text');
+    const linkInput = document.getElementById('edit-announcement-link');
+    const bgInput = document.getElementById('edit-announcement-bg');
+    const colorInput = document.getElementById('edit-announcement-color');
+    const preview = document.getElementById('announcement-preview');
+
+    if (editIndex !== null && activeAnnouncements[editIndex]) {
+        // Edit Mode
+        const ann = activeAnnouncements[editIndex];
+        idInput.value = editIndex;
+        textInput.value = ann.text;
+        linkInput.value = ann.link || '';
+        bgInput.value = ann.backgroundColor || '#667eea';
+        colorInput.value = ann.textColor || '#ffffff';
+        document.querySelector('#announcement-modal h3').textContent = 'تعديل الإعلان';
+    } else {
+        // Add Mode
+        idInput.value = '';
+        textInput.value = '';
+        linkInput.value = '';
+        bgInput.value = '#667eea';
+        colorInput.value = '#ffffff';
+        document.querySelector('#announcement-modal h3').textContent = 'إضافة إعلان جديد';
+    }
+
+    // Update preset labels
+    document.getElementById('bg-color-val').textContent = bgInput.value;
+    document.getElementById('text-color-val').textContent = colorInput.value;
+
+    // Update preview
+    updateAnnouncementPreview();
+
+    modal.style.display = 'flex';
+};
+
+window.closeAnnouncementModal = function () {
+    document.getElementById('announcement-modal').style.display = 'none';
+};
+
+window.saveAnnouncement = function () {
+    const id = document.getElementById('edit-announcement-id').value;
+    const text = document.getElementById('edit-announcement-text').value.trim();
+    const link = document.getElementById('edit-announcement-link').value.trim();
+    const bg = document.getElementById('edit-announcement-bg').value;
+    const color = document.getElementById('edit-announcement-color').value;
+
+    if (!text) {
+        showNotification('الرجاء إدخال نص الإعلان', 'error');
+        return;
+    }
+
+    const announcement = {
+        text: text,
+        link: link,
+        backgroundColor: bg,
+        textColor: color
+    };
+
+    if (id !== '') {
+        // Edit existing
+        activeAnnouncements[parseInt(id)] = announcement;
+    } else {
+        // Add new
+        activeAnnouncements.push(announcement);
+    }
+
+    renderAnnouncementsList();
+    closeAnnouncementModal();
+};
+
+window.editAnnouncement = function (index) {
+    openAnnouncementModal(index);
+};
+
+window.deleteAnnouncement = function (index) {
+    showConfirmModal('حذف الإعلان', 'هل أنت متأكد من حذف هذا الإعلان؟', () => {
+        activeAnnouncements.splice(index, 1);
+        renderAnnouncementsList();
+    });
+};
+
+function updateAnnouncementPreview() {
+    const text = document.getElementById('edit-announcement-text').value || 'نص الإعلان التجريبي';
+    const bg = document.getElementById('edit-announcement-bg').value;
+    const color = document.getElementById('edit-announcement-color').value;
+
+    const preview = document.getElementById('announcement-preview');
+    preview.textContent = text;
+    preview.style.backgroundColor = bg;
+    preview.style.color = color;
+}
+
+// Add listeners for color/text changes in modal
+['edit-announcement-text', 'edit-announcement-bg', 'edit-announcement-color'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+        el.addEventListener('input', (e) => {
+            if (e.target.type === 'color') {
+                e.target.nextElementSibling.textContent = e.target.value;
+            }
+            updateAnnouncementPreview();
+        });
+    }
 });
 
 // Settings Tab Switcher
