@@ -78,18 +78,27 @@
                 overflow-y: auto;
                 overflow-x: hidden;
                 padding: 1rem 0;
-                position: sticky;
-                top: 88px; /* Offset for header */
-                height: calc(100vh - 88px);
+                position: fixed;
+                top: 58px;
+                right: 0;
+                height: calc(100vh - 58px);
                 scrollbar-width: thin;
                 scrollbar-color: rgba(255,255,255,0.1) transparent;
-                z-index: 99; /* Below header */
+                z-index: 99;
                 transition: width 0.3s cubic-bezier(0.4,0,0.2,1),
                             min-width 0.3s cubic-bezier(0.4,0,0.2,1),
                             transform 0.3s cubic-bezier(0.4,0,0.2,1);
             }
             .admin-sidebar::-webkit-scrollbar { width: 4px; }
             .admin-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+            /* Push main content away from sidebar */
+            .admin-main {
+                margin-right: 250px;
+            }
+            .admin-sidebar.collapsed ~ .admin-main {
+                margin-right: 62px;
+            }
 
             /* ---- Collapsed state ---- */
             .admin-sidebar.collapsed {
@@ -345,6 +354,7 @@
                 }
                 .admin-main {
                     padding: 1rem;
+                    margin-right: 0 !important;
                 }
             }
             /* ---- Header Enhancement ---- */
