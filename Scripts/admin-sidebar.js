@@ -407,14 +407,6 @@
                 border-color: rgba(255,255,255,0.2);
                 transform: translateY(-1px);
             }
-            .btn-header-logout {
-                background: rgba(255,59,48,0.1);
-                border-color: rgba(255,59,48,0.2);
-                color: #ff6b6b;
-            }
-            .btn-header-logout:hover {
-                background: rgba(255,59,48,0.2);
-            }
             
             /* View Store Selector */
             .view-store-group {
@@ -468,6 +460,168 @@
                 color: white;
             }
 
+            /* ---- Admin User Dropdown ---- */
+            .admin-user-menu {
+                position: relative;
+            }
+            .admin-user-trigger {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 5px 12px 5px 8px;
+                border-radius: 12px;
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.1);
+                cursor: pointer;
+                transition: all 0.25s ease;
+                color: white;
+            }
+            .admin-user-trigger:hover {
+                background: rgba(255,255,255,0.1);
+                border-color: rgba(255,255,255,0.2);
+                transform: translateY(-1px);
+            }
+            .admin-user-trigger.open {
+                background: rgba(102,126,234,0.15);
+                border-color: rgba(102,126,234,0.35);
+            }
+            .admin-user-avatar {
+                width: 34px;
+                height: 34px;
+                border-radius: 10px;
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.95rem;
+                font-weight: 700;
+                color: white;
+                flex-shrink: 0;
+                letter-spacing: -0.5px;
+            }
+            .admin-user-info {
+                display: flex;
+                flex-direction: column;
+                text-align: right;
+                line-height: 1.2;
+            }
+            .admin-user-name {
+                font-size: 0.82rem;
+                font-weight: 600;
+                color: white;
+                white-space: nowrap;
+                max-width: 120px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .admin-user-role {
+                font-size: 0.65rem;
+                color: rgba(255,255,255,0.45);
+                font-weight: 500;
+            }
+            .admin-user-chevron {
+                font-size: 0.6rem;
+                color: rgba(255,255,255,0.4);
+                transition: transform 0.25s ease;
+                margin-right: 2px;
+            }
+            .admin-user-trigger.open .admin-user-chevron {
+                transform: rotate(180deg);
+            }
+
+            /* Dropdown Panel */
+            .admin-user-dropdown {
+                position: absolute;
+                top: calc(100% + 8px);
+                left: 0;
+                min-width: 220px;
+                background: rgba(20, 18, 42, 0.97);
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 14px;
+                padding: 8px;
+                opacity: 0;
+                visibility: hidden;
+                transform: translateY(-8px) scale(0.97);
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                z-index: 2000;
+                box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05) inset;
+            }
+            .admin-user-dropdown.open {
+                opacity: 1;
+                visibility: visible;
+                transform: translateY(0) scale(1);
+            }
+            .admin-dropdown-header {
+                padding: 12px 14px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+                margin-bottom: 6px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .admin-dropdown-header .admin-user-avatar {
+                width: 40px;
+                height: 40px;
+                font-size: 1.05rem;
+            }
+            .admin-dropdown-header-info {
+                display: flex;
+                flex-direction: column;
+            }
+            .admin-dropdown-header-name {
+                font-size: 0.88rem;
+                font-weight: 600;
+                color: white;
+            }
+            .admin-dropdown-header-email {
+                font-size: 0.7rem;
+                color: rgba(255,255,255,0.4);
+                max-width: 170px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .admin-dropdown-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 14px;
+                border-radius: 10px;
+                color: rgba(255,255,255,0.75);
+                font-size: 0.84rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.15s ease;
+                border: none;
+                background: none;
+                width: 100%;
+                text-align: right;
+                text-decoration: none;
+                font-family: inherit;
+            }
+            .admin-dropdown-item:hover {
+                background: rgba(255,255,255,0.07);
+                color: white;
+            }
+            .admin-dropdown-item .dropdown-icon {
+                font-size: 1rem;
+                min-width: 22px;
+                text-align: center;
+            }
+            .admin-dropdown-divider {
+                height: 1px;
+                background: rgba(255,255,255,0.07);
+                margin: 6px 8px;
+            }
+            .admin-dropdown-item.logout-item {
+                color: #ff6b6b;
+            }
+            .admin-dropdown-item.logout-item:hover {
+                background: rgba(255,59,48,0.12);
+                color: #ff4444;
+            }
+
             /* Mobile Responsiveness */
             @media (max-width: 768px) {
                 .header-content {
@@ -492,13 +646,24 @@
                     display: none;
                 }
                 
-                .view-store-btn, .btn-header-logout {
+                .view-store-btn {
                     padding: 8px;
                 }
                 
                 .view-store-select {
                     max-width: 120px;
                     font-size: 0.75rem;
+                }
+
+                .admin-user-info {
+                    display: none;
+                }
+                .admin-user-trigger {
+                    padding: 5px;
+                }
+                .admin-user-dropdown {
+                    left: auto;
+                    right: 0;
                 }
             }
         `;
@@ -531,9 +696,42 @@
                         </select>
                     </div>
                     
-                    <button id="logout-btn-enhanced" class="btn-header-action btn-header-logout">
-                        <span>🚪</span> <span class="btn-text">تسجيل خروج</span>
-                    </button>
+                    <div class="admin-user-menu" id="admin-user-menu">
+                        <div class="admin-user-trigger" id="admin-user-trigger">
+                            <div class="admin-user-avatar" id="admin-user-avatar">A</div>
+                            <div class="admin-user-info">
+                                <span class="admin-user-name" id="admin-user-name">المدير</span>
+                                <span class="admin-user-role">مدير النظام</span>
+                            </div>
+                            <span class="admin-user-chevron">▼</span>
+                        </div>
+                        <div class="admin-user-dropdown" id="admin-user-dropdown">
+                            <div class="admin-dropdown-header">
+                                <div class="admin-user-avatar" id="admin-dropdown-avatar">A</div>
+                                <div class="admin-dropdown-header-info">
+                                    <span class="admin-dropdown-header-name" id="admin-dropdown-name">المدير</span>
+                                    <span class="admin-dropdown-header-email" id="admin-dropdown-email">admin@zeronux.store</span>
+                                </div>
+                            </div>
+                            <a href="profile.html" class="admin-dropdown-item">
+                                <span class="dropdown-icon">👤</span>
+                                <span>الملف الشخصي</span>
+                            </a>
+                            <button class="admin-dropdown-item" onclick="if(typeof switchTab==='function'){switchTab('settings');document.getElementById('admin-user-dropdown').classList.remove('open');document.getElementById('admin-user-trigger').classList.remove('open');}">
+                                <span class="dropdown-icon">⚙️</span>
+                                <span>الإعدادات</span>
+                            </button>
+                            <a href="index.html" class="admin-dropdown-item" target="_blank">
+                                <span class="dropdown-icon">🏪</span>
+                                <span>عرض المتجر</span>
+                            </a>
+                            <div class="admin-dropdown-divider"></div>
+                            <button class="admin-dropdown-item logout-item" id="logout-btn-enhanced">
+                                <span class="dropdown-icon">🚪</span>
+                                <span>تسجيل الخروج</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
@@ -566,21 +764,79 @@
             }
         }
 
+        // ---- User Dropdown Logic ----
+        const userTrigger = document.getElementById('admin-user-trigger');
+        const userDropdown = document.getElementById('admin-user-dropdown');
+
+        if (userTrigger && userDropdown) {
+            userTrigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isOpen = userDropdown.classList.toggle('open');
+                userTrigger.classList.toggle('open', isOpen);
+            });
+
+            // Close on outside click
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('#admin-user-menu')) {
+                    userDropdown.classList.remove('open');
+                    userTrigger.classList.remove('open');
+                }
+            });
+        }
+
+        // Populate user info from Firebase Auth
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+            const currentUser = firebase.auth().currentUser;
+            if (currentUser) {
+                populateUserMenu(currentUser);
+            }
+            // Also listen for auth state in case it loads later
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) populateUserMenu(user);
+            });
+        }
+
+        function populateUserMenu(user) {
+            const displayName = user.displayName || user.email?.split('@')[0] || 'المدير';
+            const email = user.email || '';
+            const initials = getInitials(displayName);
+
+            // Update trigger
+            const avatarEl = document.getElementById('admin-user-avatar');
+            const nameEl = document.getElementById('admin-user-name');
+            if (avatarEl) avatarEl.textContent = initials;
+            if (nameEl) nameEl.textContent = displayName;
+
+            // Update dropdown header
+            const dropdownAvatar = document.getElementById('admin-dropdown-avatar');
+            const dropdownName = document.getElementById('admin-dropdown-name');
+            const dropdownEmail = document.getElementById('admin-dropdown-email');
+            if (dropdownAvatar) dropdownAvatar.textContent = initials;
+            if (dropdownName) dropdownName.textContent = displayName;
+            if (dropdownEmail) dropdownEmail.textContent = email;
+        }
+
+        function getInitials(name) {
+            if (!name) return 'A';
+            const parts = name.trim().split(/\s+/);
+            if (parts.length >= 2) {
+                return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+            }
+            return parts[0].substring(0, 2).toUpperCase();
+        }
+
         // Re-attach logout listener
         const logoutBtn = document.getElementById('logout-btn-enhanced');
         if (logoutBtn && window.logout) {
             logoutBtn.addEventListener('click', window.logout);
         } else if (logoutBtn) {
-            // Fallback if window.logout isn't exposed yet (admin.js needs to expose it)
             logoutBtn.addEventListener('click', () => {
-                const oldBtn = document.createElement('button');
-                oldBtn.id = 'logout-btn'; // Try to find original handler via ID delegation if any
-                // Or just:
                 firebase.auth().signOut().then(() => {
                     window.location.reload();
                 });
             });
         }
+
         // Dispatch event for currency switcher
         document.dispatchEvent(new CustomEvent('admin-header-ready'));
     }
