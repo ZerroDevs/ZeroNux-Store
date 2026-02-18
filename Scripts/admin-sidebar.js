@@ -408,56 +408,130 @@
                 transform: translateY(-1px);
             }
             
-            /* View Store Selector */
+            /* View Store Group */
             .view-store-group {
+                position: relative;
                 display: flex;
                 align-items: center;
-                gap: 5px;
-                background: rgba(255,255,255,0.05);
-                border: 1px solid rgba(255,255,255,0.1);
-                border-radius: 10px;
-                padding: 2px;
             }
-            
-            .view-store-btn {
-                background: transparent;
-                border: none;
-                color: white;
-                padding: 6px 12px;
-                border-radius: 8px;
-                font-size: 0.85rem;
+            .view-store-trigger {
                 display: flex;
                 align-items: center;
                 gap: 8px;
+                padding: 6px 12px;
+                border-radius: 12px;
+                background: rgba(255,255,255,0.04);
+                border: 1px solid rgba(255,255,255,0.08);
+                cursor: pointer;
+                transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                color: rgba(255,255,255,0.8);
                 text-decoration: none;
-                cursor: pointer;
-                transition: all 0.2s;
+                font-size: 0.82rem;
+                font-weight: 500;
+                white-space: nowrap;
+                line-height: 1;
             }
-            
-            .view-store-btn:hover {
-                background: rgba(255,255,255,0.1);
+            .view-store-trigger:hover {
+                background: rgba(255,255,255,0.08);
+                border-color: rgba(255,255,255,0.15);
+                color: white;
             }
-            
-            .view-store-select {
-                background: transparent;
-                border: none;
+            .view-store-trigger.open {
+                background: rgba(102,126,234,0.12);
+                border-color: rgba(102,126,234,0.3);
+            }
+            .view-store-icon {
+                font-size: 1rem;
+                line-height: 1;
+            }
+            .view-store-label {
+                display: flex;
+                flex-direction: column;
+                gap: 1px;
+            }
+            .view-store-title {
+                font-size: 0.78rem;
+                font-weight: 600;
+                color: white;
+            }
+            .view-store-target {
+                font-size: 0.65rem;
+                color: rgba(255,255,255,0.4);
+                font-weight: 500;
+            }
+            .view-store-chevron {
+                font-size: 0.55rem;
+                color: rgba(255,255,255,0.35);
+                transition: transform 0.25s ease;
+                margin-right: 2px;
+            }
+            .view-store-trigger.open .view-store-chevron {
+                transform: rotate(180deg);
+            }
+
+            /* View Store Dropdown */
+            .view-store-dropdown {
+                position: absolute;
+                top: calc(100% + 8px);
+                right: 0;
+                left: auto;
+                min-width: 200px;
+                background: rgba(20, 18, 42, 0.97);
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 14px;
+                padding: 6px;
+                opacity: 0;
+                visibility: hidden;
+                transform: translateY(-8px) scale(0.97);
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                z-index: 2000;
+                box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05) inset;
+            }
+            .view-store-dropdown.open {
+                opacity: 1;
+                visibility: visible;
+                transform: translateY(0) scale(1);
+            }
+            .view-store-option {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 14px;
+                border-radius: 10px;
                 color: rgba(255,255,255,0.7);
-                font-size: 0.8rem;
-                padding: 6px 4px;
+                font-size: 0.82rem;
+                font-weight: 500;
                 cursor: pointer;
-                outline: none;
-                border-radius: 6px;
-                transition: all 0.2s;
+                transition: all 0.15s ease;
+                border: none;
+                background: none;
+                width: 100%;
+                text-align: right;
+                font-family: inherit;
             }
-            
-            .view-store-select:hover {
-                background: rgba(255,255,255,0.05);
+            .view-store-option:hover {
+                background: rgba(255,255,255,0.07);
                 color: white;
             }
-            
-            .view-store-select option {
-                background: #1a1a2e;
+            .view-store-option.active {
+                background: rgba(102,126,234,0.12);
                 color: white;
+            }
+            .view-store-option .opt-icon {
+                font-size: 1rem;
+                min-width: 22px;
+                text-align: center;
+            }
+            .view-store-option .opt-check {
+                margin-right: auto;
+                font-size: 0.75rem;
+                color: #667eea;
+                opacity: 0;
+                transition: opacity 0.15s;
+            }
+            .view-store-option.active .opt-check {
+                opacity: 1;
             }
 
             /* ---- Admin User Dropdown ---- */
@@ -533,7 +607,8 @@
             .admin-user-dropdown {
                 position: absolute;
                 top: calc(100% + 8px);
-                left: 0;
+                right: 0;
+                left: auto;
                 min-width: 220px;
                 background: rgba(20, 18, 42, 0.97);
                 backdrop-filter: blur(20px);
@@ -622,48 +697,141 @@
                 color: #ff4444;
             }
 
+            /* ---- Global overflow guard ---- */
+            html, body {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+            }
+            .dashboard-container {
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            .admin-layout-wrapper {
+                overflow-x: hidden;
+            }
+
             /* Mobile Responsiveness */
             @media (max-width: 768px) {
+                .admin-header {
+                    padding: 0.6rem 0.75rem !important;
+                }
+
                 .header-content {
-                    flex-direction: column;
-                    gap: 10px;
-                    padding: 0.5rem;
+                    flex-direction: row;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                    padding: 0;
+                    align-items: center;
+                    justify-content: space-between;
+                    max-width: 100%;
                 }
                 
                 .header-title-area {
-                    align-items: center;
-                    text-align: center;
-                    width: 100%;
+                    flex: 1;
+                    min-width: 0;
+                    text-align: right;
+                }
+
+                .header-breadcrumbs {
+                    font-size: 0.65rem;
+                    margin-bottom: 2px;
+                }
+                
+                .header-page-title {
+                    font-size: 1rem !important;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
                 }
                 
                 .header-actions {
-                    width: 100%;
-                    justify-content: center;
-                    gap: 8px;
+                    flex-shrink: 0;
+                    gap: 6px;
+                    flex-wrap: nowrap;
                 }
                 
                 .btn-text {
                     display: none;
                 }
                 
-                .view-store-btn {
-                    padding: 8px;
+                /* View Store — icon only on mobile */
+                .view-store-label {
+                    display: none;
                 }
-                
-                .view-store-select {
-                    max-width: 120px;
-                    font-size: 0.75rem;
+                .view-store-chevron {
+                    display: none;
+                }
+                .view-store-trigger {
+                    padding: 6px 8px;
+                    border-radius: 10px;
+                }
+                .view-store-dropdown {
+                    position: fixed;
+                    top: 60px;
+                    right: 0.5rem;
+                    left: 0.5rem;
+                    max-width: calc(100vw - 1rem);
+                    min-width: unset;
+                    width: calc(100vw - 1rem);
                 }
 
+                /* Admin user — avatar only on mobile */
                 .admin-user-info {
                     display: none;
                 }
+                .admin-user-chevron {
+                    display: none;
+                }
                 .admin-user-trigger {
-                    padding: 5px;
+                    padding: 4px;
+                    border-radius: 10px;
                 }
                 .admin-user-dropdown {
-                    left: auto;
-                    right: 0;
+                    position: fixed;
+                    top: auto;
+                    bottom: auto;
+                    right: 0.5rem;
+                    left: 0.5rem;
+                    max-width: calc(100vw - 1rem);
+                    min-width: unset;
+                    width: calc(100vw - 1rem);
+                    top: 60px;
+                }
+
+                /* Currency switcher */
+                .currency-btn-group {
+                    transform: scale(0.9);
+                    transform-origin: center center;
+                }
+
+                /* Layout wrapper */
+                .admin-layout-wrapper {
+                    overflow: hidden;
+                    max-width: 100vw;
+                }
+
+                .admin-main {
+                    padding: 0.75rem !important;
+                    max-width: 100vw;
+                    overflow-x: hidden;
+                }
+            }
+
+            /* Extra small screens */
+            @media (max-width: 400px) {
+                .header-page-title {
+                    font-size: 0.9rem !important;
+                }
+                .header-breadcrumbs {
+                    display: none;
+                }
+                .view-store-trigger {
+                    padding: 5px 7px;
+                }
+                .admin-user-avatar {
+                    width: 30px;
+                    height: 30px;
+                    font-size: 0.8rem;
                 }
             }
         `;
@@ -686,14 +854,27 @@
                     <h1 class="header-page-title" id="header-page-title">نظرة عامة</h1>
                 </div>
                 <div class="header-actions">
-                    <div class="view-store-group">
-                        <a href="index.html" class="view-store-btn" id="view-store-btn" target="_blank">
-                            <span>🌐</span> <span class="btn-text">عرض المتجر</span>
-                        </a>
-                        <select id="view-store-select" class="view-store-select" title="اختر وجهة العرض">
-                            <option value="local">المحلي (Index)</option>
-                            <option value="live">المباشر (ZeroNux.store)</option>
-                        </select>
+                    <div class="view-store-group" id="view-store-group">
+                        <div class="view-store-trigger" id="view-store-trigger">
+                            <span class="view-store-icon">🌐</span>
+                            <div class="view-store-label">
+                                <span class="view-store-title">عرض المتجر</span>
+                                <span class="view-store-target" id="view-store-target-label">المحلي</span>
+                            </div>
+                            <span class="view-store-chevron">▼</span>
+                        </div>
+                        <div class="view-store-dropdown" id="view-store-dropdown">
+                            <button class="view-store-option active" data-store-target="local">
+                                <span class="opt-icon">💻</span>
+                                <span>المحلي (Index)</span>
+                                <span class="opt-check">✓</span>
+                            </button>
+                            <button class="view-store-option" data-store-target="live">
+                                <span class="opt-icon">🌍</span>
+                                <span>المباشر (ZeroNux.store)</span>
+                                <span class="opt-check">✓</span>
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="admin-user-menu" id="admin-user-menu">
@@ -736,30 +917,51 @@
             </div>
         `;
 
-        // Logic for View Store Selector
-        const viewStoreBtn = document.getElementById('view-store-btn');
-        const viewStoreSelect = document.getElementById('view-store-select');
+        // ---- View Store Custom Dropdown Logic ----
+        const storeTrigger = document.getElementById('view-store-trigger');
+        const storeDropdown = document.getElementById('view-store-dropdown');
+        const storeTargetLabel = document.getElementById('view-store-target-label');
 
-        if (viewStoreBtn && viewStoreSelect) {
+        if (storeTrigger && storeDropdown) {
             // Load saved preference
             const savedTarget = localStorage.getItem('admin_view_store_target') || 'local';
-            viewStoreSelect.value = savedTarget;
+            setActiveStoreTarget(savedTarget);
 
-            // Set initial href
-            updateViewStoreLink(savedTarget);
-
-            // Listen for changes
-            viewStoreSelect.addEventListener('change', (e) => {
-                const target = e.target.value;
-                localStorage.setItem('admin_view_store_target', target);
-                updateViewStoreLink(target);
+            // Toggle dropdown
+            storeTrigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isOpen = storeDropdown.classList.toggle('open');
+                storeTrigger.classList.toggle('open', isOpen);
             });
 
-            function updateViewStoreLink(target) {
-                if (target === 'live') {
-                    viewStoreBtn.href = 'https://zeronux.store';
-                } else {
-                    viewStoreBtn.href = 'index.html';
+            // Close on outside click
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('#view-store-group')) {
+                    storeDropdown.classList.remove('open');
+                    storeTrigger.classList.remove('open');
+                }
+            });
+
+            // Option clicks
+            storeDropdown.querySelectorAll('.view-store-option').forEach(opt => {
+                opt.addEventListener('click', () => {
+                    const target = opt.dataset.storeTarget;
+                    setActiveStoreTarget(target);
+                    localStorage.setItem('admin_view_store_target', target);
+                    storeDropdown.classList.remove('open');
+                    storeTrigger.classList.remove('open');
+                    // Open in new tab
+                    const url = target === 'live' ? 'https://zeronux.store' : 'index.html';
+                    window.open(url, '_blank');
+                });
+            });
+
+            function setActiveStoreTarget(target) {
+                storeDropdown.querySelectorAll('.view-store-option').forEach(o => {
+                    o.classList.toggle('active', o.dataset.storeTarget === target);
+                });
+                if (storeTargetLabel) {
+                    storeTargetLabel.textContent = target === 'live' ? 'المباشر' : 'المحلي';
                 }
             }
         }

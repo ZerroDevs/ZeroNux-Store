@@ -13,37 +13,54 @@
     style.textContent = `
         .currency-switcher {
             display: flex;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 4px;
-            margin-right: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            padding: 3px;
+            margin-right: 0;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            gap: 2px;
         }
         .currency-btn {
             background: transparent;
             border: none;
-            color: rgba(255, 255, 255, 0.6);
-            padding: 6px 12px;
-            border-radius: 6px;
+            color: rgba(255, 255, 255, 0.45);
+            padding: 6px 14px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             display: flex;
             align-items: center;
-            gap: 6px;
-            transition: all 0.2s;
+            gap: 5px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             font-family: inherit;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            line-height: 1;
         }
         .currency-btn:hover {
-            color: white;
-            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.06);
         }
         .currency-btn.active {
-            background: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.8));
             color: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+            font-weight: 600;
         }
         .currency-code {
-            font-weight: 600;
+            font-weight: inherit;
+        }
+        @media (max-width: 768px) {
+            .currency-switcher {
+                padding: 2px;
+            }
+            .currency-btn {
+                padding: 5px 10px;
+                font-size: 0.75rem;
+            }
+            .currency-code {
+                display: none;
+            }
         }
     `;
     document.head.appendChild(style);
