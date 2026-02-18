@@ -1061,6 +1061,7 @@ function createProductCard(id, product) {
         <p class="description">${product.description.substring(0, 100)}${product.description.length > 100 ? '...' : ''}</p>
         <div class="product-actions">
             <button class="btn btn-copy" onclick="copyProductLink('${id}')" title="نسخ الرابط">🔗</button>
+            <button class="btn btn-secondary" onclick="showProductQR('${id}', '${product.name.replace(/'/g, "\\'")}')" title="عرض QR Code" style="padding: 0.5rem 1rem;">📱</button>
             ${visibilityBtn}
             <button class="btn btn-edit" onclick="editProduct('${id}')">تعديل</button>
             <button class="btn btn-delete" onclick="deleteProduct('${id}')">حذف</button>
@@ -1470,6 +1471,65 @@ window.showNotification = function (message, type = 'success') {
             toast.remove();
         }, 300);
     }, 3000);
+};
+
+// Copy Product Link
+function copyProductLink(id) {
+    const link = `${window.location.origin}/index.html?product=${id}`;
+    navigator.clipboard.writeText(link).then(() => {
+        showNotification('تم نسخ الرابط! 🔗');
+    });
+}
+
+// Show Product QR Code
+function showProductQR(id, name) {
+    const link = `${window.location.origin}/index.html?product=${id}`;
+
+    // Create Modal Content
+    const content = `
+        <div style="text-align: center; padding: 1rem;">
+            <h3 style="margin-bottom: 1rem; color: #667eea;">${name}</h3>
+            <div id="qrcode-container" style="background: white; padding: 20px; border-radius: 8px; display: inline-block; margin-bottom: 1rem;"></div>
+            <p style="font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-bottom: 1.5rem; word-break: break-all;">${link}</p>
+            
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button onclick="downloadQR('${name}')" class="btn btn-primary">💾 تحميل صورة QR</button>
+                <button onclick="window.print()" class="btn btn-secondary">🖨️ طباعة</button>
+            </div>
+        </div>
+    `;
+
+    showCustomModal(content);
+
+    // Generate QR (Wait for modal to render)
+    setTimeout(() => {
+        const container = document.getElementById('qrcode-container');
+        if (container) {
+            container.innerHTML = ''; // Clear previous
+            new QRCode(container, {
+                text: link,
+                width: 200,
+                height: 200,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+    }, 100);
+}
+
+// Download QR Image
+window.downloadQR = function (name) {
+    const container = document.getElementById('qrcode-container');
+    const img = container.querySelector('img');
+    if (img) {
+        const link = document.createElement('a');
+        link.href = img.src;
+        link.download = `${name}-QR.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 };
 
 // Copy Product Link

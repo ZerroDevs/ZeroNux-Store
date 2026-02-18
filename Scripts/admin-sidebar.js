@@ -887,6 +887,8 @@
                         </div>
                     </div>
                     
+                    <button id="admin-search-trigger" class="admin-header-icon-btn" title="بحث شامل (Ctrl+K)" onclick="if (window.openAdminSearch) window.openAdminSearch();">🔍</button>
+                    
                     <div class="admin-user-menu" id="admin-user-menu">
                         <div class="admin-user-trigger" id="admin-user-trigger">
                             <div class="admin-user-avatar" id="admin-user-avatar">A</div>

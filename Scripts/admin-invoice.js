@@ -429,6 +429,13 @@
             </div>
         </div>
 
+
+        <!-- QR Code -->
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`${window.location.origin}/track-order.html?id=${order.orderId || orderId}`)}" alt="QR Code" style="width: 100px; height: 100px; padding: 5px; border: 1px solid #eee; border-radius: 8px;">
+            <div style="font-size: 0.75rem; color: #888; margin-top: 5px;">امسح الكود لتتبع طلبك</div>
+        </div>
+
         <!-- Footer -->
         <div class="invoice-footer">
             <div class="footer-thanks">شكراً لتسوقك معنا! 💜</div>
