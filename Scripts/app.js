@@ -873,16 +873,9 @@ function closeModal(overlay) {
 }
 
 // Newsletter form
+// Newsletter logic moved to Scripts/newsletter.js
 function initNewsletterForm() {
-    const form = document.querySelector('.newsletter-form');
-
-    if (form) {
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            showNotification('شكراً لاشتراكك في النشرة البريدية! 🎉');
-            form.reset();
-        });
-    }
+    // Disabled in favor of Scripts/newsletter.js
 }
 
 // Smooth scrolling for navigation links

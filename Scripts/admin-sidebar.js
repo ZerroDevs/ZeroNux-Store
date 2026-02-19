@@ -38,7 +38,8 @@
             items: [
                 { tab: 'support', label: 'الدعم الفني', icon: '🎧' },
                 { tab: 'activity', label: 'سجل النشاط', icon: '📜' },
-                { tab: 'seo', label: 'SEO', icon: '🌐' }
+                { tab: 'seo', label: 'SEO', icon: '🌐' },
+                { tab: 'newsletter', label: 'النشرة البريدية', icon: '📧' }
             ]
         },
         {
