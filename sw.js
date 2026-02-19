@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zeronux-store-v1';
+const CACHE_NAME = 'zeronux-store-v2';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
@@ -74,11 +74,22 @@ self.addEventListener('fetch', (event) => {
                 if (cachedResponse) {
                     return cachedResponse;
                 }
-                return fetch(event.request).then((response) => {
-                    const clonedResponse = response.clone();
-                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clonedResponse));
-                    return response;
-                });
+                return fetch(event.request)
+                    .then((response) => {
+                        // Check for valid response before caching
+                        if (!response || response.status !== 200 || response.type !== 'basic') {
+                            return response;
+                        }
+                        const clonedResponse = response.clone();
+                        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clonedResponse));
+                        return response;
+                    })
+                    .catch((err) => {
+                        // Prevent "Uncaught (in promise) TypeError: Failed to fetch"
+                        // Silently fail or return 404/Offline placeholder
+                        console.warn('SW: Fetch failed for ' + event.request.url);
+                        return new Response('', { status: 404, statusText: 'Not Found' });
+                    });
             })
         );
         return;
