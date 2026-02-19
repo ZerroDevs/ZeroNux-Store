@@ -1111,7 +1111,7 @@ function showProductDetails(productId) {
     productsRef.child(productId).once('value', (snapshot) => {
         const product = snapshot.val();
         if (!product) {
-            alert('المنتج غير موجود');
+            showNotification('المنتج غير موجود او جاري البحث عنه', 'error');
             return;
         }
 
