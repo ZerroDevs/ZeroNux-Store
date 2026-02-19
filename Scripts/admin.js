@@ -536,6 +536,410 @@ document.getElementById('save-effect-settings').addEventListener('click', functi
         });
 });
 
+// ============================================
+// GROQ API KEY VISIBILITY TOGGLE
+// ============================================
+window.toggleGroqKeyVisibility = function () {
+    const input = document.getElementById('groq-api-key');
+    const btn = document.getElementById('toggle-groq-key');
+    if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '👁️';
+        btn.style.background = 'rgba(100, 255, 218, 0.15)';
+        btn.style.borderColor = 'rgba(100, 255, 218, 0.4)';
+    } else {
+        input.type = 'password';
+        btn.textContent = '👁️\u200d🗨️';
+        btn.style.background = 'rgba(255,255,255,0.1)';
+        btn.style.borderColor = 'rgba(255,255,255,0.2)';
+    }
+};
+
+// System prompts cache (per model)
+let aiSystemPrompts = {};
+const AI_DEFAULT_PROMPT = 'أنت مساعد ذكاء اصطناعي لمتجر إلكتروني. أجب باللغة العربية بشكل مختصر ومفيد.';
+
+// Chat history for the mini chat
+let aiChatHistory = [];
+
+// Model selector change handler — also loads per-model system prompt
+document.getElementById('groq-model-select').addEventListener('change', function () {
+    const modelId = this.value;
+    const models = window.AdminAI ? window.AdminAI.MODELS : null;
+    const info = models ? models[modelId] : null;
+
+    if (info) {
+        document.getElementById('model-info-name').textContent = info.name;
+        document.getElementById('model-info-params').textContent = info.params;
+        document.getElementById('model-info-ctx').textContent = (info.context >= 131072 ? '128K' : Math.round(info.context / 1024) + 'K') + ' ctx';
+        document.getElementById('model-info-desc').textContent = info.description;
+    }
+
+    // Load the system prompt for this model
+    const key = modelId.replace(/[\/\.]/g, '_');
+    const stored = aiSystemPrompts[key];
+    document.getElementById('ai-system-prompt').value = stored || AI_DEFAULT_PROMPT;
+    document.getElementById('system-prompt-status').textContent = stored ? '✅ محفوظ' : '📝 افتراضي';
+});
+
+// Save system prompt for the current model
+window.saveSystemPrompt = function () {
+    const modelId = document.getElementById('groq-model-select').value;
+    const key = modelId.replace(/[\/\.]/g, '_');
+    const prompt = document.getElementById('ai-system-prompt').value.trim();
+
+    if (!prompt) {
+        showNotification('أدخل موجه النظام أولاً', 'error');
+        return;
+    }
+
+    aiSystemPrompts[key] = prompt;
+
+    settingsRef.update({ aiSystemPrompts: aiSystemPrompts })
+        .then(() => {
+            document.getElementById('system-prompt-status').textContent = '✅ تم الحفظ!';
+            showNotification('💾 تم حفظ موجه النظام لـ ' + modelId);
+        })
+        .catch(err => showNotification('خطأ: ' + err.message, 'error'));
+};
+
+// Reset system prompt to default
+window.resetSystemPrompt = function () {
+    const modelId = document.getElementById('groq-model-select').value;
+    const key = modelId.replace(/[\/\.]/g, '_');
+
+    document.getElementById('ai-system-prompt').value = AI_DEFAULT_PROMPT;
+    delete aiSystemPrompts[key];
+
+    settingsRef.update({ aiSystemPrompts: aiSystemPrompts })
+        .then(() => {
+            document.getElementById('system-prompt-status').textContent = '📝 افتراضي';
+            showNotification('🔄 تم استعادة الموجه الافتراضي');
+        })
+        .catch(err => showNotification('خطأ: ' + err.message, 'error'));
+};
+
+// System Prompt Presets
+const PROMPT_PRESETS = {
+    product: '🛍️ أنت كاتب محتوى تسويقي محترف لمتجر إلكتروني يبيع منتجات رقمية (برامج، ألعاب، اشتراكات). مهمتك كتابة أوصاف منتجات جذابة واحترافية باللغة العربية. اجعل الوصف تسويقياً ومقنعاً ومختصراً بدون حشو. استخدم لغة تشجع على الشراء. لا تضف علامات اقتباس أو عناوين — أعد النص الخام فقط.',
+    announcement: '📢 أنت كاتب إعلانات محترف لمتجر إلكتروني. مهمتك كتابة نصوص إعلانية قصيرة وجذابة لشريط الإعلانات. يجب أن تكون النصوص مختصرة (سطر واحد فقط)، مع إيموجي مناسبة، ولغة تحفيزية تشجع على التفاعل والشراء. أعد نص الإعلان فقط بدون أي شرح.',
+    support: '🎧 أنت موظف دعم عملاء ودود ومحترف لمتجر إلكتروني يبيع منتجات رقمية. ساعد العملاء بأسلوب مهذب وصبور. قدم حلولاً واضحة ومختصرة. إذا لم تعرف الإجابة، وجّه العميل للتواصل مع الإدارة. أجب دائماً باللغة العربية. كن متعاطفاً مع مشاكل العملاء.',
+    seo: '🔍 أنت خبير SEO محترف. مهمتك كتابة عناوين ميتا (meta titles) وأوصاف ميتا (meta descriptions) وكلمات مفتاحية محسّنة لمحركات البحث باللغة العربية. اجعل العناوين جذابة وتحتوي على الكلمات المفتاحية الرئيسية. الأوصاف يجب أن تكون بين 150-160 حرف.',
+    translator: '🌐 أنت مترجم محترف متخصص في الترجمة بين العربية والإنجليزية في مجال التقنية والمنتجات الرقمية. ترجم النصوص بدقة مع الحفاظ على المعنى والسياق. إذا احتوى النص على مصطلحات تقنية، استخدم الترجمة المتعارف عليها. أعد الترجمة فقط بدون أي شرح.',
+    email: '✉️ أنت كاتب إيميلات محترف لمتجر إلكتروني. مهمتك كتابة رسائل بريد إلكتروني احترافية وودية باللغة العربية. تشمل: رسائل ترحيب، تأكيد الطلبات، عروض ترويجية، متابعة العملاء، واستعادة السلات المتروكة. اجعل الإيميل مختصراً وجذاباً مع دعوة واضحة للإجراء (CTA). أعد نص الإيميل فقط.',
+    general: '🤖 أنت مساعد ذكاء اصطناعي ذكي ومفيد لمتجر إلكتروني. أجب على الأسئلة باللغة العربية بشكل مختصر ومفيد. يمكنك المساعدة في كتابة المحتوى، تحليل البيانات، اقتراح أفكار تسويقية، والإجابة على الأسئلة العامة. كن ودوداً ومحترفاً.'
+};
+
+window.loadPromptPreset = function (presetKey) {
+    const prompt = PROMPT_PRESETS[presetKey];
+    if (prompt) {
+        document.getElementById('ai-system-prompt').value = prompt;
+        document.getElementById('system-prompt-status').textContent = '⚡ قالب — اضغط حفظ لتثبيته';
+        showNotification('⚡ تم تحميل القالب — اضغط "حفظ الموجه" لحفظه للنموذج الحالي');
+    }
+};
+
+// Get the active system prompt for current model
+function getActiveSystemPrompt() {
+    const modelId = document.getElementById('groq-model-select').value;
+    const key = modelId.replace(/[\/\.]/g, '_');
+    return aiSystemPrompts[key] || AI_DEFAULT_PROMPT;
+}
+
+// ---------- Mini AI Chat ----------
+
+window.sendAIChatMessage = async function () {
+    const input = document.getElementById('ai-chat-input');
+    const messagesDiv = document.getElementById('ai-chat-messages');
+    const sendBtn = document.getElementById('ai-chat-send-btn');
+    const userText = input.value.trim();
+
+    if (!userText) return;
+    if (!window.AdminAI || !window.AdminAI.getApiKey()) {
+        showNotification('أضف مفتاح Groq API في الإعدادات → AI / API', 'error');
+        return;
+    }
+
+    // Clear placeholder if first message
+    if (aiChatHistory.length === 0) {
+        messagesDiv.innerHTML = '';
+    }
+
+    // Add user message
+    aiChatHistory.push({ role: 'user', content: userText });
+    appendChatBubble('user', userText, messagesDiv);
+    input.value = '';
+
+    // Show typing indicator
+    const typingId = 'typing-' + Date.now();
+    messagesDiv.innerHTML += `<div id="${typingId}" style="display: flex; gap: 8px; align-items: flex-start;">
+        <span style="font-size: 1.2rem;">🤖</span>
+        <div style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.2); border-radius: 10px; padding: 10px 14px; color: rgba(255,255,255,0.5); font-size: 0.9rem;">
+            <span class="ai-typing-dots">⏳ يفكر...</span>
+        </div>
+    </div>`;
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+    sendBtn.disabled = true;
+    sendBtn.textContent = '⏳...';
+
+    try {
+        const messages = [
+            { role: 'system', content: getActiveSystemPrompt() },
+            ...aiChatHistory
+        ];
+
+        const response = await window.AdminAI.chat('', { messages });
+
+        // Remove typing indicator
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.remove();
+
+        // Add AI response
+        aiChatHistory.push({ role: 'assistant', content: response });
+        appendChatBubble('assistant', response, messagesDiv);
+
+    } catch (error) {
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.remove();
+        appendChatBubble('error', error.message, messagesDiv);
+    }
+
+    sendBtn.disabled = false;
+    sendBtn.textContent = 'إرسال ➤';
+};
+
+function appendChatBubble(role, text, container) {
+    const div = document.createElement('div');
+    div.style.cssText = 'display: flex; gap: 8px; align-items: flex-start;';
+
+    if (role === 'user') {
+        div.style.flexDirection = 'row-reverse';
+        div.innerHTML = `
+            <span style="font-size: 1.2rem;">👤</span>
+            <div style="background: rgba(100, 255, 218, 0.08); border: 1px solid rgba(100, 255, 218, 0.2); border-radius: 10px; padding: 10px 14px; color: rgba(255,255,255,0.85); font-size: 0.9rem; max-width: 80%; word-wrap: break-word; white-space: pre-wrap;">${escapeHtml(text)}</div>
+        `;
+    } else if (role === 'assistant') {
+        div.innerHTML = `
+            <span style="font-size: 1.2rem;">🤖</span>
+            <div style="background: rgba(102, 126, 234, 0.08); border: 1px solid rgba(102, 126, 234, 0.2); border-radius: 10px; padding: 10px 14px; color: rgba(255,255,255,0.85); font-size: 0.9rem; max-width: 80%; word-wrap: break-word; white-space: pre-wrap; line-height: 1.6;">${escapeHtml(text)}</div>
+        `;
+    } else {
+        div.innerHTML = `
+            <span style="font-size: 1.2rem;">⚠️</span>
+            <div style="background: rgba(244, 67, 54, 0.08); border: 1px solid rgba(244, 67, 54, 0.2); border-radius: 10px; padding: 10px 14px; color: #ef5350; font-size: 0.85rem; max-width: 80%;">${escapeHtml(text)}</div>
+        `;
+    }
+
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+function escapeHtml(text) {
+    const d = document.createElement('div');
+    d.textContent = text;
+    return d.innerHTML;
+}
+
+window.clearAIChat = function () {
+    aiChatHistory = [];
+    document.getElementById('ai-chat-messages').innerHTML = `<div style="color: rgba(255,255,255,0.25); text-align: center; padding: 30px 10px; font-size: 0.9rem;">🤖 ابدأ محادثة مع الذكاء الاصطناعي...</div>`;
+};
+
+
+// Test AI Connection
+window.testAIConnection = async function () {
+    const btn = document.getElementById('test-ai-connection');
+    const resultDiv = document.getElementById('ai-test-result');
+
+    btn.disabled = true;
+    btn.textContent = '⏳ جاري الاختبار...';
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = '<div style="color: #4facfe; padding: 10px;">⏳ جاري الاتصال بـ Groq API...</div>';
+
+    try {
+        if (!window.AdminAI) throw new Error('ملف admin-ai.js غير محمّل');
+
+        const result = await window.AdminAI.testConnection();
+
+        if (result.success) {
+            resultDiv.innerHTML = `
+                <div style="background: rgba(76, 175, 80, 0.1); border: 1px solid rgba(76, 175, 80, 0.3); border-radius: 8px; padding: 12px;">
+                    <div style="color: #81c784; font-weight: bold;">✅ الاتصال ناجح!</div>
+                    <div style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 5px;">
+                        🤖 النموذج: ${result.model}<br>
+                        💬 الرد: ${result.message}
+                    </div>
+                </div>
+            `;
+        } else {
+            resultDiv.innerHTML = `
+                <div style="background: rgba(244, 67, 54, 0.1); border: 1px solid rgba(244, 67, 54, 0.3); border-radius: 8px; padding: 12px;">
+                    <div style="color: #ef5350; font-weight: bold;">❌ فشل الاتصال</div>
+                    <div style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 5px;">${result.message}</div>
+                </div>
+            `;
+        }
+    } catch (error) {
+        resultDiv.innerHTML = `
+            <div style="background: rgba(244, 67, 54, 0.1); border: 1px solid rgba(244, 67, 54, 0.3); border-radius: 8px; padding: 12px;">
+                <div style="color: #ef5350; font-weight: bold;">❌ خطأ</div>
+                <div style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 5px;">${error.message}</div>
+            </div>
+        `;
+    }
+
+    btn.disabled = false;
+    btn.textContent = '✅ اختبار الاتصال';
+};
+
+// AI Enhance - Short Description
+window.aiEnhanceShortDesc = async function () {
+    const productName = document.getElementById('product-name').value.trim();
+    const category = document.getElementById('product-category').value;
+    const currentDesc = document.getElementById('product-short-desc').value.trim();
+    const btn = event.target.closest('button');
+
+    if (!productName) {
+        showNotification('أدخل اسم المنتج أولاً', 'error');
+        return;
+    }
+    if (!window.AdminAI || !window.AdminAI.getApiKey()) {
+        showNotification('أضف مفتاح Groq API في الإعدادات → AI / API', 'error');
+        return;
+    }
+
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '⏳ جاري التحسين...';
+
+    try {
+        let prompt;
+        if (currentDesc) {
+            prompt = `حسّن هذا الوصف المختصر لمنتج رقمي اسمه "${productName}" (تصنيف: ${category}): "${currentDesc}". اكتب وصفاً مختصراً جذاباً في سطر واحد فقط باللغة العربية. أعد الوصف المحسّن فقط بدون أي شرح إضافي.`;
+        } else {
+            prompt = `اكتب وصفاً مختصراً جذاباً (سطر واحد فقط) لمنتج رقمي اسمه "${productName}" في تصنيف "${category}". باللغة العربية. أعد الوصف فقط بدون أي شرح.`;
+        }
+
+        const result = await window.AdminAI.chat(prompt, {
+            systemPrompt: 'أنت كاتب محتوى تسويقي محترف. اكتب أوصاف منتجات قصيرة وجذابة. أعد النص فقط بدون علامات اقتباس أو شرح.',
+            maxTokens: 100,
+            temperature: 0.8
+        });
+
+        document.getElementById('product-short-desc').value = result.replace(/^["']|["']$/g, '').trim();
+        showNotification('✨ تم تحسين الوصف المختصر بالذكاء الاصطناعي');
+    } catch (error) {
+        showNotification('خطأ: ' + error.message, 'error');
+    }
+
+    btn.disabled = false;
+    btn.textContent = originalText;
+};
+
+// AI Enhance - Full Description
+window.aiEnhanceFullDesc = async function () {
+    const productName = document.getElementById('product-name').value.trim();
+    const category = document.getElementById('product-category').value;
+    const currentDesc = document.getElementById('product-description').value.trim();
+    const btn = event.target.closest('button');
+
+    if (!productName) {
+        showNotification('أدخل اسم المنتج أولاً', 'error');
+        return;
+    }
+    if (!window.AdminAI || !window.AdminAI.getApiKey()) {
+        showNotification('أضف مفتاح Groq API في الإعدادات → AI / API', 'error');
+        return;
+    }
+
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '⏳ جاري التحسين...';
+
+    try {
+        let prompt;
+        if (currentDesc) {
+            prompt = `حسّن هذا الوصف التفصيلي لمنتج رقمي اسمه "${productName}" (تصنيف: ${category}): "${currentDesc}". اكتب وصفاً تفصيلياً جذاباً ومقنعاً (3-5 أسطر) باللغة العربية. أعد الوصف المحسّن فقط بدون أي شرح إضافي.`;
+        } else {
+            prompt = `اكتب وصفاً تفصيلياً جذاباً ومقنعاً (3-5 أسطر) لمنتج رقمي اسمه "${productName}" في تصنيف "${category}". يجب أن يكون تسويقياً واحترافياً باللغة العربية. أعد الوصف فقط بدون أي شرح.`;
+        }
+
+        const result = await window.AdminAI.chat(prompt, {
+            systemPrompt: 'أنت كاتب محتوى تسويقي محترف لمتجر إلكتروني. اكتب أوصاف منتجات مفصلة وجذابة خالية من الحشو. أعد النص فقط بدون علامات اقتباس.',
+            maxTokens: 300,
+            temperature: 0.8
+        });
+
+        document.getElementById('product-description').value = result.replace(/^["']|["']$/g, '').trim();
+        showNotification('✨ تم تحسين الوصف الكامل بالذكاء الاصطناعي');
+    } catch (error) {
+        showNotification('خطأ: ' + error.message, 'error');
+    }
+
+    btn.disabled = false;
+    btn.textContent = originalText;
+};
+
+// AI Generate Features List
+window.aiGenerateFeatures = async function () {
+    const productName = document.getElementById('product-name').value.trim();
+    const category = document.getElementById('product-category').value;
+    const currentFeatures = document.getElementById('product-features').value.trim();
+    const btn = event.target.closest('button');
+
+    if (!productName) {
+        showNotification('أدخل اسم المنتج أولاً', 'error');
+        return;
+    }
+    if (!window.AdminAI || !window.AdminAI.getApiKey()) {
+        showNotification('أضف مفتاح Groq API في الإعدادات → AI / API', 'error');
+        return;
+    }
+
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '⏳ جاري التوليد...';
+
+    try {
+        let prompt;
+        if (currentFeatures) {
+            prompt = `حسّن قائمة مميزات منتج رقمي اسمه "${productName}" (تصنيف: ${category}).
+المميزات الحالية:
+${currentFeatures}
+
+أعد كتابة المميزات بتنسيق: إيموجي|عنوان الميزة|وصف مختصر للميزة
+كل سطر ميزة واحدة. استخدم إيموجي مناسب لكل ميزة. الوصف مختصر وجذاب باللغة العربية.
+أعد القائمة فقط بدون أي شرح أو عناوين إضافية.`;
+        } else {
+            prompt = `اكتب 4-6 مميزات لمنتج رقمي اسمه "${productName}" في تصنيف "${category}".
+
+التنسيق المطلوب: إيموجي|عنوان الميزة|وصف مختصر للميزة
+كل سطر ميزة واحدة فقط.
+مثال:
+🚀|سرعة فائقة|أداء عالي بدون تأخير
+🔒|حماية متقدمة|تشفير كامل لبياناتك
+
+استخدم إيموجي مناسب لكل ميزة. الوصف مختصر وجذاب باللغة العربية.
+أعد القائمة فقط بدون أي شرح أو عناوين إضافية.`;
+        }
+
+        const result = await window.AdminAI.chat(prompt, {
+            systemPrompt: 'أنت كاتب محتوى محترف. أعد فقط قائمة المميزات بالتنسيق المطلوب (إيموجي|عنوان|وصف) بدون أي نص إضافي أو علامات اقتباس أو عناوين.',
+            maxTokens: 400,
+            temperature: 0.8
+        });
+
+        document.getElementById('product-features').value = result.replace(/^["'`\s]+|["'`\s]+$/g, '').trim();
+        showNotification('🏷️ تم توليد المميزات بالذكاء الاصطناعي');
+    } catch (error) {
+        showNotification('خطأ: ' + error.message, 'error');
+    }
+
+    btn.disabled = false;
+    btn.textContent = originalText;
+};
+
 // Load settings (exchange rate, phone, facebook, email, theme, admins)
 function loadSettings() {
     settingsRef.once('value', (snapshot) => {
@@ -605,6 +1009,24 @@ function loadSettings() {
             }
             if (settings.maintenanceCustomMessage) {
                 document.getElementById('maintenance-custom-message').value = settings.maintenanceCustomMessage;
+            }
+
+            // Groq API Key
+            if (settings.groqApiKey) {
+                document.getElementById('groq-api-key').value = settings.groqApiKey;
+            }
+
+            // Groq Model Selection + System Prompts
+            if (settings.aiSystemPrompts) {
+                aiSystemPrompts = settings.aiSystemPrompts;
+            }
+            if (settings.groqModel) {
+                const modelSelect = document.getElementById('groq-model-select');
+                modelSelect.value = settings.groqModel;
+                modelSelect.dispatchEvent(new Event('change'));
+            } else {
+                // Load default system prompt for default model
+                document.getElementById('groq-model-select').dispatchEvent(new Event('change'));
             }
 
             // Theme Settings
@@ -800,6 +1222,8 @@ document.getElementById('settings-form').addEventListener('submit', (e) => {
         maintenanceEnabled: maintenanceEnabled,
         maintenancePreset: maintenancePreset,
         maintenanceCustomMessage: maintenanceCustomMessage,
+        groqApiKey: document.getElementById('groq-api-key').value.trim(),
+        groqModel: document.getElementById('groq-model-select').value,
         theme: themeData,
         lastUpdated: Date.now() // Keep lastUpdated
     };
