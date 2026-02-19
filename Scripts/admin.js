@@ -940,6 +940,78 @@ ${currentFeatures}
     btn.textContent = originalText;
 };
 
+// AI Enhance - Meta Description (SEO)
+window.aiEnhanceMetaDesc = async function () {
+    const productName = document.getElementById('product-name').value.trim();
+    const category = document.getElementById('product-category').value;
+    const currentDesc = document.getElementById('product-meta-desc').value.trim();
+    const fullDesc = document.getElementById('product-description').value.trim();
+    const btn = event.target.closest('button');
+
+    if (!productName) {
+        showNotification('أدخل اسم المنتج أولاً', 'error');
+        return;
+    }
+    if (!window.AdminAI || !window.AdminAI.getApiKey()) {
+        showNotification('أضف مفتاح Groq API في الإعدادات → AI / API', 'error');
+        return;
+    }
+
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '⏳ جاري التحسين...';
+
+    try {
+        let prompt;
+        const context = fullDesc ? `معلومات عن المنتج: "${fullDesc.substring(0, 300)}..."` : '';
+
+        if (currentDesc) {
+            prompt = `حسّن وصف الميتا (Meta Description) التالي لصفحة منتج "${productName}" (${category}). الوصف الحالي: "${currentDesc}". ${context}
+            اكتب وصفاً جديداً جذاباً لمحركات البحث (SEO) باللغة العربية. يجب أن يكون بين 140 و 160 حرفاً. ركز على الكلمات المفتاحية والدعوة لاتخاذ إجراء.`;
+        } else {
+            prompt = `اكتب وصف ميتا (Meta Description) احترافي لصفحة منتج "${productName}" (${category}). ${context}
+            الوصف يجب أن يكون جذاباً، متوافقاً مع SEO، وباللغة العربية. الحد الأقصى 160 حرفاً.`;
+        }
+
+        const result = await window.AdminAI.chat(prompt, {
+            systemPrompt: 'أنت خبير SEO. اكتب أوصاف ميتا (Meta Descriptions) دقيقة وجذابة. الرد يجب أن يكون النص فقط (بدون عناوين أو شرح). الطول: 140-160 حرف.',
+            maxTokens: 100,
+            temperature: 0.7
+        });
+
+        const finalDesc = result.replace(/^["']|["']$/g, '').trim().substring(0, 160);
+        document.getElementById('product-meta-desc').value = finalDesc;
+
+        // Update counter
+        const counter = document.getElementById('meta-desc-count');
+        if (counter) counter.textContent = finalDesc.length + ' / 160';
+
+        showNotification('✨ تم تحسين وصف SEO بنجاح');
+    } catch (error) {
+        showNotification('خطأ: ' + error.message, 'error');
+    }
+
+    btn.disabled = false;
+    btn.textContent = originalText;
+};
+
+// Meta Description Character Counter
+document.addEventListener('DOMContentLoaded', () => {
+    const metaInput = document.getElementById('product-meta-desc');
+    const metaCounter = document.getElementById('meta-desc-count');
+    if (metaInput && metaCounter) {
+        metaInput.addEventListener('input', function () {
+            const count = this.value.length;
+            metaCounter.textContent = count + ' / 160';
+            if (count > 160) {
+                metaCounter.style.color = '#f44336';
+            } else {
+                metaCounter.style.color = 'rgba(255,255,255,0.4)';
+            }
+        });
+    }
+});
+
 // ---------- Translation & Dialect Handlers ----------
 
 window.translateAllFields = async function (direction) {
@@ -2123,6 +2195,7 @@ document.getElementById('product-form').addEventListener('submit', (e) => {
         category: document.getElementById('product-category').value,
         image: document.getElementById('product-image').value,
         features: parseFeatures(document.getElementById('product-features').value),
+        metaDesc: document.getElementById('product-meta-desc').value,
         visible: true, // Default to visible
         timestamp: Date.now(),
         // Stock Management
@@ -2216,6 +2289,9 @@ window.editProduct = function (id) {
         document.getElementById('product-category').value = product.category || 'general'; // Load Category
         document.getElementById('product-image').value = product.image;
         document.getElementById('product-features').value = formatFeatures(product.features);
+        document.getElementById('product-meta-desc').value = product.metaDesc || '';
+        if (document.getElementById('meta-desc-count')) document.getElementById('meta-desc-count').textContent = (product.metaDesc || '').length + ' / 160';
+
 
         // Load stock data
         const trackStockCheckbox = document.getElementById('track-stock');
@@ -2282,6 +2358,8 @@ window.deleteProduct = function (id) {
 function resetForm() {
     document.getElementById('product-form').reset();
     document.getElementById('product-id').value = '';
+    if (document.getElementById('meta-desc-count')) document.getElementById('meta-desc-count').textContent = '0 / 160';
+
 
     // Clear custom file input
     document.getElementById('image-file').value = '';

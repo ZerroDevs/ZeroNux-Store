@@ -191,7 +191,14 @@
                         <div class="form-group">
                             <label>وصف الصفحة (Meta Description) 📝</label>
                             <textarea id="seo-meta-desc" rows="3" placeholder="متجر زيرونكس - وجهتك الأولى للتسوق الإلكتروني..." maxlength="170"></textarea>
-                            <div class="seo-char-count" id="seo-desc-count">0 / 160 حرف (الأفضل 120-160)</div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div class="seo-char-count" id="seo-desc-count">0 / 160 حرف (الأفضل 120-160)</div>
+                                <button type="button" onclick="aiEnhanceSeoDesc()"
+                                    style="margin-top: 4px; background: linear-gradient(135deg, #ff9800, #f57c00); color: white; border: none; padding: 4px 12px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; transition: all 0.3s; opacity: 0.9;"
+                                    onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
+                                    🤖 تحسين AI
+                                </button>
+                            </div>
                         </div>
 
                         <hr class="seo-section-divider">
@@ -268,6 +275,52 @@
             main.appendChild(tabContent);
         }
     }
+
+    // ---- AI Enhance SEO Description ----
+    window.aiEnhanceSeoDesc = async function () {
+        if (!window.AdminAI || !window.AdminAI.getApiKey()) {
+            if (typeof showNotification === 'function') showNotification('أضف مفتاح API أولاً في الإعدادات', 'error');
+            return;
+        }
+
+        const btn = event.target.closest('button');
+        const originalText = btn.textContent;
+        const currentTitle = document.getElementById('seo-meta-title').value || 'متجر زيرونكس';
+        const currentDesc = document.getElementById('seo-meta-desc').value;
+
+        btn.disabled = true;
+        btn.textContent = '⏳ ...';
+
+        try {
+            let prompt;
+            if (currentDesc) {
+                prompt = `حسّن وصف الميتا (Meta Description) لصفحة متجر إلكتروني رئيسية بعنوان "${currentTitle}". الوصف الحالي: "${currentDesc}". اجعله احترافياً، جذاباً ومختصراً (أقل من 160 حرف) باللغة العربية.`;
+            } else {
+                prompt = `اكتب وصف ميتا (Meta Description) احترافي لصفحة رئيسية لمتجر إلكتروني اسمه "${currentTitle}". يبيع منتجات رقمية وكتب. اجعله جذاباً ومحفزاً للنقر (CTR) في حدود 150 حرفاً باللغة العربية.`;
+            }
+
+            const result = await window.AdminAI.chat(prompt, {
+                systemPrompt: 'أنت خبير SEO. اكتب وصفاً واحداً فقط، مباشراً، بدون أي مقدمات أو علامات تنصيص.',
+                maxTokens: 80,
+                temperature: 0.7
+            });
+
+            const finalDesc = result.replace(/^["']|["']$/g, '').trim().substring(0, 160);
+
+            const descInput = document.getElementById('seo-meta-desc');
+            descInput.value = finalDesc;
+            descInput.dispatchEvent(new Event('input')); // Trigger preview update
+
+            if (typeof showNotification === 'function') showNotification('✨ تم تحسين الوصف!');
+
+        } catch (error) {
+            console.error(error);
+            if (typeof showNotification === 'function') showNotification('فشل التحسين: ' + error.message, 'error');
+        }
+
+        btn.disabled = false;
+        btn.textContent = originalText;
+    };
 
     // ---- Preview Toggle ----
     window.switchSeoPreview = function (type, btn) {

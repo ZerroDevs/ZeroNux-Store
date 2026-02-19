@@ -453,7 +453,7 @@
 
                         <div class="form-group">
                             <label>المميزات (كل سطر ميزة، استخدم | للفصل بين الأيقونة والعنوان والوصف)</label>
-                            <textarea id="product-features" rows="6" placeholder="�|الميزة الأولى|وصف الميزة الأولى
+                            <textarea id="product-features" rows="6" placeholder="🚀|الميزة الأولى|وصف الميزة الأولى
 💻|الميزة الثانية|وصف الميزة الثانية"></textarea>
                             <small>مثال: 📱|NotebookLM|شريكك في الأبحاث</small>
                             <button type="button" onclick="aiGenerateFeatures()"
@@ -461,6 +461,22 @@
                                 onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
                                 🏷️ توليد المميزات بالذكاء الاصطناعي
                             </button>
+                        </div>
+
+                        <!-- SEO Meta Description -->
+                        <div class="form-group"
+                            style="background: rgba(255, 193, 7, 0.05); border: 1px solid rgba(255, 193, 7, 0.15); border-radius: 12px; padding: 15px; margin-top: 20px;">
+                            <label style="color: #ffb74d;">📝 وصف الصفحة (Meta Description) - SEO</label>
+                            <textarea id="product-meta-desc" rows="3"
+                                placeholder="وصف يظهر في محركات البحث (150-160 حرف)" maxlength="160"></textarea>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <small id="meta-desc-count" style="color: rgba(255,255,255,0.4);">0 / 160</small>
+                                <button type="button" onclick="aiEnhanceMetaDesc()"
+                                    style="margin-top: 8px; background: linear-gradient(135deg, #ff9800, #f57c00); color: white; border: none; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: all 0.3s; opacity: 0.9;"
+                                    onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
+                                    🤖 تحسين SEO بالذكاء الاصطناعي
+                                </button>
+                            </div>
                         </div>
 
                         <div class="form-actions">
