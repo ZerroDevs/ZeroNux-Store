@@ -361,6 +361,47 @@
 
                         <hr style="border-color: rgba(255,255,255,0.1); margin: 1.5rem 0;">
 
+                        <!-- AI Translation Toolbar -->
+                        <div
+                            style="background: rgba(0,188,212,0.04); border: 1px solid rgba(0,188,212,0.15); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                                <span style="color: #4dd0e1; font-size: 0.85rem; font-weight: bold;">🌐 ترجمة
+                                    ولهجات</span>
+                                <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+                                    <button type="button" onclick="translateAllFields('ar-to-en')"
+                                        style="background: rgba(100,255,218,0.08); border: 1px solid rgba(100,255,218,0.2); color: #64ffda; padding: 4px 12px; border-radius: 6px; cursor: pointer; font-size: 0.78rem; white-space: nowrap;"
+                                        title="ترجمة جميع الحقول من العربية إلى الإنجليزية">
+                                        🔤 عربي → English
+                                    </button>
+                                    <button type="button" onclick="translateAllFields('en-to-ar')"
+                                        style="background: rgba(102,126,234,0.08); border: 1px solid rgba(102,126,234,0.2); color: #7c9cff; padding: 4px 12px; border-radius: 6px; cursor: pointer; font-size: 0.78rem; white-space: nowrap;"
+                                        title="ترجمة جميع الحقول من الإنجليزية إلى العربية">
+                                        🔤 English → عربي
+                                    </button>
+                                    <span style="color: rgba(255,255,255,0.15); margin: 0 2px;">|</span>
+                                    <select id="dialect-select"
+                                        style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.7); padding: 4px 8px; border-radius: 6px; font-size: 0.78rem; cursor: pointer;">
+                                        <option value="" disabled selected>🗣️ تحويل للهجة...</option>
+                                        <option value="fus7a">📖 العربية الفصحى</option>
+                                        <option value="egyptian">🇪🇬 المصرية</option>
+                                        <option value="gulf">🇸🇦 الخليجية</option>
+                                        <option value="libyan">🇱🇾 الليبية</option>
+                                        <option value="moroccan">🇲🇦 المغربية</option>
+                                        <option value="iraqi">🇮🇶 العراقية</option>
+                                        <option value="levantine">🇱🇧 الشامية</option>
+                                    </select>
+                                    <button type="button" onclick="adaptToDialect()"
+                                        style="background: rgba(255,152,0,0.08); border: 1px solid rgba(255,152,0,0.2); color: #ffb74d; padding: 4px 12px; border-radius: 6px; cursor: pointer; font-size: 0.78rem; white-space: nowrap;">
+                                        🗣️ تحويل
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="translator-status"
+                                style="margin-top: 6px; font-size: 0.75rem; color: rgba(255,255,255,0.3); display: none;">
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <label>الوصف المختصر</label>
                             <input type="text" id="product-short-desc" placeholder="وصف قصير للمنتج">
@@ -1219,8 +1260,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <!-- Admin Script -->
-    <script src="Scripts/admin.js?v=3.4"></script>
+    <script src="Scripts/admin.js?v=3.5"></script>
     <script src="Scripts/admin-ai.js?v=1.0"></script>
+    <script src="Scripts/ai-translator.js?v=1.0"></script>
     <script src="Scripts/admin-sidebar.js"></script>
     <script src="Scripts/admin-currency.js"></script>
     <script src="Scripts/admin-search-filter.js"></script>

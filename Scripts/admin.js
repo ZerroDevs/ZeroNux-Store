@@ -940,6 +940,77 @@ ${currentFeatures}
     btn.textContent = originalText;
 };
 
+// ---------- Translation & Dialect Handlers ----------
+
+window.translateAllFields = async function (direction) {
+    if (!window.AITranslator) {
+        showNotification('وحدة الترجمة غير محمّلة', 'error');
+        return;
+    }
+
+    const statusDiv = document.getElementById('translator-status');
+    const dirLabel = direction === 'ar-to-en' ? 'عربي → English' : 'English → عربي';
+    statusDiv.style.display = 'block';
+    statusDiv.textContent = `⏳ جاري الترجمة (${dirLabel})...`;
+    statusDiv.style.color = '#4dd0e1';
+
+    try {
+        const count = await window.AITranslator.translateProductFields(direction);
+        if (count > 0) {
+            statusDiv.textContent = `✅ تمت ترجمة ${count} حقول بنجاح`;
+            statusDiv.style.color = '#64ffda';
+            showNotification(`🌐 تمت ترجمة ${count} حقول (${dirLabel})`);
+        } else {
+            statusDiv.textContent = '⚠️ لا توجد حقول تحتوي على نص للترجمة';
+            statusDiv.style.color = '#ffb74d';
+        }
+    } catch (error) {
+        statusDiv.textContent = '❌ خطأ: ' + error.message;
+        statusDiv.style.color = '#ef5350';
+        showNotification('خطأ في الترجمة: ' + error.message, 'error');
+    }
+
+    setTimeout(() => { statusDiv.style.display = 'none'; }, 5000);
+};
+
+window.adaptToDialect = async function () {
+    const dialectKey = document.getElementById('dialect-select').value;
+    if (!dialectKey) {
+        showNotification('اختر لهجة أولاً', 'error');
+        return;
+    }
+    if (!window.AITranslator) {
+        showNotification('وحدة الترجمة غير محمّلة', 'error');
+        return;
+    }
+
+    const dialect = window.AITranslator.DIALECTS[dialectKey];
+    const statusDiv = document.getElementById('translator-status');
+    statusDiv.style.display = 'block';
+    statusDiv.textContent = `⏳ جاري التحويل إلى ${dialect.name}...`;
+    statusDiv.style.color = '#ffb74d';
+
+    try {
+        const count = await window.AITranslator.adaptProductDialect(dialectKey);
+        if (count > 0) {
+            statusDiv.textContent = `✅ تم تحويل ${count} حقول إلى ${dialect.name}`;
+            statusDiv.style.color = '#64ffda';
+            showNotification(`🗣️ تم تحويل ${count} حقول إلى ${dialect.name} ${dialect.flag}`);
+        } else {
+            statusDiv.textContent = '⚠️ لا توجد حقول تحتوي على نص للتحويل';
+            statusDiv.style.color = '#ffb74d';
+        }
+    } catch (error) {
+        statusDiv.textContent = '❌ خطأ: ' + error.message;
+        statusDiv.style.color = '#ef5350';
+        showNotification('خطأ في التحويل: ' + error.message, 'error');
+    }
+
+    // Reset dropdown
+    document.getElementById('dialect-select').selectedIndex = 0;
+    setTimeout(() => { statusDiv.style.display = 'none'; }, 5000);
+};
+
 // Load settings (exchange rate, phone, facebook, email, theme, admins)
 function loadSettings() {
     settingsRef.once('value', (snapshot) => {
