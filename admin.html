@@ -793,36 +793,59 @@
                         <div id="settings-tab-ai" class="settings-subtab-content" style="display: none;">
                             <h3>🤖 إعدادات الذكاء الاصطناعي (AI Settings)</h3>
 
-                            <div
-                                style="background: rgba(100, 255, 218, 0.05); border: 1px solid rgba(100, 255, 218, 0.15); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
-                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                                    <img src="https://groq.com/wp-content/uploads/2024/03/PBG-mark1-color.svg"
-                                        alt="Groq" style="width: 28px; height: 28px;"
-                                        onerror="this.style.display='none'">
-                                    <h4 style="margin: 0; color: #64ffda;">Groq API Key</h4>
-                                </div>
-                                <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 15px;">
-                                    أدخل مفتاح API الخاص بك من Groq لتفعيل ميزات الذكاء الاصطناعي القادمة.
-                                    <br>
-                                    <a href="https://console.groq.com/keys" target="_blank"
-                                        style="color: #64ffda; text-decoration: underline;">احصل على مفتاح API من هنا
-                                        ↗</a>
-                                </p>
+                            <!-- Provider Selector Tabs -->
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;">
+                                <button type="button" class="ai-provider-tab active" data-provider="groq"
+                                    onclick="switchAIProvider('groq')"
+                                    style="background: rgba(245,80,54,0.12); border: 2px solid #f55036; color: #f55036; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: all 0.3s; display: flex; align-items: center; gap: 6px; font-size: 0.9rem;">
+                                    ⚡ Groq
+                                </button>
+                                <button type="button" class="ai-provider-tab" data-provider="cerebras"
+                                    onclick="switchAIProvider('cerebras')"
+                                    style="background: rgba(255,107,53,0.05); border: 2px solid rgba(255,107,53,0.2); color: rgba(255,107,53,0.6); padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: all 0.3s; display: flex; align-items: center; gap: 6px; font-size: 0.9rem;">
+                                    🧠 Cerebras
+                                </button>
+                                <button type="button" class="ai-provider-tab" data-provider="sambanova"
+                                    onclick="switchAIProvider('sambanova')"
+                                    style="background: rgba(255,140,0,0.05); border: 2px solid rgba(255,140,0,0.2); color: rgba(255,140,0,0.6); padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: all 0.3s; display: flex; align-items: center; gap: 6px; font-size: 0.9rem;">
+                                    🔶 SambaNova
+                                </button>
+                                <button type="button" class="ai-provider-tab" data-provider="openrouter"
+                                    onclick="switchAIProvider('openrouter')"
+                                    style="background: rgba(99,102,241,0.05); border: 2px solid rgba(99,102,241,0.2); color: rgba(99,102,241,0.6); padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: all 0.3s; display: flex; align-items: center; gap: 6px; font-size: 0.9rem;">
+                                    🌐 OpenRouter
+                                </button>
+                            </div>
 
-                                <div class="form-group">
-                                    <label>مفتاح Groq API</label>
+                            <!-- Provider API Key Card -->
+                            <div id="ai-provider-card"
+                                style="background: rgba(245,80,54,0.05); border: 1px solid rgba(245,80,54,0.15); border-radius: 12px; padding: 20px; margin-bottom: 20px; transition: all 0.4s;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                    <span id="ai-provider-icon" style="font-size: 1.5rem;">⚡</span>
+                                    <div>
+                                        <h4 id="ai-provider-title" style="margin: 0; color: #f55036;">Groq API Key</h4>
+                                        <small id="ai-provider-desc" style="color: rgba(255,255,255,0.5);">أسرع مزود —
+                                            سرعات استجابة فائقة</small>
+                                    </div>
+                                </div>
+                                <p style="margin: 0 0 12px;">
+                                    <a id="ai-provider-link" href="https://console.groq.com/keys" target="_blank"
+                                        style="color: #64ffda; text-decoration: underline; font-size: 0.85rem;">احصل على
+                                        مفتاح API من هنا ↗</a>
+                                </p>
+                                <div class="form-group" style="margin-bottom: 0;">
                                     <div style="position: relative; display: flex; gap: 10px;">
-                                        <input type="password" id="groq-api-key"
+                                        <input type="password" id="ai-api-key"
                                             placeholder="gsk_xxxxxxxxxxxxxxxxxxxxxxxx"
                                             style="flex: 1; font-family: monospace; letter-spacing: 1px;">
-                                        <button type="button" id="toggle-groq-key" onclick="toggleGroqKeyVisibility()"
+                                        <button type="button" onclick="toggleAIKeyVisibility()"
                                             style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; min-width: 50px; font-size: 1.1rem; transition: all 0.3s;"
                                             title="إظهار/إخفاء المفتاح">
                                             👁️‍🗨️
                                         </button>
                                     </div>
-                                    <small style="color: rgba(255,255,255,0.4);">المفتاح يبدأ عادةً بـ gsk_ — يتم حفظه
-                                        بشكل آمن في إعدادات المتجر</small>
+                                    <small id="ai-key-hint" style="color: rgba(255,255,255,0.4);">المفتاح يبدأ عادةً بـ
+                                        gsk_ — يتم حفظه بشكل آمن</small>
                                 </div>
                             </div>
 
@@ -835,32 +858,7 @@
                                 <div class="form-group">
                                     <label>النموذج المستخدم</label>
                                     <select id="groq-model-select" style="font-size: 0.95rem;">
-                                        <optgroup label="🦙 Meta Llama">
-                                            <option value="llama-3.3-70b-versatile">🦙 Llama 3.3 70B Versatile — الأقوى
-                                            </option>
-                                            <option value="llama-3.1-8b-instant">⚡ Llama 3.1 8B Instant — سريع</option>
-                                            <option value="llama3-8b-8192">📦 Llama 3 8B (Legacy)</option>
-                                            <option value="meta-llama/llama-4-scout-17b-16e-instruct">🔭 Llama 4 Scout
-                                                17B — الأحدث</option>
-                                            <option value="meta-llama/llama-4-maverick-17b-128e-instruct">🚀 Llama 4
-                                                Maverick 17B</option>
-                                        </optgroup>
-                                        <optgroup label="💎 Google Gemma">
-                                            <option value="gemma2-9b-it">💎 Gemma 2 9B — متوازن</option>
-                                        </optgroup>
-                                        <optgroup label="🌊 Mistral AI">
-                                            <option value="mistral-saba-24b">🌊 Mistral Saba 24B — يدعم العربية</option>
-                                        </optgroup>
-                                        <optgroup label="🐉 Qwen (Alibaba)">
-                                            <option value="qwen/qwen3-32b">🐉 Qwen 3 32B — متعدد اللغات</option>
-                                        </optgroup>
-                                        <optgroup label="🧠 OpenAI">
-                                            <option value="openai/gpt-oss-120b">🧠 GPT OSS 120B — مفتوح المصدر</option>
-                                        </optgroup>
-                                        <optgroup label="🔬 DeepSeek">
-                                            <option value="deepseek-r1-distill-llama-70b">🔬 DeepSeek R1 70B — استدلال
-                                            </option>
-                                        </optgroup>
+                                        <!-- Models populated dynamically by JS -->
                                     </select>
                                 </div>
 
@@ -869,19 +867,16 @@
                                     style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px 15px; margin-top: 10px;">
                                     <div
                                         style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                                        <span id="model-info-name" style="font-weight: bold; color: white;">Llama 3.3
-                                            70B Versatile</span>
+                                        <span id="model-info-name" style="font-weight: bold; color: white;">—</span>
                                         <div style="display: flex; gap: 8px;">
                                             <span id="model-info-params"
-                                                style="background: rgba(100, 255, 218, 0.1); color: #64ffda; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem;">70B</span>
+                                                style="background: rgba(100, 255, 218, 0.1); color: #64ffda; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem;">—</span>
                                             <span id="model-info-ctx"
-                                                style="background: rgba(167, 139, 250, 0.1); color: #a78bfa; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem;">128K
-                                                ctx</span>
+                                                style="background: rgba(167, 139, 250, 0.1); color: #a78bfa; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem;">—</span>
                                         </div>
                                     </div>
                                     <p id="model-info-desc"
-                                        style="margin: 8px 0 0; color: rgba(255,255,255,0.5); font-size: 0.85rem;">
-                                        أقوى نموذج Llama — متعدد المهام</p>
+                                        style="margin: 8px 0 0; color: rgba(255,255,255,0.5); font-size: 0.85rem;">—</p>
                                 </div>
                             </div>
 
@@ -1260,9 +1255,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <!-- Admin Script -->
-    <script src="Scripts/admin.js?v=3.5"></script>
-    <script src="Scripts/admin-ai.js?v=1.0"></script>
-    <script src="Scripts/ai-translator.js?v=1.0"></script>
+    <script src="Scripts/admin-ai.js?v=1.1"></script>
+    <script src="Scripts/ai-translator.js?v=1.1"></script>
+    <script src="Scripts/admin.js?v=3.7"></script>
     <script src="Scripts/admin-sidebar.js"></script>
     <script src="Scripts/admin-currency.js"></script>
     <script src="Scripts/admin-search-filter.js"></script>

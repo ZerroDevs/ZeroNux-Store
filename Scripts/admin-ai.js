@@ -1,152 +1,254 @@
 // ============================================
-// AI WORKER - Groq API Integration
+// AI WORKER - Multi-Provider Integration
+// Supports: Groq, Cerebras, SambaNova, OpenRouter
 // ============================================
 
 const AdminAI = (() => {
-    // Available Groq Models (Free Tier)
-    const MODELS = {
-        // --- Llama Models ---
-        'llama-3.3-70b-versatile': {
-            name: 'Llama 3.3 70B Versatile',
-            provider: 'Meta',
-            params: '70B',
-            context: 131072,
-            description: 'أقوى نموذج Llama — متعدد المهام',
-            icon: '🦙',
-            category: 'llama'
-        },
-        'llama-3.1-8b-instant': {
-            name: 'Llama 3.1 8B Instant',
-            provider: 'Meta',
-            params: '8B',
-            context: 131072,
-            description: 'سريع وخفيف — مثالي للمهام البسيطة',
+    'use strict';
+
+    // ─── Provider Definitions ───
+    const PROVIDERS = {
+        groq: {
+            name: 'Groq',
             icon: '⚡',
-            category: 'llama'
+            color: '#f55036',
+            apiUrl: 'https://api.groq.com/openai/v1/chat/completions',
+            keyPrefix: 'gsk_',
+            keyPlaceholder: 'gsk_xxxxxxxxxxxxxxxxxxxxxxxx',
+            description: 'أسرع مزود — سرعات استجابة فائقة',
+            website: 'https://console.groq.com/keys',
+            models: {
+                'llama-3.3-70b-versatile': {
+                    name: 'Llama 3.3 70B Versatile',
+                    provider: 'Meta', params: '70B', context: 131072,
+                    description: 'أقوى نموذج Llama — متعدد المهام', icon: '🦙'
+                },
+                'llama-3.1-8b-instant': {
+                    name: 'Llama 3.1 8B Instant',
+                    provider: 'Meta', params: '8B', context: 131072,
+                    description: 'سريع وخفيف — مثالي للمهام البسيطة', icon: '⚡'
+                },
+                'meta-llama/llama-4-scout-17b-16e-instruct': {
+                    name: 'Llama 4 Scout 17B',
+                    provider: 'Meta', params: '17B', context: 131072,
+                    description: 'أحدث نموذج من Meta — متعدد الوسائط', icon: '🔭'
+                },
+                'meta-llama/llama-4-maverick-17b-128e-instruct': {
+                    name: 'Llama 4 Maverick 17B',
+                    provider: 'Meta', params: '17B', context: 131072,
+                    description: 'قوي في البرمجة والاستدلال', icon: '🚀'
+                },
+                'gemma2-9b-it': {
+                    name: 'Gemma 2 9B',
+                    provider: 'Google', params: '9B', context: 8192,
+                    description: 'نموذج Google المفتوح — متوازن', icon: '💎'
+                },
+                'mistral-saba-24b': {
+                    name: 'Mistral Saba 24B',
+                    provider: 'Mistral AI', params: '24B', context: 32768,
+                    description: 'يدعم العربية بشكل ممتاز', icon: '🌊'
+                },
+                'qwen/qwen3-32b': {
+                    name: 'Qwen 3 32B',
+                    provider: 'Alibaba', params: '32B', context: 131072,
+                    description: 'نموذج صيني قوي — متعدد اللغات', icon: '🐉'
+                },
+                'deepseek-r1-distill-llama-70b': {
+                    name: 'DeepSeek R1 Distill 70B',
+                    provider: 'DeepSeek', params: '70B', context: 131072,
+                    description: 'متخصص في الاستدلال والتفكير', icon: '🔬'
+                }
+            }
         },
-        'llama3-8b-8192': {
-            name: 'Llama 3 8B (Legacy)',
-            provider: 'Meta',
-            params: '8B',
-            context: 8192,
-            description: 'نموذج Llama 3 الأصلي — قديم',
-            icon: '📦',
-            category: 'llama'
-        },
-        'meta-llama/llama-4-scout-17b-16e-instruct': {
-            name: 'Llama 4 Scout 17B',
-            provider: 'Meta',
-            params: '17B',
-            context: 131072,
-            description: 'أحدث نموذج من Meta — متعدد الوسائط',
-            icon: '🔭',
-            category: 'llama'
-        },
-        'meta-llama/llama-4-maverick-17b-128e-instruct': {
-            name: 'Llama 4 Maverick 17B',
-            provider: 'Meta',
-            params: '17B',
-            context: 131072,
-            description: 'قوي في البرمجة والاستدلال',
-            icon: '🚀',
-            category: 'llama'
-        },
-        // --- Gemma Models ---
-        'gemma2-9b-it': {
-            name: 'Gemma 2 9B',
-            provider: 'Google',
-            params: '9B',
-            context: 8192,
-            description: 'نموذج Google المفتوح — متوازن',
-            icon: '💎',
-            category: 'gemma'
-        },
-        // --- Mistral Models ---
-        'mistral-saba-24b': {
-            name: 'Mistral Saba 24B',
-            provider: 'Mistral AI',
-            params: '24B',
-            context: 32768,
-            description: 'يدعم العربية بشكل ممتاز',
-            icon: '🌊',
-            category: 'mistral'
-        },
-        // --- Qwen Models ---
-        'qwen/qwen3-32b': {
-            name: 'Qwen 3 32B',
-            provider: 'Alibaba',
-            params: '32B',
-            context: 131072,
-            description: 'نموذج صيني قوي — متعدد اللغات',
-            icon: '🐉',
-            category: 'qwen'
-        },
-        // --- OpenAI Ecosystem ---
-        'openai/gpt-oss-120b': {
-            name: 'GPT OSS 120B',
-            provider: 'OpenAI',
-            params: '120B',
-            context: 131072,
-            description: 'نموذج مفتوح المصدر من OpenAI',
+        cerebras: {
+            name: 'Cerebras',
             icon: '🧠',
-            category: 'openai'
+            color: '#ff6b35',
+            apiUrl: 'https://api.cerebras.ai/v1/chat/completions',
+            keyPrefix: 'csk-',
+            keyPlaceholder: 'csk-xxxxxxxxxxxxxxxxxxxxxxxx',
+            description: 'سرعة فائقة — أسرع استدلال في العالم',
+            website: 'https://cloud.cerebras.ai/',
+            models: {
+                'llama-3.3-70b': {
+                    name: 'Llama 3.3 70B',
+                    provider: 'Meta', params: '70B', context: 8192,
+                    description: 'أقوى نموذج Llama على Cerebras', icon: '🦙'
+                },
+                'llama-3.1-8b': {
+                    name: 'Llama 3.1 8B',
+                    provider: 'Meta', params: '8B', context: 8192,
+                    description: 'سريع وخفيف', icon: '⚡'
+                },
+                'llama-4-scout-17b-16e-instruct': {
+                    name: 'Llama 4 Scout 17B',
+                    provider: 'Meta', params: '17B', context: 131072,
+                    description: 'أحدث إصدار من Llama 4', icon: '🔭'
+                },
+                'qwen-3-32b': {
+                    name: 'Qwen 3 32B',
+                    provider: 'Alibaba', params: '32B', context: 32768,
+                    description: 'نموذج متعدد اللغات قوي', icon: '🐉'
+                }
+            }
         },
-        // --- DeepSeek ---
-        'deepseek-r1-distill-llama-70b': {
-            name: 'DeepSeek R1 Distill 70B',
-            provider: 'DeepSeek',
-            params: '70B',
-            context: 131072,
-            description: 'متخصص في الاستدلال والتفكير',
-            icon: '🔬',
-            category: 'deepseek'
+        sambanova: {
+            name: 'SambaNova',
+            icon: '🔶',
+            color: '#ff8c00',
+            apiUrl: 'https://api.sambanova.ai/v1/chat/completions',
+            keyPrefix: '',
+            keyPlaceholder: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+            description: 'يدعم Llama 405B مجاناً — الأقوى',
+            website: 'https://cloud.sambanova.ai/apis',
+            models: {
+                'Meta-Llama-3.1-8B-Instruct': {
+                    name: 'Llama 3.1 8B',
+                    provider: 'Meta', params: '8B', context: 8192,
+                    description: 'سريع وخفيف', icon: '⚡'
+                },
+                'Meta-Llama-3.1-70B-Instruct': {
+                    name: 'Llama 3.1 70B',
+                    provider: 'Meta', params: '70B', context: 8192,
+                    description: 'قوي ومتعدد المهام', icon: '🦙'
+                },
+                'Meta-Llama-3.1-405B-Instruct': {
+                    name: 'Llama 3.1 405B ⭐',
+                    provider: 'Meta', params: '405B', context: 8192,
+                    description: 'أكبر نموذج مفتوح المصدر في العالم!', icon: '👑'
+                },
+                'Meta-Llama-3.3-70B-Instruct': {
+                    name: 'Llama 3.3 70B',
+                    provider: 'Meta', params: '70B', context: 8192,
+                    description: 'أحدث Llama 3.3', icon: '🚀'
+                },
+                'DeepSeek-R1': {
+                    name: 'DeepSeek R1',
+                    provider: 'DeepSeek', params: '671B', context: 8192,
+                    description: 'أقوى نموذج استدلال مفتوح المصدر', icon: '🔬'
+                },
+                'Qwen2.5-72B-Instruct': {
+                    name: 'Qwen 2.5 72B',
+                    provider: 'Alibaba', params: '72B', context: 8192,
+                    description: 'نموذج متعدد اللغات', icon: '🐉'
+                }
+            }
+        },
+        openrouter: {
+            name: 'OpenRouter',
+            icon: '🌐',
+            color: '#6366f1',
+            apiUrl: 'https://openrouter.ai/api/v1/chat/completions',
+            keyPrefix: 'sk-or-',
+            keyPlaceholder: 'sk-or-v1-xxxxxxxxxxxxxxxxxxxxxxxx',
+            description: 'أكبر مجموعة نماذج مجانية — 50+ نموذج',
+            website: 'https://openrouter.ai/keys',
+            extraHeaders: {
+                'HTTP-Referer': window.location.origin,
+                'X-Title': 'ZeroNux Store Admin'
+            },
+            models: {
+                'meta-llama/llama-3.3-70b-instruct:free': {
+                    name: 'Llama 3.3 70B',
+                    provider: 'Meta', params: '70B', context: 131072,
+                    description: 'أقوى نموذج مجاني عالي الأداء', icon: '🦙'
+                },
+                'google/gemma-2-9b-it:free': {
+                    name: 'Gemma 2 9B',
+                    provider: 'Google', params: '9B', context: 8192,
+                    description: 'سريع ومتوازن من Google', icon: '💎'
+                },
+                'mistralai/mistral-7b-instruct:free': {
+                    name: 'Mistral 7B',
+                    provider: 'Mistral', params: '7B', context: 32768,
+                    description: 'خفيف وسريع جداً', icon: '⚡'
+                },
+                'qwen/qwen-2-7b-instruct:free': {
+                    name: 'Qwen 2 7B',
+                    provider: 'Alibaba', params: '7B', context: 32768,
+                    description: 'أداء ممتاز في اللغة العربية', icon: '🐉'
+                }
+            }
         }
     };
 
-    const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+    // ─── State ───
+    let currentProvider = 'groq';
+    let providerApiKeys = {};
 
-    /**
-     * Get the stored API key from the settings input
-     */
-    function getApiKey() {
-        const input = document.getElementById('groq-api-key');
-        return input ? input.value.trim() : '';
+    // ─── Provider Management ───
+    function getProviders() { return PROVIDERS; }
+    function getCurrentProvider() { return currentProvider; }
+
+    function setCurrentProvider(providerId) {
+        if (PROVIDERS[providerId]) currentProvider = providerId;
     }
 
-    /**
-     * Get the selected model ID from settings
-     */
+    function getProviderInfo(providerId) {
+        return PROVIDERS[providerId || currentProvider] || null;
+    }
+
+    function getModels(providerId) {
+        const p = PROVIDERS[providerId || currentProvider];
+        return p ? p.models : {};
+    }
+
+    // ─── API Key Management ───
+    function getApiKey(providerId) {
+        const pid = providerId || currentProvider;
+        // Return stored key if exists
+        if (providerApiKeys[pid]) return providerApiKeys[pid];
+
+        // Only return input value if we are querying the CURRENT active provider
+        if (pid === currentProvider) {
+            const input = document.getElementById('ai-api-key');
+            return input ? input.value.trim() : '';
+        }
+
+        return '';
+    }
+
+    function setApiKey(providerId, key) {
+        providerApiKeys[providerId] = key;
+    }
+
+    function setAllApiKeys(keysObj) {
+        providerApiKeys = keysObj || {};
+    }
+
+    // ─── Model Selection ───
     function getSelectedModel() {
         const select = document.getElementById('groq-model-select');
-        return select ? select.value : 'llama-3.3-70b-versatile';
+        let val = select ? select.value : '';
+
+        // Validation: Ensure model belongs to current provider
+        // This prevents using stale/removed models from settings
+        const models = getModels();
+        if (!models[val]) {
+            val = Object.keys(models)[0] || '';
+        }
+        return val;
     }
 
-    /**
-     * Get model info by ID
-     */
     function getModelInfo(modelId) {
-        return MODELS[modelId] || null;
+        // Handle case where modelId might be invalid/stale
+        const models = getModels();
+        if (!models[modelId]) {
+            // Fallback to first model
+            const firstId = Object.keys(models)[0];
+            return models[firstId] || null;
+        }
+        return models[modelId];
     }
 
-    /**
-     * Get all available models
-     */
-    function getAllModels() {
-        return MODELS;
-    }
-
-    /**
-     * Send a chat completion request to Groq API
-     * @param {string} prompt - The user prompt
-     * @param {object} options - Optional settings
-     * @returns {Promise<string>} The AI response text
-     */
+    // ─── Chat API ───
     async function chat(prompt, options = {}) {
-        const apiKey = options.apiKey || getApiKey();
+        const provider = PROVIDERS[options.provider || currentProvider];
+        const apiKey = options.apiKey || getApiKey(options.provider || currentProvider);
         const model = options.model || getSelectedModel();
 
         if (!apiKey) {
-            throw new Error('مفتاح Groq API غير موجود. أضفه في الإعدادات → AI / API');
+            throw new Error(`مفتاح API غير موجود لـ ${provider.name}. أضفه في الإعدادات → AI / API`);
         }
 
         const messages = options.messages || [
@@ -154,10 +256,7 @@ const AdminAI = (() => {
                 role: 'system',
                 content: options.systemPrompt || 'أنت مساعد ذكاء اصطناعي لمتجر إلكتروني. أجب باللغة العربية بشكل مختصر ومفيد.'
             },
-            {
-                role: 'user',
-                content: prompt
-            }
+            { role: 'user', content: prompt }
         ];
 
         const body = {
@@ -169,95 +268,93 @@ const AdminAI = (() => {
             stream: false
         };
 
+        const headers = {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+        };
+
+        if (provider.extraHeaders) {
+            Object.assign(headers, provider.extraHeaders);
+        }
+
         try {
-            const response = await fetch(GROQ_API_URL, {
+            const response = await fetch(provider.apiUrl, {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json'
-                },
+                headers: headers,
                 body: JSON.stringify(body)
             });
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                const errorMsg = errorData.error?.message || `HTTP ${response.status}`;
-                throw new Error(`خطأ من Groq API: ${errorMsg}`);
+                let errorMsg = errorData.error?.message || `HTTP ${response.status}`;
+
+                // Customize common errors
+                if (response.status === 401) {
+                    errorMsg = 'مفتاح API غير صحيح أو غير صالح الاستخدام.';
+                } else if (response.status === 402) {
+                    errorMsg = 'نفذ رصيد الحساب (أو الخطة المجانية).';
+                } else if (errorMsg.includes('User not found')) {
+                    errorMsg = 'مفتاح API هذا غير مرتبط بحساب صالح على OpenRouter.';
+                }
+
+                throw new Error(`${errorMsg} (${provider.name})`);
             }
 
             const data = await response.json();
             return data.choices?.[0]?.message?.content || '';
-
         } catch (error) {
             if (error.message.includes('Failed to fetch')) {
-                throw new Error('تعذر الاتصال بـ Groq API. تحقق من اتصال الإنترنت.');
+                throw new Error(`تعذر الاتصال بـ ${provider.name}. تحقق من اتصال الإنترنت.`);
             }
             throw error;
         }
     }
 
-    /**
-     * Test the API connection with the current key & model
-     * @returns {Promise<object>} Test result { success, message, model }
-     */
+    // ─── Test Connection ───
     async function testConnection() {
         try {
             const model = getSelectedModel();
-            const response = await chat('قل "مرحباً" فقط.', {
-                maxTokens: 20,
-                temperature: 0
-            });
-
-            return {
-                success: true,
-                message: response,
-                model: model
-            };
+            const response = await chat('قل "مرحباً" فقط.', { maxTokens: 20, temperature: 0 });
+            return { success: true, message: response, model, provider: currentProvider };
         } catch (error) {
-            return {
-                success: false,
-                message: error.message,
-                model: getSelectedModel()
-            };
+            return { success: false, message: error.message, model: getSelectedModel(), provider: currentProvider };
         }
     }
 
-    /**
-     * Generate a product description
-     */
+    // ─── Helper Functions ───
     async function generateProductDescription(productName, category) {
-        const prompt = `اكتب وصفاً جذاباً ومختصراً (3-4 أسطر) لمنتج رقمي اسمه "${productName}" في تصنيف "${category}". الوصف يجب أن يكون تسويقي وباللغة العربية.`;
-        return await chat(prompt, {
-            systemPrompt: 'أنت كاتب محتوى تسويقي محترف لمتجر إلكتروني. اكتب أوصاف منتجات قصيرة وجذابة وخالية من الحشو.',
-            temperature: 0.8
-        });
+        return await chat(
+            `اكتب وصفاً جذاباً ومختصراً (3-4 أسطر) لمنتج رقمي اسمه "${productName}" في تصنيف "${category}". الوصف يجب أن يكون تسويقي وباللغة العربية.`,
+            { systemPrompt: 'أنت كاتب محتوى تسويقي محترف لمتجر إلكتروني. اكتب أوصاف منتجات قصيرة وجذابة وخالية من الحشو.', temperature: 0.8 }
+        );
     }
 
-    /**
-     * Generate announcement text
-     */
     async function generateAnnouncement(topic) {
-        const prompt = `اكتب نص إعلان قصير (سطر واحد فقط) لشريط إعلانات متجر إلكتروني عن: "${topic}". يجب أن يكون جذاباً ومختصراً ويحتوي على إيموجي.`;
-        return await chat(prompt, {
-            systemPrompt: 'أنت كاتب إعلانات محترف. اكتب نصوص إعلانية قصيرة جذابة مع إيموجي مناسبة.',
-            maxTokens: 100,
-            temperature: 0.9
-        });
+        return await chat(
+            `اكتب نص إعلان قصير (سطر واحد فقط) لشريط إعلانات متجر إلكتروني عن: "${topic}". يجب أن يكون جذاباً ومختصراً ويحتوي على إيموجي.`,
+            { systemPrompt: 'أنت كاتب إعلانات محترف. اكتب نصوص إعلانية قصيرة جذابة مع إيموجي مناسبة.', maxTokens: 100, temperature: 0.9 }
+        );
     }
 
-    // Public API
+    // ─── Public API ───
     return {
-        MODELS,
+        PROVIDERS,
+        get MODELS() { return getModels(currentProvider); },
         chat,
         testConnection,
         getApiKey,
+        setApiKey,
+        setAllApiKeys,
         getSelectedModel,
         getModelInfo,
-        getAllModels,
+        getModels,
+        getProviders,
+        getCurrentProvider,
+        setCurrentProvider,
+        getProviderInfo,
         generateProductDescription,
         generateAnnouncement
     };
 })();
 
-// Expose globally
 window.AdminAI = AdminAI;

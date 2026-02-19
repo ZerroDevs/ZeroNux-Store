@@ -1011,6 +1011,164 @@ window.adaptToDialect = async function () {
     setTimeout(() => { statusDiv.style.display = 'none'; }, 5000);
 };
 
+// ============================================
+// AI MULTI-PROVIDER HANDLERS
+// ============================================
+
+window.switchAIProvider = function (providerId) {
+    // UI Updates
+    document.querySelectorAll('.ai-provider-tab').forEach(btn => {
+        const isTarget = btn.dataset.provider === providerId;
+        btn.classList.toggle('active', isTarget);
+
+        // Reset styles first
+        btn.style.background = 'rgba(255,255,255,0.05)';
+        btn.style.color = 'rgba(255,255,255,0.6)';
+        btn.style.borderColor = 'transparent';
+
+        if (isTarget) {
+            if (providerId === 'groq') {
+                btn.style.background = 'rgba(245,80,54,0.12)';
+                btn.style.color = '#f55036';
+                btn.style.borderColor = '#f55036';
+            } else if (providerId === 'cerebras') {
+                btn.style.background = 'rgba(255,107,53,0.12)';
+                btn.style.color = '#ff6b35';
+                btn.style.borderColor = 'rgba(255,107,53,0.5)';
+            } else if (providerId === 'sambanova') {
+                btn.style.background = 'rgba(255,140,0,0.12)';
+                btn.style.color = '#ff8c00';
+                btn.style.borderColor = 'rgba(255,140,0,0.5)';
+            } else if (providerId === 'openrouter') {
+                btn.style.background = 'rgba(99,102,241,0.12)';
+                btn.style.color = '#6366f1';
+                btn.style.borderColor = 'rgba(99,102,241,0.5)';
+            }
+        }
+    });
+
+    const provider = window.AdminAI.getProviders()[providerId];
+    if (!provider) return;
+
+    // Update Provider Card
+    const card = document.getElementById('ai-provider-card');
+    card.style.background = `${provider.color}08`; // 5% opacity
+    card.style.borderColor = `${provider.color}26`; // 15% opacity
+
+    document.getElementById('ai-provider-icon').textContent = provider.icon;
+    document.getElementById('ai-provider-title').textContent = `${provider.name} API Key`;
+    document.getElementById('ai-provider-title').style.color = provider.color;
+    document.getElementById('ai-provider-desc').textContent = provider.description;
+
+    const link = document.getElementById('ai-provider-link');
+    link.href = provider.website;
+
+    const keyInput = document.getElementById('ai-api-key');
+    keyInput.placeholder = provider.keyPlaceholder;
+    // Load key from AdminAI state
+    keyInput.value = window.AdminAI.getApiKey(providerId) || '';
+
+    // Update AdminAI State
+    window.AdminAI.setCurrentProvider(providerId);
+
+    // Populate Models
+    populateAIModels(providerId);
+};
+
+window.populateAIModels = function (providerId) {
+    const models = window.AdminAI.getModels(providerId);
+    const select = document.getElementById('groq-model-select');
+    select.innerHTML = '';
+
+    Object.entries(models).forEach(([id, model]) => {
+        const option = document.createElement('option');
+        option.value = id;
+        option.textContent = `${model.icon} ${model.name}`;
+        select.appendChild(option);
+    });
+
+    if (select.options.length > 0) {
+        select.selectedIndex = 0;
+        updateAIModelInfo();
+    }
+};
+
+window.updateAIModelInfo = function () {
+    const select = document.getElementById('groq-model-select');
+    const modelId = select.value;
+    const model = window.AdminAI.getModelInfo(modelId);
+
+    if (model) {
+        document.getElementById('model-info-name').textContent = model.name;
+        document.getElementById('model-info-desc').textContent = model.description;
+        document.getElementById('model-info-params').textContent = model.params;
+        document.getElementById('model-info-ctx').textContent = (model.context / 1024) + 'K ctx';
+    }
+};
+
+window.toggleAIKeyVisibility = function () {
+    const input = document.getElementById('ai-api-key');
+    input.type = input.type === 'password' ? 'text' : 'password';
+};
+
+window.testAIConnection = async function () {
+    const btn = document.getElementById('test-ai-connection');
+    const resultDiv = document.getElementById('ai-test-result');
+    const originalText = btn.textContent;
+
+    // Update local key before testing
+    const currentProvider = window.AdminAI.getCurrentProvider();
+    const currentKey = document.getElementById('ai-api-key').value.trim();
+    window.AdminAI.setApiKey(currentProvider, currentKey);
+
+    btn.disabled = true;
+    btn.textContent = '⏳ جاري الاختبار...';
+    resultDiv.style.display = 'none';
+
+    try {
+        const result = await window.AdminAI.testConnection();
+        resultDiv.style.display = 'block';
+        if (result.success) {
+            resultDiv.innerHTML = `
+                <div style="background: rgba(76, 175, 80, 0.1); color: #81c784; padding: 10px; border-radius: 8px; border: 1px solid rgba(76, 175, 80, 0.2);">
+                    <strong>✅ نجح الاتصال!</strong><br>
+                    <small>الرد: "${result.message}"</small><br>
+                    <small>النموذج: ${result.model} | المزود: ${result.provider}</small>
+                </div>
+            `;
+            showNotification('✅ تم الاتصال بنجاح!');
+        } else {
+            throw new Error(result.message);
+        }
+    } catch (error) {
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = `
+            <div style="background: rgba(244, 67, 54, 0.1); color: #e57373; padding: 10px; border-radius: 8px; border: 1px solid rgba(244, 67, 54, 0.2);">
+                <strong>❌ فشل الاتصال</strong><br>
+                <small>${error.message}</small>
+            </div>
+        `;
+        showNotification('❌ فشل اختبار الاتصال', 'error');
+    }
+
+    btn.disabled = false;
+    btn.textContent = originalText;
+};
+
+// Event Listeners for Model Change & Key Input
+document.addEventListener('DOMContentLoaded', () => {
+    const modelSelect = document.getElementById('groq-model-select');
+    if (modelSelect) {
+        modelSelect.addEventListener('change', window.updateAIModelInfo);
+    }
+    const keyInput = document.getElementById('ai-api-key');
+    if (keyInput) {
+        keyInput.addEventListener('input', (e) => {
+            window.AdminAI.setApiKey(window.AdminAI.getCurrentProvider(), e.target.value.trim());
+        });
+    }
+});
+
 // Load settings (exchange rate, phone, facebook, email, theme, admins)
 function loadSettings() {
     settingsRef.once('value', (snapshot) => {
@@ -1082,23 +1240,41 @@ function loadSettings() {
                 document.getElementById('maintenance-custom-message').value = settings.maintenanceCustomMessage;
             }
 
-            // Groq API Key
-            if (settings.groqApiKey) {
-                document.getElementById('groq-api-key').value = settings.groqApiKey;
+            // AI Settings (Multi-Provider)
+            if (settings.aiApiKeys) {
+                if (window.AdminAI) window.AdminAI.setAllApiKeys(settings.aiApiKeys);
+            }
+            if (settings.groqApiKey && window.AdminAI && !window.AdminAI.getApiKey('groq')) {
+                // Backward compatibility
+                window.AdminAI.setApiKey('groq', settings.groqApiKey);
             }
 
-            // Groq Model Selection + System Prompts
             if (settings.aiSystemPrompts) {
                 aiSystemPrompts = settings.aiSystemPrompts;
             }
-            if (settings.groqModel) {
+
+            // Initialize Provider & Model
+            const savedProvider = settings.aiProvider || 'groq';
+            if (window.switchAIProvider) window.switchAIProvider(savedProvider);
+
+            if (settings.aiModel) {
                 const modelSelect = document.getElementById('groq-model-select');
-                modelSelect.value = settings.groqModel;
-                modelSelect.dispatchEvent(new Event('change'));
-            } else {
-                // Load default system prompt for default model
-                document.getElementById('groq-model-select').dispatchEvent(new Event('change'));
+                if (modelSelect) {
+                    modelSelect.value = settings.aiModel;
+                    if (window.updateAIModelInfo) window.updateAIModelInfo();
+                }
+            } else if (settings.groqModel) {
+                // Backward compatibility
+                const modelSelect = document.getElementById('groq-model-select');
+                if (modelSelect) {
+                    modelSelect.value = settings.groqModel;
+                    if (window.updateAIModelInfo) window.updateAIModelInfo();
+                }
             }
+
+            // Trigger change for system prompt loading
+            const modelSelectObj = document.getElementById('groq-model-select');
+            if (modelSelectObj) modelSelectObj.dispatchEvent(new Event('change'));
 
             // Theme Settings
             if (settings.theme) {
@@ -1293,8 +1469,28 @@ document.getElementById('settings-form').addEventListener('submit', (e) => {
         maintenanceEnabled: maintenanceEnabled,
         maintenancePreset: maintenancePreset,
         maintenanceCustomMessage: maintenanceCustomMessage,
-        groqApiKey: document.getElementById('groq-api-key').value.trim(),
+
+        // AI Settings
+        aiProvider: window.AdminAI ? window.AdminAI.getCurrentProvider() : 'groq',
+        aiModel: document.getElementById('groq-model-select').value,
+        aiApiKeys: (function () {
+            const keys = {};
+            if (window.AdminAI) {
+                const providers = window.AdminAI.getProviders();
+                Object.keys(providers).forEach(pid => {
+                    keys[pid] = window.AdminAI.getApiKey(pid);
+                });
+                // Ensure current input value is saved
+                const currentPid = window.AdminAI.getCurrentProvider();
+                keys[currentPid] = document.getElementById('ai-api-key').value.trim();
+            }
+            return keys;
+        })(),
+
+        // Legacy Support
+        groqApiKey: document.getElementById('ai-api-key').value.trim(), // Saves current key as legacy groq key if provider is groq
         groqModel: document.getElementById('groq-model-select').value,
+
         theme: themeData,
         lastUpdated: Date.now() // Keep lastUpdated
     };
