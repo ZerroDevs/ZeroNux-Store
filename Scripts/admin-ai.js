@@ -134,39 +134,30 @@ const AdminAI = (() => {
                 }
             }
         },
-        openrouter: {
-            name: 'OpenRouter',
-            icon: '🌐',
-            color: '#6366f1',
-            apiUrl: 'https://openrouter.ai/api/v1/chat/completions',
-            keyPrefix: 'sk-or-',
-            keyPlaceholder: 'sk-or-v1-xxxxxxxxxxxxxxxxxxxxxxxx',
-            description: 'أكبر مجموعة نماذج مجانية — 50+ نموذج',
-            website: 'https://openrouter.ai/keys',
-            extraHeaders: {
-                'HTTP-Referer': window.location.origin,
-                'X-Title': 'ZeroNux Store Admin'
-            },
+        google: {
+            name: 'Google Gemini',
+            icon: '💎',
+            color: '#4285F4',
+            apiUrl: 'https://generativelanguage.googleapis.com/v1beta/openai/',
+            keyPrefix: '',
+            keyPlaceholder: 'AIzaSy...',
+            description: 'أذكى نماذج جوجل — متعدد الوسائط',
+            website: 'https://aistudio.google.com/app/apikey',
             models: {
-                'meta-llama/llama-3.3-70b-instruct:free': {
-                    name: 'Llama 3.3 70B',
-                    provider: 'Meta', params: '70B', context: 131072,
-                    description: 'أقوى نموذج مجاني عالي الأداء', icon: '🦙'
+                'gemini-2.0-flash': {
+                    name: 'Gemini 2.0 Flash',
+                    provider: 'Google', params: 'Unknown', context: 1048576,
+                    description: 'الأحدث والأسرع من جوجل', icon: '⚡'
                 },
-                'google/gemma-2-9b-it:free': {
-                    name: 'Gemma 2 9B',
-                    provider: 'Google', params: '9B', context: 8192,
-                    description: 'سريع ومتوازن من Google', icon: '💎'
+                'gemini-1.5-pro': {
+                    name: 'Gemini 1.5 Pro',
+                    provider: 'Google', params: 'Unknown', context: 2097152,
+                    description: 'الأذكى للمهام المعقدة', icon: '🧠'
                 },
-                'mistralai/mistral-7b-instruct:free': {
-                    name: 'Mistral 7B',
-                    provider: 'Mistral', params: '7B', context: 32768,
-                    description: 'خفيف وسريع جداً', icon: '⚡'
-                },
-                'qwen/qwen-2-7b-instruct:free': {
-                    name: 'Qwen 2 7B',
-                    provider: 'Alibaba', params: '7B', context: 32768,
-                    description: 'أداء ممتاز في اللغة العربية', icon: '🐉'
+                'gemini-1.5-flash': {
+                    name: 'Gemini 1.5 Flash',
+                    provider: 'Google', params: 'Unknown', context: 1048576,
+                    description: 'توازن مثالي بين السرعة والتكلفة', icon: '�'
                 }
             }
         }
@@ -293,8 +284,8 @@ const AdminAI = (() => {
                     errorMsg = 'مفتاح API غير صحيح أو غير صالح الاستخدام.';
                 } else if (response.status === 402) {
                     errorMsg = 'نفذ رصيد الحساب (أو الخطة المجانية).';
-                } else if (errorMsg.includes('User not found')) {
-                    errorMsg = 'مفتاح API هذا غير مرتبط بحساب صالح على OpenRouter.';
+                } else if (response.status === 400 && provider.name === 'Google Gemini') {
+                    errorMsg = 'طلب غير صالح. تحقق من مفتاح API وصلاحياته.';
                 }
 
                 throw new Error(`${errorMsg} (${provider.name})`);
