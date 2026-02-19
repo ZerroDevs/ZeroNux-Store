@@ -1111,10 +1111,10 @@ window.switchAIProvider = function (providerId) {
                 btn.style.background = 'rgba(255,140,0,0.12)';
                 btn.style.color = '#ff8c00';
                 btn.style.borderColor = 'rgba(255,140,0,0.5)';
-            } else if (providerId === 'google') {
-                btn.style.background = 'rgba(66, 133, 244, 0.12)';
-                btn.style.color = '#4285F4';
-                btn.style.borderColor = 'rgba(66, 133, 244, 0.5)';
+            } else if (providerId === 'openrouter') {
+                btn.style.background = 'rgba(99,102,241,0.12)';
+                btn.style.color = '#6366f1';
+                btn.style.borderColor = 'rgba(99,102,241,0.5)';
             }
         }
     });
