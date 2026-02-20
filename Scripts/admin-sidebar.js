@@ -618,8 +618,8 @@
             .admin-user-dropdown {
                 position: absolute;
                 top: calc(100% + 8px);
-                right: 0;
-                left: auto;
+                right: auto;
+                left: 0;
                 min-width: 220px;
                 background: rgba(20, 18, 42, 0.97);
                 backdrop-filter: blur(20px);
