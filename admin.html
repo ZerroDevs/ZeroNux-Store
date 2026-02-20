@@ -98,6 +98,9 @@
         <p>عذراً، انت لا تملك الصلاحيات الكافية للوصول إلى لوحة التحكم.</p>
         <a href="index.html" class="back-home-btn">العودة للرئيسية</a>
     </div>
+
+    <!-- Background Animation Canvas -->
+    <canvas id="bg-canvas"></canvas>
     <!-- Login Screen -->
     <div id="login-screen" class="login-container">
         <div class="login-box">
@@ -663,7 +666,7 @@
                             <h3>🛡️ إدارة المسؤولين</h3>
                             <div class="form-group">
                                 <label>البريد الإلكتروني للمسؤول</label>
-                                <div style="display: flex; gap: 10px;">
+                                <div id="admin-add-container" style="display: flex; gap: 10px;">
                                     <input type="email" id="new-admin-email" placeholder="email@example.com">
                                     <button type="button" onclick="addAdminEmail()" class="btn"
                                         style="background: #4caf50; color: white;">إضافة</button>
@@ -1291,6 +1294,7 @@
     <script src="Scripts/seasonal-effects.js"></script>
     <script src="Scripts/smart-search.js"></script>
     <script src="Scripts/pwa.js"></script>
+    <script src="Scripts/login-animation.js"></script>
 </body>
 
 </html>

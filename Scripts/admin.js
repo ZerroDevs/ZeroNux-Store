@@ -1294,7 +1294,9 @@ function loadSettings() {
             renderAnnouncementsList();
 
             // Admin Emails
-            loadAdminEmails(settings.adminEmails);
+            const ownerEmail = settings.ownerEmail // Fallback or default
+            window.ownerEmail = ownerEmail; // Store globally for actions
+            loadAdminEmails(settings.adminEmails, ownerEmail);
 
             // Maintenance Mode
             if (settings.maintenanceEnabled !== undefined) {
@@ -1392,18 +1394,23 @@ function loadSettings() {
     });
 }
 
-function loadAdminEmails(adminEmails) {
+function loadAdminEmails(adminEmails, ownerEmail) {
     const list = document.getElementById('admin-emails-list');
+    const addContainer = document.getElementById('admin-add-container');
+    const currentUserEmail = auth.currentUser ? auth.currentUser.email : '';
+    const isOwner = currentUserEmail && ownerEmail && currentUserEmail.toLowerCase() === ownerEmail.toLowerCase();
+
     list.innerHTML = '';
+
+    // Toggle Add Container Visibility
+    if (addContainer) {
+        addContainer.style.display = isOwner ? 'flex' : 'none';
+    }
 
     if (!adminEmails || Object.keys(adminEmails).length === 0) {
         list.innerHTML = '<p style="color: rgba(255,255,255,0.5); text-align: center;">لا يوجد مسؤولين إضافيين.</p>';
         return;
     }
-
-    // Convert object to array if needed (Firebase stores arrays as objects with numeric keys sometimes)
-    // or if it's a map of email -> true
-    // Let's assume we store it as an object/map for easier deletion logic: { "sanitized_email": "email@example.com" }
 
     Object.entries(adminEmails).forEach(([key, email]) => {
         const item = document.createElement('div');
@@ -1415,9 +1422,18 @@ function loadAdminEmails(adminEmails) {
         item.style.padding = '8px';
         item.style.borderRadius = '4px';
 
+        let deleteBtn = '';
+        // Only show delete button if current user is owner
+        // AND the email in the list is NOT the owner (owner can't delete themselves here, though logic handles it)
+        if (isOwner && email.toLowerCase() !== ownerEmail.toLowerCase()) {
+            deleteBtn = `<button onclick="removeAdminEmail('${key}')" type="button" style="background: none; border: none; color: #ff4444; cursor: pointer;">🗑️</button>`;
+        } else if (email.toLowerCase() === ownerEmail.toLowerCase()) {
+            deleteBtn = `<span style="color: gold; font-size: 0.8rem;">👑 المالك</span>`;
+        }
+
         item.innerHTML = `
             <span>${email}</span>
-            <button onclick="removeAdminEmail('${key}')" type="button" style="background: none; border: none; color: #ff4444; cursor: pointer;">🗑️</button>
+            ${deleteBtn}
         `;
         list.appendChild(item);
     });
@@ -1426,6 +1442,15 @@ function loadAdminEmails(adminEmails) {
 window.addAdminEmail = function () {
     const emailInput = document.getElementById('new-admin-email');
     const email = emailInput.value.trim();
+
+    // Owner Check
+    const currentUserEmail = auth.currentUser ? auth.currentUser.email : '';
+    const ownerEmail = window.ownerEmail;
+
+    if (!ownerEmail || currentUserEmail.toLowerCase() !== ownerEmail.toLowerCase()) {
+        showNotification('عذراً، فقط المالك يمكنه إضافة مسؤولين.', 'error');
+        return;
+    }
 
     if (!email) {
         showNotification('الرجاء إدخال البريد الإلكتروني', 'error');
@@ -1450,6 +1475,15 @@ window.addAdminEmail = function () {
 };
 
 window.removeAdminEmail = function (key) {
+    // Owner Check
+    const currentUserEmail = auth.currentUser ? auth.currentUser.email : '';
+    const ownerEmail = window.ownerEmail;
+
+    if (!ownerEmail || currentUserEmail.toLowerCase() !== ownerEmail.toLowerCase()) {
+        showNotification('عذراً، فقط المالك يمكنه حذف المسؤولين.', 'error');
+        return;
+    }
+
     showConfirmModal('حذف مسؤول', 'هل أنت متأكد من إزالة هذا البريد من قائمة المسؤولين؟', () => {
         settingsRef.child('adminEmails').child(key).remove()
             .then(() => {
